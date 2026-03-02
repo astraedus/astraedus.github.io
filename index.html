@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astraedus — AI Business Automation, Installed in 7 Days</title>
+  <meta name="description" content="Custom AI automation systems that eliminate manual work, catch leads faster, and give you real-time business visibility. Installed in 7 days.">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #222;
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --green: #22c55e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav */
+    nav {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+    .nav-cta {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* Hero */
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 3.75rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 16px 40px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px var(--accent-glow);
+    }
+    .hero-sub {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    /* Proof bar */
+    .proof {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      text-align: center;
+    }
+    .proof-item strong {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .proof-item span {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    /* Services */
+    .services {
+      padding: 80px 0;
+    }
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 48px;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      transition: border-color 0.2s;
+    }
+    .service-card:hover {
+      border-color: rgba(59,130,246,0.4);
+    }
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-glow);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
+    .service-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .service-card p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* How it works */
+    .how {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 48px;
+    }
+    .step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+    }
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* CTA section */
+    .cta-section {
+      padding: 80px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .cta-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 60px 40px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .cta-box p {
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+    }
+    .cta-box .hero-cta {
+      font-size: 1rem;
+      padding: 14px 36px;
+    }
+    .cta-email {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .cta-email a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 768px) {
+      .proof-grid, .steps { grid-template-columns: 1fr; gap: 24px; }
+      .hero { padding: 60px 0 40px; }
+      .services, .how, .cta-section { padding: 60px 0; }
+      .cta-box { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="logo">astra<span>.</span></div>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">AI-Powered Automation</div>
+    <h1>Your business on <em>autopilot</em>,<br>installed in 7 days</h1>
+    <p>Custom automation systems that eliminate manual work, catch leads faster, and give you real-time visibility into what matters.</p>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry&body=Hi%2C%20I'm%20interested%20in%20learning%20more%20about%20your%20automation%20services.%20Here's%20what%20I'm%20looking%20for%3A%0A%0A" class="hero-cta">Book a Free Consultation</a>
+    <p class="hero-sub">No commitment. We'll map your automation opportunities in 30 minutes.</p>
+  </div>
+</section>
+
+<section class="proof">
+  <div class="container">
+    <div class="proof-grid">
+      <div class="proof-item">
+        <strong>7 days</strong>
+        <span>From kickoff to live system</span>
+      </div>
+      <div class="proof-item">
+        <strong>10x</strong>
+        <span>Faster lead response time</span>
+      </div>
+      <div class="proof-item">
+        <strong>20+ hrs</strong>
+        <span>Saved per week, per client</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services">
+  <div class="container">
+    <div class="section-label">What We Build</div>
+    <h2 class="section-title">Automation that moves the needle</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">&#9889;</div>
+        <h3>Lead Capture & Follow-up</h3>
+        <p>Leads hit your form and get an instant, personalized response. Auto-qualified, logged in your CRM, and flagged for your team — in seconds, not hours.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">&#128202;</div>
+        <h3>KPI Dashboards & Reports</h3>
+        <p>Weekly reports auto-generated from Stripe, analytics, and your tools. Real-time dashboards showing revenue, pipeline, and conversion rates.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">&#128172;</div>
+        <h3>Support Triage & Routing</h3>
+        <p>Incoming tickets auto-categorized and routed to the right team. Common questions answered automatically. Urgent issues escalated instantly.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">&#128196;</div>
+        <h3>Document & Proposal Generation</h3>
+        <p>Proposals, invoices, and reports generated from your CRM data in one click. Approval workflows with notifications keep things moving.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">&#128279;</div>
+        <h3>API & Tool Integration</h3>
+        <p>Connect your existing tools — Stripe, HubSpot, Notion, Slack, whatever you use. We make them talk to each other so data flows automatically.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">&#128301;</div>
+        <h3>Data Pipelines & Scraping</h3>
+        <p>Extract structured data from any source, transform it, and deliver it where you need it. Market research, competitor tracking, lead enrichment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Three steps to automation</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Discovery Call</h3>
+        <p>30-minute call to map your workflows, identify bottlenecks, and find the highest-impact automation opportunities.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Build & Install</h3>
+        <p>We build your custom automation system and install it into your existing tools. Typical turnaround: 7 days.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Optimize & Scale</h3>
+        <p>We monitor performance, optimize flows, and add new automations as your needs evolve. Your system gets smarter over time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <h2>Ready to automate?</h2>
+      <p>Tell us what's eating your time. We'll show you what automation looks like for your business — free, no strings attached.</p>
+      <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry&body=Hi%2C%20I'm%20interested%20in%20learning%20more%20about%20your%20automation%20services.%0A%0AHere's%20what%20I%20need%20help%20with%3A%0A%0A" class="hero-cta">Get Your Free Consultation</a>
+      <p class="cta-email">Or email us directly at <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    &copy; 2026 Astraedus. Built with precision.
+  </div>
+</footer>
+
+</body>
+</html>
