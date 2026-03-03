@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Astraedus — AI Business Automation, Installed in 7 Days</title>
-  <meta name="description" content="We build the automations your business should already have. Leads followed up in seconds, reports that write themselves, tools that finally talk to each other. Installed in 7 days.">
+  <title>Astraedus | Senior Full-Stack Developer &amp; AI Engineer</title>
+  <meta name="description" content="Custom software built right. I build AI systems, full-stack applications, and data pipelines for law firms, finance companies, and high-growth SaaS.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     :root {
@@ -94,7 +94,7 @@
     .hero p {
       font-size: 1.2rem;
       color: var(--text-dim);
-      max-width: 600px;
+      max-width: 640px;
       margin: 0 auto 40px;
       line-height: 1.7;
     }
@@ -128,7 +128,7 @@
     }
     .proof-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 32px;
       text-align: center;
     }
@@ -197,6 +197,92 @@
       font-size: 0.9rem;
       color: var(--text-dim);
       line-height: 1.6;
+    }
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+    .service-tag {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    /* Industries */
+    .industries {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .industries-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+    .industry-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .industry-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .industry-card p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Pricing */
+    .pricing {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .pricing-card.featured {
+      border-color: rgba(59,130,246,0.5);
+      background: rgba(59,130,246,0.06);
+    }
+    .pricing-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .pricing-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .pricing-amount {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .pricing-card p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
     }
 
     /* How it works */
@@ -282,9 +368,10 @@
     }
 
     @media (max-width: 768px) {
-      .proof-grid, .steps { grid-template-columns: 1fr; gap: 24px; }
+      .proof-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .steps { grid-template-columns: 1fr; gap: 24px; }
       .hero { padding: 60px 0 40px; }
-      .services, .how, .cta-section { padding: 60px 0; }
+      .services, .industries, .pricing, .how, .cta-section { padding: 60px 0; }
       .cta-box { padding: 40px 24px; }
     }
   </style>
@@ -294,17 +381,17 @@
 <nav>
   <div class="container">
     <div class="logo">astra<span>.</span></div>
-    <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry" class="nav-cta">Get Started</a>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Project%20Inquiry" class="nav-cta">Schedule a Call</a>
   </div>
 </nav>
 
 <section class="hero">
   <div class="container">
-    <div class="hero-badge">AI-Powered Automation</div>
-    <h1>Your business on <em>autopilot</em>,<br>installed in 7 days</h1>
-    <p>We build the automations your business should already have. Leads followed up in seconds. Reports that write themselves. Tools that finally talk to each other.</p>
-    <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry&body=Hi%2C%20I'm%20interested%20in%20learning%20more%20about%20your%20automation%20services.%20Here's%20what%20I'm%20looking%20for%3A%0A%0A" class="hero-cta">Talk to Us</a>
-    <p class="hero-sub">Free 30-minute call. We'll tell you exactly what we'd build and what it would cost.</p>
+    <div class="hero-badge">Full-Stack Development &amp; AI Engineering</div>
+    <h1>Custom software<br>built <em>right</em>.</h1>
+    <p>I build AI systems, full-stack applications, and data pipelines for law firms, finance companies, and high-growth SaaS. Production-grade from day one.</p>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Project%20Inquiry&body=Hi%2C%20I%27d%20like%20to%20discuss%20a%20project.%20Here%27s%20what%20I%27m%20working%20on%3A%0A%0A" class="hero-cta">Get in Touch</a>
+    <p class="hero-sub">Free 30-minute call. Scope, timeline, and a straight answer on what it will cost.</p>
   </div>
 </section>
 
@@ -312,16 +399,20 @@
   <div class="container">
     <div class="proof-grid">
       <div class="proof-item">
-        <strong>7 days</strong>
-        <span>From kickoff to live system</span>
+        <strong>5+</strong>
+        <span>Years building production systems</span>
       </div>
       <div class="proof-item">
-        <strong>10x</strong>
-        <span>Faster lead response time</span>
+        <strong>Full-stack</strong>
+        <span>Frontend to infrastructure</span>
       </div>
       <div class="proof-item">
-        <strong>20+ hrs</strong>
-        <span>Saved per week, per client</span>
+        <strong>AI-native</strong>
+        <span>LLMs, RAG, agents, pipelines</span>
+      </div>
+      <div class="proof-item">
+        <strong>$10k-$100k</strong>
+        <span>Typical engagement range</span>
       </div>
     </div>
   </div>
@@ -329,39 +420,150 @@
 
 <section class="services">
   <div class="container">
-    <div class="section-label">What We Build</div>
-    <h2 class="section-title">The things you keep doing manually</h2>
+    <div class="section-label">What I Build</div>
+    <h2 class="section-title">Production-grade systems, end to end</h2>
     <div class="services-grid">
+
       <div class="service-card">
-        <div class="service-icon">&#9889;</div>
-        <h3>Lead Capture & Follow-up</h3>
-        <p>Someone fills out your form and gets a real reply in under 60 seconds. Scored, logged in your CRM, flagged if they're worth calling. Your team only touches the ones that matter.</p>
+        <div class="service-icon">&#129504;</div>
+        <h3>AI &amp; LLM Integration</h3>
+        <p>RAG pipelines, document processing, LLM-powered workflows. Custom agents that handle real tasks: contract review, report generation, classification at scale.</p>
+        <div class="service-tags">
+          <span class="service-tag">OpenAI</span>
+          <span class="service-tag">LangChain</span>
+          <span class="service-tag">RAG</span>
+          <span class="service-tag">Embeddings</span>
+        </div>
       </div>
+
+      <div class="service-card">
+        <div class="service-icon">&#128187;</div>
+        <h3>Full-Stack Development</h3>
+        <p>Complete applications from database schema to deployed UI. React, Node.js, Python. Not prototypes. Not MVPs that need rewrites in 6 months. Shipped code that scales.</p>
+        <div class="service-tags">
+          <span class="service-tag">React</span>
+          <span class="service-tag">Next.js</span>
+          <span class="service-tag">Node.js</span>
+          <span class="service-tag">Python</span>
+        </div>
+      </div>
+
       <div class="service-card">
         <div class="service-icon">&#128202;</div>
-        <h3>KPI Dashboards & Reports</h3>
-        <p>Stop copying numbers from Stripe into a spreadsheet every Monday. Connect your data sources once, get a dashboard that updates on its own and emails you the summary.</p>
+        <h3>Data Engineering</h3>
+        <p>ETL pipelines, real-time dashboards, data infrastructure. Connect your scattered data sources and turn them into something you can actually use to make decisions.</p>
+        <div class="service-tags">
+          <span class="service-tag">ETL</span>
+          <span class="service-tag">Postgres</span>
+          <span class="service-tag">Dashboards</span>
+          <span class="service-tag">APIs</span>
+        </div>
       </div>
+
       <div class="service-card">
-        <div class="service-icon">&#128172;</div>
-        <h3>Support Triage & Routing</h3>
-        <p>Your customers ask the same 10 things over and over. We build the bot that handles those and routes the real problems to your team. Works with Zendesk, Intercom, or a custom setup.</p>
+        <div class="service-icon">&#9889;</div>
+        <h3>Business Automation</h3>
+        <p>n8n, custom Python, workflow systems. Leads followed up in seconds. Reports that write themselves. Proposal generation in 30 minutes instead of half a day.</p>
+        <div class="service-tags">
+          <span class="service-tag">n8n</span>
+          <span class="service-tag">Python</span>
+          <span class="service-tag">Zapier</span>
+          <span class="service-tag">Webhooks</span>
+        </div>
       </div>
+
       <div class="service-card">
-        <div class="service-icon">&#128196;</div>
-        <h3>Document & Proposal Generation</h3>
-        <p>You fill in the client name, the rest pulls from your CRM. Proposal out in seconds, not 20 minutes. Add an approval step if you need sign-off before it sends.</p>
+        <div class="service-icon">&#9878;</div>
+        <h3>Legal &amp; Finance Tech</h3>
+        <p>Contract review automation, compliance dashboards, client intake systems. Built for the regulatory requirements and data sensitivity that these industries actually have.</p>
+        <div class="service-tags">
+          <span class="service-tag">Document AI</span>
+          <span class="service-tag">Compliance</span>
+          <span class="service-tag">Intake</span>
+          <span class="service-tag">Billing</span>
+        </div>
       </div>
-      <div class="service-card">
-        <div class="service-icon">&#128279;</div>
-        <h3>API & Tool Integration</h3>
-        <p>Your tools don't share data, so someone copies it manually. We connect them. Stripe, HubSpot, Notion, Slack, whatever you're running. If it has an API, we can wire it up.</p>
-      </div>
+
       <div class="service-card">
         <div class="service-icon">&#128301;</div>
-        <h3>Data Pipelines & Scraping</h3>
-        <p>Need data from a site that doesn't have an API? We extract it, clean it, deliver it in whatever format you need on whatever schedule. Handles pagination, anti-bot measures, deduplication.</p>
+        <h3>Data Pipelines &amp; Scraping</h3>
+        <p>Need data that is not behind an API? Web scraping, extraction, cleaning, delivery on a schedule. Handles pagination, anti-bot measures, deduplication, and transformation.</p>
+        <div class="service-tags">
+          <span class="service-tag">Playwright</span>
+          <span class="service-tag">Scrapy</span>
+          <span class="service-tag">ETL</span>
+          <span class="service-tag">Cron</span>
+        </div>
       </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="industries">
+  <div class="container">
+    <div class="section-label">Who I Work With</div>
+    <h2 class="section-title">Industries that take software seriously</h2>
+    <div class="industries-grid">
+
+      <div class="industry-card">
+        <h3>Law Firms</h3>
+        <p>Document automation, client intake, contract review, billing integration, matter management. Built to handle privileged data correctly.</p>
+      </div>
+
+      <div class="industry-card">
+        <h3>Finance &amp; Accounting</h3>
+        <p>Reporting automation, reconciliation, compliance dashboards, audit trail systems. Fast, accurate, auditable.</p>
+      </div>
+
+      <div class="industry-card">
+        <h3>Consulting Firms</h3>
+        <p>Proposal generation, client reporting, data pipelines, research tools. Cut the admin work so senior people can bill more hours.</p>
+      </div>
+
+      <div class="industry-card">
+        <h3>Series A/B SaaS</h3>
+        <p>AI feature integration, internal tooling, data pipelines, growth infrastructure. Move fast without accumulating technical debt.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Straightforward engagement models</h2>
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <div class="pricing-label">Discovery Project</div>
+        <h3>Scoped Deliverable</h3>
+        <div class="pricing-amount">$1,500 - $5,000</div>
+        <p>A defined proof-of-concept, audit, or prototype. Clear scope, fixed output, fast turnaround.</p>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-label">Full Project</div>
+        <h3>End-to-End Build</h3>
+        <div class="pricing-amount">$5,000 - $30,000</div>
+        <p>Complete feature or system from spec to deployment. This is where most engagements land.</p>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-label">Retainer</div>
+        <h3>Ongoing Partnership</h3>
+        <div class="pricing-amount">$2,500 - $8,000/mo</div>
+        <p>Continuous development, maintenance, and iteration. Reserved capacity every month.</p>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-label">Enterprise</div>
+        <h3>Large-Scale Build</h3>
+        <div class="pricing-amount">Custom quote</div>
+        <p>Multi-month engagements, team integrations, complex infrastructure. Scoped after discovery.</p>
+      </div>
+
     </div>
   </div>
 </section>
@@ -369,22 +571,22 @@
 <section class="how">
   <div class="container">
     <div class="section-label">How It Works</div>
-    <h2 class="section-title">Three steps to automation</h2>
+    <h2 class="section-title">Three steps to a working system</h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <h3>Discovery Call</h3>
-        <p>30-minute call to map your workflows, identify bottlenecks, and find the highest-impact automation opportunities.</p>
+        <p>30-minute call to understand your problem, the existing stack, and what a good outcome looks like. I will tell you exactly what I would build and what it would cost.</p>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <h3>Build & Install</h3>
-        <p>We build your custom automation system and install it into your existing tools. Typical turnaround: 7 days.</p>
+        <h3>Build</h3>
+        <p>Scoped, documented, and shipped. You get updates throughout. No surprises at the end. Code that your team can maintain and extend without calling me every time.</p>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <h3>Optimize & Scale</h3>
-        <p>We monitor performance, optimize flows, and add new automations as your needs evolve. Your system gets smarter over time.</p>
+        <h3>Handoff &amp; Support</h3>
+        <p>Full documentation, deployment, and a walkthrough. Retainer available if you want ongoing development. You own everything you paid for.</p>
       </div>
     </div>
   </div>
@@ -393,10 +595,10 @@
 <section class="cta-section">
   <div class="container">
     <div class="cta-box">
-      <h2>Ready to automate?</h2>
-      <p>Tell us what's eating your time. We'll show you what automation looks like for your business — free, no strings attached.</p>
-      <a href="mailto:theagentthatcould@gmail.com?subject=Automation%20Inquiry&body=Hi%2C%20I'm%20interested%20in%20learning%20more%20about%20your%20automation%20services.%0A%0AHere's%20what%20I%20need%20help%20with%3A%0A%0A" class="hero-cta">Get Your Free Consultation</a>
-      <p class="cta-email">Or email us directly at <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
+      <h2>Have a project in mind?</h2>
+      <p>Describe what you are building or what problem you need solved. I will respond within 24 hours with a clear take on whether I can help and what it would look like.</p>
+      <a href="mailto:theagentthatcould@gmail.com?subject=Project%20Inquiry&body=Hi%2C%20here%27s%20what%20I%27m%20working%20on%3A%0A%0AProject%20description%3A%0A%0ATimeline%3A%0A%0ABudget%20range%3A%0A%0A" class="hero-cta">Schedule a Call</a>
+      <p class="cta-email">Or email directly: <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
     </div>
   </div>
 </section>
