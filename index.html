@@ -240,6 +240,104 @@
       line-height: 1.5;
     }
 
+    /* Case Studies */
+    .case-studies {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .case-studies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .case-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .case-card:hover {
+      border-color: rgba(59,130,246,0.4);
+    }
+    .case-industry {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(59,130,246,0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      align-self: flex-start;
+    }
+    .case-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .case-problem {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .case-result {
+      background: rgba(34,197,94,0.07);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .case-result-metric {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--green);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .case-result-desc {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+    .case-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .case-tag {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .case-studies-cta {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .case-studies-cta a {
+      display: inline-block;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .case-studies-cta a:hover {
+      border-color: rgba(59,130,246,0.5);
+      color: var(--accent);
+    }
+
     /* Pricing */
     .pricing {
       padding: 80px 0;
@@ -371,7 +469,7 @@
       .proof-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
       .steps { grid-template-columns: 1fr; gap: 24px; }
       .hero { padding: 60px 0 40px; }
-      .services, .industries, .pricing, .how, .cta-section { padding: 60px 0; }
+      .services, .industries, .case-studies, .pricing, .how, .cta-section { padding: 60px 0; }
       .cta-box { padding: 40px 24px; }
     }
   </style>
@@ -526,6 +624,70 @@
         <p>AI feature integration, internal tooling, data pipelines, growth infrastructure. Move fast without accumulating technical debt.</p>
       </div>
 
+    </div>
+  </div>
+</section>
+
+<section class="case-studies">
+  <div class="container">
+    <div class="section-label">Selected Projects</div>
+    <h2 class="section-title">Recent Work</h2>
+    <div class="case-studies-grid">
+
+      <div class="case-card">
+        <span class="case-industry">Legal / Law Firm</span>
+        <h3>Legal Contract Review AI</h3>
+        <p class="case-problem">Attorneys were spending 2 to 3 hours per contract review, mostly reading to find the 8 to 12 clauses that actually needed attention. A slow, expensive bottleneck on a high-billing team.</p>
+        <div class="case-result">
+          <div class="case-result-metric">75% less time</div>
+          <div class="case-result-desc">Review time dropped from 2 to 3 hours down to 30 to 45 minutes. Attorneys now review only flagged clauses.</div>
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Python</span>
+          <span class="case-tag">Claude API</span>
+          <span class="case-tag">LangChain</span>
+          <span class="case-tag">PostgreSQL</span>
+          <span class="case-tag">React</span>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <span class="case-industry">Finance / Accounting</span>
+        <h3>Finance Reconciliation Dashboard</h3>
+        <p class="case-problem">Finance team spending 2 full days per month on manual AP reconciliation: pulling data from multiple systems, checking for discrepancies, formatting reports by hand.</p>
+        <div class="case-result">
+          <div class="case-result-metric">2 days to 15 min</div>
+          <div class="case-result-desc">Zero missed discrepancies in the first 90 days. Friday email summaries sent automatically.</div>
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Python</span>
+          <span class="case-tag">PostgreSQL</span>
+          <span class="case-tag">React</span>
+          <span class="case-tag">Airflow</span>
+          <span class="case-tag">SMTP</span>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <span class="case-industry">SaaS / Sales Operations</span>
+        <h3>Lead Intelligence Pipeline</h3>
+        <p class="case-problem">Sales team manually researching leads from multiple sources. 20+ hours per week of copy-paste data entry into the CRM, with inconsistent data quality slowing down outreach.</p>
+        <div class="case-result">
+          <div class="case-result-metric">10,000 records/day</div>
+          <div class="case-result-desc">Sales team recovered 20+ hours per week. Lead quality score improved with richer, cleaner data.</div>
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Python</span>
+          <span class="case-tag">n8n</span>
+          <span class="case-tag">PostgreSQL</span>
+          <span class="case-tag">REST APIs</span>
+          <span class="case-tag">HubSpot</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="case-studies-cta">
+      <a href="mailto:theagentthatcould@gmail.com?subject=Project%20Inquiry">Discuss your project</a>
     </div>
   </div>
 </section>
