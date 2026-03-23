@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production AI Agents — Build, Deploy, and Monetize Autonomous Systems</title>
+  <meta name="description" content="The definitive guide to building AI agents that actually work in production. Architecture, memory, MCP, deployment, security, and business models. Real code in Python and TypeScript.">
+  <meta name="keywords" content="ai agents, build ai agent, autonomous ai systems, ai agent architecture, monetize ai agents, production ai systems, ai agent framework 2026, MCP, model context protocol">
+  <meta name="author" content="Diven Rastdus">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Production AI Agents — Build, Deploy, and Monetize Autonomous Systems">
+  <meta property="og:description" content="The definitive guide to building AI agents that actually work in production. 12 chapters, 40,000+ words, real code examples.">
+  <meta property="og:image" content="https://astraedus.dev/book/cover.jpg">
+  <meta property="og:url" content="https://astraedus.dev/book/">
+  <meta property="og:type" content="book">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Production AI Agents">
+  <meta name="twitter:description" content="Build, Deploy, and Monetize Autonomous AI Systems. The complete guide for 2026.">
+  <meta name="twitter:image" content="https://astraedus.dev/book/cover.jpg">
+
+  <!-- JSON-LD Structured Data (for AI agent discovery) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "Production AI Agents",
+    "alternateName": "Production AI Agents: Build, Deploy, and Monetize Autonomous Systems",
+    "author": {
+      "@type": "Person",
+      "name": "Diven Rastdus",
+      "url": "https://astraedus.dev"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Astras Labs"
+    },
+    "datePublished": "2026-03-24",
+    "bookFormat": "EBook",
+    "isbn": "",
+    "numberOfPages": 250,
+    "genre": ["Artificial Intelligence", "Software Engineering", "Computer Science"],
+    "inLanguage": "en",
+    "description": "The definitive guide to building AI agents that actually work in production. Covers architecture patterns, memory systems, tool calling, MCP, multi-agent coordination, deployment, security, and business models. Includes real code examples in Python and TypeScript.",
+    "keywords": "ai agents, build ai agent, autonomous ai systems, ai agent architecture, monetize ai agents, production ai systems, MCP, model context protocol, tool calling, multi-agent systems, Claude, OpenAI, LangGraph",
+    "about": [
+      {"@type": "Thing", "name": "AI Agent Architecture"},
+      {"@type": "Thing", "name": "Model Context Protocol (MCP)"},
+      {"@type": "Thing", "name": "Multi-Agent Systems"},
+      {"@type": "Thing", "name": "AI Agent Monetization"},
+      {"@type": "Thing", "name": "Production AI Systems"}
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "7.99",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "https://astraedus.dev/book/"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #222;
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --accent: #00c8dc;
+      --accent-glow: rgba(0, 200, 220, 0.15);
+      --blue: #3b82f6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav */
+    nav {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-left: 24px;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .cover-wrapper {
+      position: relative;
+    }
+    .cover-wrapper img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 200, 220, 0.1), 0 0 0 1px rgba(0, 200, 220, 0.1);
+    }
+
+    .hero-text h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .hero-text h1 .accent { color: var(--accent); }
+    .hero-text .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+    .hero-text .meta {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+    .hero-text .meta strong { color: var(--text); }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
+
+    .price-tag {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .price-note {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+
+    /* Chapters */
+    .chapters {
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+    }
+    .chapters h2 {
+      font-size: 1.5rem;
+      margin-bottom: 32px;
+      letter-spacing: -0.02em;
+    }
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .chapter-item {
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .chapter-item .num {
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    /* Features */
+    .features {
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+    }
+    .features h2 {
+      font-size: 1.5rem;
+      margin-bottom: 32px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .feature-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Blog posts */
+    .blog-section {
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+    }
+    .blog-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+    }
+    .blog-list {
+      list-style: none;
+    }
+    .blog-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .blog-list a {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .blog-list a:hover { text-decoration: underline; }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .cover-wrapper {
+        max-width: 200px;
+        margin: 0 auto;
+      }
+      .hero-text h1 { font-size: 1.8rem; }
+      .cta-group { justify-content: center; }
+      .chapter-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo">astraedus</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/book/">Book</a>
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" target="_blank">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="container" style="display: grid; grid-template-columns: 280px 1fr; gap: 60px; align-items: start; padding-top: 80px; padding-bottom: 60px;">
+
+      <div class="cover-wrapper">
+        <img src="/book/cover.jpg" alt="Production AI Agents book cover" width="280">
+      </div>
+
+      <div class="hero-text">
+        <h1>Production <span class="accent">AI Agents</span></h1>
+        <p class="subtitle">Build, Deploy, and Monetize Autonomous Systems</p>
+        <p class="meta">By <strong>Diven Rastdus</strong> | 12 chapters | 40,000+ words | Real code in Python &amp; TypeScript</p>
+
+        <div class="price-tag">$7.99</div>
+        <p class="price-note">Kindle eBook | 70% royalty to author | Also available in paperback</p>
+
+        <div class="cta-group">
+          <a href="#" class="btn btn-primary" id="amazon-link">Get on Amazon Kindle</a>
+          <a href="#chapters" class="btn btn-secondary">See chapters</a>
+        </div>
+
+        <p style="font-size: 0.9rem; color: var(--text-dim);">
+          Most AI agent tutorials stop at "hello world." This book starts where they end.
+          Covers architecture, memory, MCP, multi-agent systems, deployment, security,
+          and the business models that actually make money.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapters" id="chapters">
+    <div class="container">
+      <h2>What's Inside</h2>
+      <div class="chapter-grid">
+        <div class="chapter-item"><span class="num">01</span> The Age of Agents</div>
+        <div class="chapter-item"><span class="num">02</span> Agent Architecture Fundamentals</div>
+        <div class="chapter-item"><span class="num">03</span> The Memory Problem</div>
+        <div class="chapter-item"><span class="num">04</span> Tool Use and the MCP Standard</div>
+        <div class="chapter-item"><span class="num">05</span> Determinism and Reliability</div>
+        <div class="chapter-item"><span class="num">06</span> The Modern Agent Stack (2026)</div>
+        <div class="chapter-item"><span class="num">07</span> Building Your First Production Agent</div>
+        <div class="chapter-item"><span class="num">08</span> Multi-Agent Systems</div>
+        <div class="chapter-item"><span class="num">09</span> Deployment and Operations</div>
+        <div class="chapter-item"><span class="num">10</span> The Agent Economy</div>
+        <div class="chapter-item"><span class="num">11</span> Security and Safety</div>
+        <div class="chapter-item"><span class="num">12</span> The Future: What Comes Next</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <h2>Why This Book</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Production-Tested</h3>
+          <p>Written by an engineer who has built and operated production agent systems. Not theory. Real patterns that work.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Real Code</h3>
+          <p>Complete examples in Python and TypeScript. A full MCP server template. A hands-on tutorial building a research agent from scratch.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Current (2026)</h3>
+          <p>Covers Claude Opus 4.6, GPT-5.4, Gemini 3.1, MCP standard, Google ADK, Vercel AI SDK, and the latest frameworks.</p>
+        </div>
+        <div class="feature-card">
+          <h3>The Determinism Ladder</h3>
+          <p>Our original framework for making agents reliable. Push critical behaviors up the ladder: Hook &gt; Rule &gt; Skill &gt; Prompt.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Business Models</h3>
+          <p>The $4.2B agent economy is real. 5 business models, pricing strategies, and distribution channels for agent builders.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Security First</h3>
+          <p>Prompt injection defense, tool security, the blast radius framework. Don't ship an agent without reading this chapter.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-section">
+    <div class="container">
+      <h2>Free Articles from the Book</h2>
+      <ul class="blog-list">
+        <li><a href="#">Why 2026 Is the Year of Production AI Agents</a></li>
+        <li><a href="#">The 4 Components Every AI Agent Needs</a></li>
+        <li><a href="#">How to Give Your AI Agent a Memory That Actually Works</a></li>
+        <li><a href="#">MCP: The Universal Standard for AI Agent Tools</a></li>
+        <li><a href="#">The Determinism Ladder: Why Your AI Agent Keeps Failing</a></li>
+        <li><a href="#">Choosing the Right AI Agent Framework in 2026</a></li>
+        <li><a href="#">Build a Production AI Research Agent in 30 Minutes</a></li>
+        <li><a href="#">The $4.2 Billion Agent Economy: Business Models That Work</a></li>
+        <li><a href="#">AI Agent Security: The Threat Model Nobody Talks About</a></li>
+      </ul>
+      <p style="margin-top: 16px; font-size: 0.85rem; color: var(--text-dim);">
+        Each article covers one chapter in condensed form. For the full guide with complete code, get the book.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; 2026 Diven Rastdus / Astras Labs. <a href="/" style="color: var(--accent); text-decoration: none;">astraedus.dev</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
