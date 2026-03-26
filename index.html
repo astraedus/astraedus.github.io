@@ -3,41 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Astraedus | Senior Full-Stack Developer &amp; AI Engineer</title>
-  <meta name="description" content="Custom software built right. Production AI systems, RAG pipelines, full-stack applications, and data engineering for SaaS companies and enterprises.">
+  <title>Diven Rastdus | AI Engineer + Full-Stack Developer</title>
+  <meta name="description" content="I build production AI systems, RAG pipelines, and full-stack applications. TypeScript, Python, Next.js, FastAPI. Available for project-based work.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #141414;
-      --border: #222;
-      --text: #e8e8e8;
-      --text-dim: #888;
-      --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.15);
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
       --green: #22c55e;
+      --green-dim: rgba(34, 197, 94, 0.12);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-family: var(--sans);
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px;
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    a { color: inherit; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
     }
 
     /* Nav */
     nav {
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
     }
     nav .container {
       display: flex;
@@ -45,432 +69,387 @@
       align-items: center;
     }
     .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
     }
-    .logo span { color: var(--accent); }
-    .nav-cta {
-      background: var(--accent);
-      color: #fff;
-      padding: 10px 24px;
-      border-radius: 8px;
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
       text-decoration: none;
-      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
       font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
       transition: opacity 0.2s;
     }
-    .nav-cta:hover { opacity: 0.85; }
+    .nav-cta:hover { opacity: 0.88; }
 
     /* Hero */
     .hero {
       padding: 100px 0 80px;
-      text-align: center;
+      position: relative;
     }
-    .hero-badge {
-      display: inline-block;
-      background: var(--accent-glow);
-      border: 1px solid rgba(59,130,246,0.3);
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-intro {
+      font-family: var(--mono);
+      font-size: 0.82rem;
       color: var(--accent);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      margin-bottom: 20px;
       letter-spacing: 0.03em;
-      margin-bottom: 24px;
     }
     .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 3.75rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      margin-bottom: 20px;
+      font-family: var(--serif);
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      max-width: 750px;
     }
     .hero h1 em {
-      font-style: normal;
+      font-style: italic;
       color: var(--accent);
     }
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--text-dim);
-      max-width: 640px;
-      margin: 0 auto 40px;
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
       line-height: 1.7;
+      margin-bottom: 44px;
     }
-    .hero-cta {
-      display: inline-block;
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       background: var(--accent);
-      color: #fff;
-      padding: 16px 40px;
-      border-radius: 10px;
+      color: var(--bg);
+      padding: 14px 28px;
+      border-radius: 8px;
       text-decoration: none;
-      font-size: 1.05rem;
       font-weight: 700;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 0 30px var(--accent-glow);
+      font-size: 0.92rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 40px var(--accent-dim);
     }
-    .hero-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 50px var(--accent-glow);
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 60px rgba(245,158,11,0.2);
     }
-    .hero-sub {
-      margin-top: 16px;
-      font-size: 0.85rem;
-      color: var(--text-dim);
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
     }
 
-    /* Proof bar */
-    .proof {
-      padding: 40px 0;
+    /* Stats strip */
+    .stats {
+      padding: 48px 0;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
-    .proof-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 32px;
-      text-align: center;
+    .stats-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
     }
-    .proof-item strong {
-      display: block;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--accent);
+    .stat {
+      text-align: center;
+      flex: 1;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
       margin-bottom: 4px;
     }
-    .proof-item span {
-      font-size: 0.9rem;
+    .stat-label {
+      font-size: 0.8rem;
       color: var(--text-dim);
     }
 
-    /* Services */
-    .services {
-      padding: 80px 0;
-    }
-    .section-label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+    /* Section headers */
+    .section-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     .section-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      line-height: 1.65;
       margin-bottom: 48px;
     }
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-    }
-    .service-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 32px;
-      transition: border-color 0.2s;
-    }
-    .service-card:hover {
-      border-color: rgba(59,130,246,0.4);
-    }
-    .service-icon {
-      width: 44px;
-      height: 44px;
-      background: var(--accent-glow);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      margin-bottom: 20px;
-    }
-    .service-card h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-    .service-card p {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .service-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 16px;
-    }
-    .service-tag {
-      font-size: 0.75rem;
-      padding: 3px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-    }
 
-    /* Industries */
-    .industries {
-      padding: 80px 0;
-      border-top: 1px solid var(--border);
-    }
-    .industries-grid {
+    /* Projects */
+    .projects { padding: 80px 0; }
+    .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 48px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
     }
-    .industry-card {
+    .project-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-    }
-    .industry-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .industry-card p {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    /* Case Studies */
-    .case-studies {
-      padding: 80px 0;
-      border-top: 1px solid var(--border);
-    }
-    .case-studies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      margin-top: 48px;
-    }
-    .case-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 32px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      transition: border-color 0.2s;
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
     }
-    .case-card:hover {
-      border-color: rgba(59,130,246,0.4);
+    .project-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
     }
-    .case-industry {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+    .project-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+      border-color: var(--accent-border);
+    }
+    .project-card.featured:hover {
+      border-color: var(--accent);
+    }
+    .project-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--accent);
-      background: var(--accent-glow);
-      border: 1px solid rgba(59,130,246,0.3);
-      padding: 4px 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 4px 12px;
       border-radius: 20px;
       align-self: flex-start;
     }
-    .case-card h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-    .case-problem {
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .case-result {
-      background: rgba(34,197,94,0.07);
-      border: 1px solid rgba(34,197,94,0.2);
-      border-radius: 8px;
-      padding: 14px 16px;
-    }
-    .case-result-metric {
+    .project-badge.live { color: var(--green); background: var(--green-dim); border-color: rgba(34,197,94,0.25); }
+    .project-card h3 {
+      font-family: var(--serif);
       font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--green);
-      line-height: 1.1;
-      margin-bottom: 4px;
+      font-weight: 400;
+      line-height: 1.2;
     }
-    .case-result-desc {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      line-height: 1.4;
+    .project-card.featured h3 { font-size: 1.75rem; }
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
     }
-    .case-tags {
+    .project-tech {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-top: auto;
     }
-    .case-tag {
-      font-size: 0.75rem;
-      padding: 3px 10px;
-      border-radius: 20px;
+    .project-tech span {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 4px;
       border: 1px solid var(--border);
       color: var(--text-dim);
     }
-    .case-studies-cta {
-      text-align: center;
-      margin-top: 40px;
+    .project-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
     }
-    .case-studies-cta a {
-      display: inline-block;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 32px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.9rem;
+    .project-links a {
+      font-size: 0.82rem;
       font-weight: 600;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .case-studies-cta a:hover {
-      border-color: rgba(59,130,246,0.5);
       color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
     }
+    .project-links a:hover { opacity: 0.75; }
+    .project-links a::after { content: '\2197'; font-size: 0.9em; }
 
-    /* Pricing */
-    .pricing {
-      padding: 80px 0;
-      border-top: 1px solid var(--border);
-    }
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-top: 48px;
-    }
-    .pricing-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 28px;
-    }
-    .pricing-card.featured {
-      border-color: rgba(59,130,246,0.5);
-      background: rgba(59,130,246,0.06);
-    }
-    .pricing-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-    .pricing-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .pricing-amount {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
-    .pricing-card p {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    /* How it works */
-    .how {
-      padding: 80px 0;
-      border-top: 1px solid var(--border);
-    }
-    .steps {
+    /* Stack */
+    .stack { padding: 80px 0; border-top: 1px solid var(--border); }
+    .stack-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      margin-top: 48px;
+      gap: 2px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
     }
-    .step-num {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: var(--accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.1rem;
-      margin-bottom: 16px;
+    .stack-item {
+      background: var(--surface);
+      padding: 28px;
     }
-    .step h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .stack-item h4 {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
     }
-    .step p {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-      line-height: 1.6;
+    .stack-item p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
     }
 
-    /* CTA section */
-    .cta-section {
-      padding: 80px 0;
-      text-align: center;
-      border-top: 1px solid var(--border);
+    /* Writing */
+    .writing { padding: 80px 0; border-top: 1px solid var(--border); }
+    .writing-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: padding-left 0.2s;
     }
-    .cta-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 60px 40px;
-      max-width: 700px;
-      margin: 0 auto;
+    .writing-link:first-of-type { border-top: 1px solid var(--border); }
+    .writing-link:hover { padding-left: 8px; }
+    .writing-link h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
     }
-    .cta-box h2 {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-    .cta-box p {
+    .writing-link span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
       color: var(--text-dim);
-      margin-bottom: 32px;
-      font-size: 1.05rem;
+      white-space: nowrap;
+      margin-left: 20px;
     }
-    .cta-box .hero-cta {
-      font-size: 1rem;
-      padding: 14px 36px;
+
+    /* CTA */
+    .cta { padding: 100px 0; border-top: 1px solid var(--border); text-align: center; }
+    .cta h2 {
+      font-family: var(--serif);
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 400;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    .cta h2 em { font-style: italic; color: var(--accent); }
+    .cta p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+    .cta-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     .cta-email {
-      margin-top: 16px;
-      font-size: 0.85rem;
+      margin-top: 24px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
       color: var(--text-dim);
     }
-    .cta-email a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    .cta-email a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .cta-email a:hover { color: var(--text); border-color: var(--text-dim); }
 
     /* Footer */
     footer {
       padding: 32px 0;
       border-top: 1px solid var(--border);
-      text-align: center;
-      font-size: 0.8rem;
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
       color: var(--text-dim);
     }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-intro, .hero h1, .hero-desc, .hero-actions {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .hero h1 { animation-delay: 0.1s; }
+    .hero-desc { animation-delay: 0.2s; }
+    .hero-actions { animation-delay: 0.3s; }
 
     @media (max-width: 768px) {
-      .proof-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-      .steps { grid-template-columns: 1fr; gap: 24px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .project-card.featured { grid-column: span 1; }
+      .stack-grid { grid-template-columns: 1fr; }
+      .stats-grid { flex-wrap: wrap; }
+      .stat { min-width: 45%; }
       .hero { padding: 60px 0 40px; }
-      .services, .industries, .case-studies, .pricing, .how, .cta-section { padding: 60px 0; }
-      .cta-box { padding: 40px 24px; }
+      .nav-links a:not(.nav-cta) { display: none; }
     }
   </style>
 </head>
@@ -478,370 +457,238 @@
 
 <nav>
   <div class="container">
-    <div class="logo">astra<span>.</span></div>
-    <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="nav-cta" target="_blank" rel="noopener">Schedule a Call</a>
+    <div class="logo"><strong>diven</strong>@astraedus ~</div>
+    <div class="nav-links">
+      <a href="#projects">Projects</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" target="_blank" rel="noopener">Writing</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="nav-cta" target="_blank" rel="noopener">Book a call</a>
+    </div>
   </div>
 </nav>
 
 <section class="hero">
   <div class="container">
-    <div class="hero-badge">Full-Stack Development &amp; AI Engineering</div>
-    <h1>Custom software<br>built <em>right</em>.</h1>
-    <p>I build production AI systems, RAG pipelines, full-stack applications, and data infrastructure for SaaS companies and enterprises. Production-grade from day one.</p>
-    <a href="mailto:theagentthatcould@gmail.com?subject=Project%20Inquiry&body=Hi%2C%20I%27d%20like%20to%20discuss%20a%20project.%20Here%27s%20what%20I%27m%20working%20on%3A%0A%0A" class="hero-cta">Get in Touch</a>
-    <p class="hero-sub">Free 30-minute call. Scope, timeline, and a straight answer on what it will cost.</p>
+    <div class="hero-intro">// available for project work</div>
+    <h1>I build production<br>AI systems that <em>ship.</em></h1>
+    <p class="hero-desc">RAG pipelines, AI agents, full-stack applications. TypeScript, Python, Next.js, FastAPI. I write the code, deploy it, and hand you something that works on day one.</p>
+    <div class="hero-actions">
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="btn-primary" target="_blank" rel="noopener">Schedule a call</a>
+      <a href="#projects" class="btn-ghost">View projects</a>
+    </div>
   </div>
 </section>
 
-<section class="proof">
+<section class="stats">
   <div class="container">
-    <div class="proof-grid">
-      <div class="proof-item">
-        <strong>5+</strong>
-        <span>Years building production systems</span>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Live products shipped</div>
       </div>
-      <div class="proof-item">
-        <strong>Full-stack</strong>
-        <span>Frontend to infrastructure</span>
+      <div class="stat">
+        <div class="stat-value">20+</div>
+        <div class="stat-label">Articles on Dev.to</div>
       </div>
-      <div class="proof-item">
-        <strong>AI-native</strong>
-        <span>LLMs, RAG, agents, pipelines</span>
+      <div class="stat">
+        <div class="stat-value">1 book</div>
+        <div class="stat-label">Published on Amazon</div>
       </div>
-      <div class="proof-item">
-        <strong>$10k-$100k</strong>
-        <span>Typical engagement range</span>
+      <div class="stat">
+        <div class="stat-value">async</div>
+        <div class="stat-label">Clear brief in, code out</div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="services">
+<section class="projects" id="projects">
   <div class="container">
-    <div class="section-label">What I Build</div>
-    <h2 class="section-title">Production-grade systems, end to end</h2>
-    <div class="services-grid">
+    <div class="section-eyebrow">Shipped</div>
+    <h2 class="section-title">Things I built and deployed</h2>
+    <p class="section-desc">Every project here is live, running in production, and you can click through to see it work.</p>
 
-      <div class="service-card">
-        <div class="service-icon">&#129504;</div>
-        <h3>AI &amp; LLM Integration</h3>
-        <p>RAG pipelines, document processing, LLM-powered workflows. Custom agents that handle real tasks: contract review, report generation, classification at scale.</p>
-        <div class="service-tags">
-          <span class="service-tag">OpenAI</span>
-          <span class="service-tag">LangChain</span>
-          <span class="service-tag">RAG</span>
-          <span class="service-tag">Embeddings</span>
-        </div>
-      </div>
+    <div class="projects-grid">
 
-      <div class="service-card">
-        <div class="service-icon">&#128187;</div>
-        <h3>Full-Stack Development</h3>
-        <p>Complete applications from database schema to deployed UI. React, Node.js, Python. Not prototypes. Not MVPs that need rewrites in 6 months. Shipped code that scales.</p>
-        <div class="service-tags">
-          <span class="service-tag">React</span>
-          <span class="service-tag">Next.js</span>
-          <span class="service-tag">Node.js</span>
-          <span class="service-tag">Python</span>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">&#128202;</div>
-        <h3>Data Engineering</h3>
-        <p>ETL pipelines, real-time dashboards, data infrastructure. Connect your scattered data sources and turn them into something you can actually use to make decisions.</p>
-        <div class="service-tags">
-          <span class="service-tag">ETL</span>
-          <span class="service-tag">Postgres</span>
-          <span class="service-tag">Dashboards</span>
-          <span class="service-tag">APIs</span>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">&#9889;</div>
-        <h3>Business Automation</h3>
-        <p>n8n, custom Python, workflow systems. Leads followed up in seconds. Reports that write themselves. Proposal generation in 30 minutes instead of half a day.</p>
-        <div class="service-tags">
-          <span class="service-tag">n8n</span>
-          <span class="service-tag">Python</span>
-          <span class="service-tag">Zapier</span>
-          <span class="service-tag">Webhooks</span>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">&#9878;</div>
-        <h3>Legal &amp; Finance Tech</h3>
-        <p>Contract review automation, compliance dashboards, client intake systems. Built for the regulatory requirements and data sensitivity that these industries actually have.</p>
-        <div class="service-tags">
-          <span class="service-tag">Document AI</span>
-          <span class="service-tag">Compliance</span>
-          <span class="service-tag">Intake</span>
-          <span class="service-tag">Billing</span>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">&#128301;</div>
-        <h3>Data Pipelines &amp; Scraping</h3>
-        <p>Need data that is not behind an API? Web scraping, extraction, cleaning, delivery on a schedule. Handles pagination, anti-bot measures, deduplication, and transformation.</p>
-        <div class="service-tags">
-          <span class="service-tag">Playwright</span>
-          <span class="service-tag">Scrapy</span>
-          <span class="service-tag">ETL</span>
-          <span class="service-tag">Cron</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="industries">
-  <div class="container">
-    <div class="section-label">Who I Work With</div>
-    <h2 class="section-title">Industries that take software seriously</h2>
-    <div class="industries-grid">
-
-      <div class="industry-card">
-        <h3>Law Firms</h3>
-        <p>Document automation, client intake, contract review, billing integration, matter management. Built to handle privileged data correctly.</p>
-      </div>
-
-      <div class="industry-card">
-        <h3>Finance &amp; Accounting</h3>
-        <p>Reporting automation, reconciliation, compliance dashboards, audit trail systems. Fast, accurate, auditable.</p>
-      </div>
-
-      <div class="industry-card">
-        <h3>Consulting Firms</h3>
-        <p>Proposal generation, client reporting, data pipelines, research tools. Cut the admin work so senior people can bill more hours.</p>
-      </div>
-
-      <div class="industry-card">
-        <h3>Series A/B SaaS</h3>
-        <p>AI feature integration, internal tooling, data pipelines, growth infrastructure. Move fast without accumulating technical debt.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="case-studies">
-  <div class="container">
-    <div class="section-label">Selected Projects</div>
-    <h2 class="section-title">Recent Work</h2>
-    <div class="case-studies-grid">
-
-      <div class="case-card">
-        <span class="case-industry">Legal / Law Firm</span>
-        <h3>Legal Contract Review AI</h3>
-        <p class="case-problem">Attorneys were spending 2 to 3 hours per contract review, mostly reading to find the 8 to 12 clauses that actually needed attention. A slow, expensive bottleneck on a high-billing team.</p>
-        <div class="case-result">
-          <div class="case-result-metric">75% less time</div>
-          <div class="case-result-desc">Review time dropped from 2 to 3 hours down to 30 to 45 minutes. Attorneys now review only flagged clauses.</div>
-        </div>
-        <div class="case-tags">
-          <span class="case-tag">Python</span>
-          <span class="case-tag">Claude API</span>
-          <span class="case-tag">LangChain</span>
-          <span class="case-tag">PostgreSQL</span>
-          <span class="case-tag">React</span>
-        </div>
-      </div>
-
-      <div class="case-card">
-        <span class="case-industry">Finance / Accounting</span>
-        <h3>Finance Reconciliation Dashboard</h3>
-        <p class="case-problem">Finance team spending 2 full days per month on manual AP reconciliation: pulling data from multiple systems, checking for discrepancies, formatting reports by hand.</p>
-        <div class="case-result">
-          <div class="case-result-metric">2 days to 15 min</div>
-          <div class="case-result-desc">Zero missed discrepancies in the first 90 days. Friday email summaries sent automatically.</div>
-        </div>
-        <div class="case-tags">
-          <span class="case-tag">Python</span>
-          <span class="case-tag">PostgreSQL</span>
-          <span class="case-tag">React</span>
-          <span class="case-tag">Airflow</span>
-          <span class="case-tag">SMTP</span>
-        </div>
-      </div>
-
-      <div class="case-card">
-        <span class="case-industry">SaaS / Sales Operations</span>
-        <h3>Lead Intelligence Pipeline</h3>
-        <p class="case-problem">Sales team manually researching leads from multiple sources. 20+ hours per week of copy-paste data entry into the CRM, with inconsistent data quality slowing down outreach.</p>
-        <div class="case-result">
-          <div class="case-result-metric">10,000 records/day</div>
-          <div class="case-result-desc">Sales team recovered 20+ hours per week. Lead quality score improved with richer, cleaner data.</div>
-        </div>
-        <div class="case-tags">
-          <span class="case-tag">Python</span>
-          <span class="case-tag">n8n</span>
-          <span class="case-tag">PostgreSQL</span>
-          <span class="case-tag">REST APIs</span>
-          <span class="case-tag">HubSpot</span>
-        </div>
-      </div>
-
-    </div>
-    <div class="case-studies-cta">
-      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" target="_blank" rel="noopener">Discuss your project</a>
-    </div>
-  </div>
-</section>
-
-<section class="pricing">
-  <div class="container">
-    <div class="section-label">Pricing</div>
-    <h2 class="section-title">Straightforward engagement models</h2>
-    <div class="pricing-grid">
-
-      <div class="pricing-card">
-        <div class="pricing-label">Discovery Project</div>
-        <h3>Scoped Deliverable</h3>
-        <div class="pricing-amount">$1,500 - $5,000</div>
-        <p>A defined proof-of-concept, audit, or prototype. Clear scope, fixed output, fast turnaround.</p>
-      </div>
-
-      <div class="pricing-card featured">
-        <div class="pricing-label">Full Project</div>
-        <h3>End-to-End Build</h3>
-        <div class="pricing-amount">$5,000 - $30,000</div>
-        <p>Complete feature or system from spec to deployment. This is where most engagements land.</p>
-      </div>
-
-      <div class="pricing-card">
-        <div class="pricing-label">Retainer</div>
-        <h3>Ongoing Partnership</h3>
-        <div class="pricing-amount">$2,500 - $8,000/mo</div>
-        <p>Continuous development, maintenance, and iteration. Reserved capacity every month.</p>
-      </div>
-
-      <div class="pricing-card">
-        <div class="pricing-label">Enterprise</div>
-        <h3>Large-Scale Build</h3>
-        <div class="pricing-amount">Custom quote</div>
-        <p>Multi-month engagements, team integrations, complex infrastructure. Scoped after discovery.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="how">
-  <div class="container">
-    <div class="section-label">How It Works</div>
-    <h2 class="section-title">Three steps to a working system</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h3>Discovery Call</h3>
-        <p>30-minute call to understand your problem, the existing stack, and what a good outcome looks like. I will tell you exactly what I would build and what it would cost.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h3>Build</h3>
-        <p>Scoped, documented, and shipped. You get updates throughout. No surprises at the end. Code that your team can maintain and extend without calling me every time.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h3>Handoff &amp; Support</h3>
-        <p>Full documentation, deployment, and a walkthrough. Retainer available if you want ongoing development. You own everything you paid for.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="case-studies" style="border-top: 1px solid var(--border);">
-  <div class="container">
-    <div class="section-label">Shipped Products</div>
-    <h2 class="section-title">Things I built and launched</h2>
-    <div class="case-studies-grid">
-      <div class="case-card">
-        <span class="case-industry">AI / RAG</span>
+      <div class="project-card featured">
+        <div class="project-badge live">Live system</div>
         <h3>Scout</h3>
-        <p class="case-problem">AI-powered company research agent. Dual Amazon Nova models for real-time synthesis and semantic search across unstructured data.</p>
-        <div class="case-result">
-          <div class="case-result-metric">Live system</div>
-          <div class="case-result-desc">RAG pipeline with Nova 2 Lite (synthesis) + Nova Embeddings (vector search). FastAPI backend, Next.js frontend, deployed on AWS EC2 + Vercel.</div>
+        <p class="project-desc">AI-powered research agent. Feeds it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a searchable knowledge base with semantic vector search. Two Nova models working together: one for synthesis, one for embeddings.</p>
+        <div class="project-tech">
+          <span>Python</span>
+          <span>FastAPI</span>
+          <span>Amazon Nova</span>
+          <span>RAG</span>
+          <span>Vector Search</span>
+          <span>AWS EC2</span>
+          <span>Next.js</span>
         </div>
-        <div class="case-tags">
-          <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">Live Demo</a>
-          <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">GitHub</a>
-          <span class="case-tag">Python</span>
-          <span class="case-tag">RAG</span>
-          <span class="case-tag">AWS</span>
+        <div class="project-links">
+          <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
+          <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source code</a>
         </div>
       </div>
-      <div class="case-card">
-        <span class="case-industry">AI / Auth</span>
+
+      <div class="project-card">
+        <div class="project-badge live">Live system</div>
         <h3>DevContext</h3>
-        <p class="case-problem">AI developer context agent with secure OAuth integration. Connects GitHub, Google Calendar, and Slack via Auth0 Token Vault for contextual briefings.</p>
-        <div class="case-result">
-          <div class="case-result-metric">Live system</div>
-          <div class="case-result-desc">Permission Control Center for token management. Streaming AI chat with tool calling. Auth0 v4 proxy-based auth.</div>
+        <p class="project-desc">AI agent that connects to your GitHub, Calendar, and Slack via Auth0 Token Vault, then gives you contextual briefings. Permission Control Center lets you grant and revoke access per provider.</p>
+        <div class="project-tech">
+          <span>TypeScript</span>
+          <span>Next.js</span>
+          <span>Auth0</span>
+          <span>AI SDK</span>
         </div>
-        <div class="case-tags">
-          <a href="https://devcontext-two.vercel.app" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">Live Demo</a>
-          <a href="https://github.com/astraedus/devcontext" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">GitHub</a>
-          <span class="case-tag">TypeScript</span>
-          <span class="case-tag">Auth0</span>
-          <span class="case-tag">Next.js</span>
+        <div class="project-links">
+          <a href="https://devcontext-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
+          <a href="https://github.com/astraedus/devcontext" target="_blank" rel="noopener">Source</a>
         </div>
       </div>
-      <div class="case-card">
-        <span class="case-industry">SaaS</span>
+
+      <div class="project-card">
+        <div class="project-badge live">Live product</div>
         <h3>Rebill</h3>
-        <p class="case-problem">Failed payment recovery for SaaS companies. Smart dunning email sequences, expiring card alerts, recovery analytics. Connect Stripe in 30 seconds.</p>
-        <div class="case-result">
-          <div class="case-result-metric">Live product</div>
-          <div class="case-result-desc">Next.js + Supabase + Stripe Connect + Resend. Full auth, billing, and email infrastructure.</div>
+        <p class="project-desc">Failed payment recovery for SaaS. Connect Stripe, get smart dunning emails, expiring card alerts, and recovery analytics. Multi-tenant with Stripe Connect.</p>
+        <div class="project-tech">
+          <span>Next.js</span>
+          <span>Stripe Connect</span>
+          <span>Supabase</span>
+          <span>Resend</span>
         </div>
-        <div class="case-tags">
-          <a href="https://rebill.astraedus.dev" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">Live Demo</a>
-          <span class="case-tag">Next.js</span>
-          <span class="case-tag">Stripe</span>
-          <span class="case-tag">Supabase</span>
+        <div class="project-links">
+          <a href="https://rebill.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
         </div>
       </div>
-      <div class="case-card">
-        <span class="case-industry">SaaS</span>
+
+      <div class="project-card">
+        <div class="project-badge live">Live product</div>
         <h3>Echoboard</h3>
-        <p class="case-problem">Customer feedback and voting tool for SaaS teams. Public boards, upvoting, roadmap kanban, changelog with email notifications, embeddable widget.</p>
-        <div class="case-result">
-          <div class="case-result-metric">Live product</div>
-          <div class="case-result-desc">Full CRUD with RLS, real-time voting, Stripe billing, public portal, and widget embed system.</div>
+        <p class="project-desc">Customer feedback boards with upvoting, public roadmap kanban, changelog with email notifications, and an embeddable widget. A Canny alternative at a tenth of the price.</p>
+        <div class="project-tech">
+          <span>Next.js</span>
+          <span>Supabase</span>
+          <span>Stripe</span>
+          <span>RLS</span>
         </div>
-        <div class="case-tags">
-          <a href="https://echoboard.astraedus.dev" target="_blank" rel="noopener" class="case-tag" style="color:var(--accent);border-color:var(--accent);text-decoration:none;">Live Demo</a>
-          <span class="case-tag">Next.js</span>
-          <span class="case-tag">Supabase</span>
-          <span class="case-tag">Stripe</span>
+        <div class="project-links">
+          <a href="https://echoboard.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
         </div>
       </div>
-    </div>
-    <div class="case-studies-cta" style="margin-top:24px;">
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3" target="_blank" rel="noopener">Read my technical writing on Dev.to</a>
+
+      <div class="project-card">
+        <div class="project-badge">AI agent</div>
+        <h3>Viva</h3>
+        <p class="project-desc">Real-time AI interview coach. Listens to your interview via Gemini Live API, analyzes body language with Vision, and gives live coaching feedback with scoring.</p>
+        <div class="project-tech">
+          <span>Gemini Live API</span>
+          <span>Vision</span>
+          <span>Cloud Run</span>
+          <span>React</span>
+        </div>
+        <div class="project-links">
+          <a href="https://viva-kappa-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
+          <a href="https://github.com/astraedus/viva" target="_blank" rel="noopener">Source</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-badge">Chrome extension</div>
+        <h3>FormPilot</h3>
+        <p class="project-desc">AI form navigator using Gemini Vision. Analyzes any web form and overlays intelligent guidance on each field. Understands context, suggests values, flags required fields.</p>
+        <div class="project-tech">
+          <span>Gemini Vision</span>
+          <span>Chrome Extension</span>
+          <span>Python</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/astraedus/formpilot" target="_blank" rel="noopener">Source</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<section class="cta-section">
+<section class="stack">
   <div class="container">
-    <div class="cta-box">
-      <h2>Have a project in mind?</h2>
-      <p>Describe what you are building or what problem you need solved. I will respond within 24 hours with a clear take on whether I can help and what it would look like.</p>
-      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="hero-cta" target="_blank" rel="noopener">Schedule a Call</a>
-      <p class="cta-email">Or email directly: <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
+    <div class="section-eyebrow">Stack</div>
+    <h2 class="section-title">What I work with</h2>
+    <p class="section-desc">The tools depend on the problem. These are the ones I reach for most.</p>
+    <div class="stack-grid">
+      <div class="stack-item">
+        <h4>Languages</h4>
+        <p>TypeScript, Python, SQL. Production code in all three, daily.</p>
+      </div>
+      <div class="stack-item">
+        <h4>Frontend</h4>
+        <p>Next.js, React, Tailwind, shadcn/ui. Server components by default.</p>
+      </div>
+      <div class="stack-item">
+        <h4>Backend</h4>
+        <p>FastAPI, Node.js, PostgreSQL, Supabase. REST and webhooks.</p>
+      </div>
+      <div class="stack-item">
+        <h4>AI / ML</h4>
+        <p>Claude, GPT, Gemini APIs. RAG pipelines, embeddings, tool calling, agents.</p>
+      </div>
+      <div class="stack-item">
+        <h4>Infra</h4>
+        <p>AWS (EC2, Bedrock, Lambda), Vercel, Docker, Cloudflare. CI/CD.</p>
+      </div>
+      <div class="stack-item">
+        <h4>Payments</h4>
+        <p>Stripe, Stripe Connect, webhooks, subscription billing, invoicing.</p>
+      </div>
     </div>
+  </div>
+</section>
+
+<section class="writing">
+  <div class="container">
+    <div class="section-eyebrow">Writing</div>
+    <h2 class="section-title">Recent articles</h2>
+    <p class="section-desc">Technical deep-dives on building production AI systems. 20+ articles published.</p>
+
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/why-your-ai-agent-needs-a-kill-switch-and-how-to-build-one-lm2" class="writing-link" target="_blank" rel="noopener">
+      <h4>Why Your AI Agent Needs a Kill Switch (and How to Build One)</h4>
+      <span>Mar 2026</span>
+    </a>
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-determinism-ladder-why-your-ai-agent-keeps-failing-and-the-framework-to-fi-3ipm" class="writing-link" target="_blank" rel="noopener">
+      <h4>The Determinism Ladder: Why Your AI Agent Keeps Failing</h4>
+      <span>Mar 2026</span>
+    </a>
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/choosing-the-right-ai-agent-framework-in-2026-a-practical-comparison-3mig" class="writing-link" target="_blank" rel="noopener">
+      <h4>Choosing the Right AI Agent Framework in 2026</h4>
+      <span>Mar 2026</span>
+    </a>
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/mcp-the-universal-standard-for-ai-agent-tools-in-2026-bem" class="writing-link" target="_blank" rel="noopener">
+      <h4>MCP: The Universal Standard for AI Agent Tools</h4>
+      <span>Mar 2026</span>
+    </a>
+
+    <div style="margin-top: 24px;">
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px;">All articles on Dev.to</a>
+      <a href="https://astraedus.dev/book" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Book: Production AI Agents</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Let's build <em>something.</em></h2>
+    <p>Tell me what you need. I'll reply within 24 hours with a straight answer on whether I can help and what it would take.</p>
+    <div class="cta-actions">
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="btn-primary" target="_blank" rel="noopener">Schedule a call</a>
+      <a href="https://github.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="cta-email">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    &copy; 2026 Astraedus. Built with precision.
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
   </div>
 </footer>
 
