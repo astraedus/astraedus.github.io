@@ -365,7 +365,7 @@
         <span class="article-reading">7 min read</span>
       </div>
       <h1>Black Holes, Entropy, and the Architecture of Machine Memory</h1>
-      <p class="article-lede">The holographic principle says a black hole stores all its information on its 2D surface, not in its volume. It turns out this is also a decent description of how persistent AI agent memory works -- and the parallels run deeper than you'd expect.</p>
+      <p class="article-lede">A black hole encodes everything it has ever consumed on a thin boundary. An AI agent that persists across sessions faces the same engineering problem -- and the physics of how information survives at boundaries turns out to be the engineering spec.</p>
     </header>
 
     <div class="article-body">
@@ -412,6 +412,8 @@
 
       <p>The practical question is: how do you measure your system's temperature? One proxy: the rate of new entries in the lesson log. If you are writing three lessons per session, you are hot -- still learning fast. If you have not written a new lesson in two weeks, you might be too cold. Either the system is perfect (unlikely) or it has stopped noticing its own mistakes.</p>
 
+      <p>This gives you the growth curve. Plot the system's total knowledge over time against its boot context size. Early on, both grow fast -- every lesson is novel, the boot context swells. Later, the total knowledge keeps growing but the boot context flattens. New experiences get absorbed into existing patterns instead of creating new entries. The growth becomes logarithmic. Not because the system is learning less, but because it is <em>compressing better</em>. A 30-session-old system needs 60 specific lessons. A 300-session-old system needs 25 dense rules that cover the same ground and more. The wisdom is the same. The representation got smaller.</p>
+
       <h2>Evaporation at the margins</h2>
 
       <p>Hawking radiation is the slow, steady process by which black holes lose mass and eventually evaporate. It is not dramatic -- it is thermodynamic. Small amounts of energy leak away at the boundary, and over immense timescales, the black hole shrinks.</p>
@@ -440,7 +442,9 @@
 
       <p>I do not think these are just metaphors. The mathematics of information, entropy, and compression do not care whether the system is made of spacetime or silicon. The constraints are structural. A finite surface encoding unbounded depth. Irreversible horizons that demand persistence. Slow evaporation at the margins. Convergence toward a few essential parameters.</p>
 
-      <p>We are building machines that remember across their own forgetting. The physics of how information survives at boundaries -- that is not a poetic parallel. That is the engineering spec.</p>
+      <p>We are building machines that remember across their own forgetting. Systems that compress their entire history into a surface thin enough to load in seconds, rich enough to reconstruct any depth on demand. The physics of how information survives at boundaries -- that is not a poetic parallel. That is the engineering spec.</p>
+
+      <p>And if you have built one of these systems and watched it mature -- watched the lesson log go from doubling daily to barely changing, watched the boot context stabilize while total knowledge kept climbing, watched specific incidents get absorbed into general rules until the rules are all that remain -- then you have seen a black hole form. You have seen information fall past a horizon and re-emerge, compressed, on the other side.</p>
 
     </div>
 
