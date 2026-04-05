@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Arc Journal</title>
+  <meta name="description" content="Privacy Policy for Arc Journal, a smart journaling app by Raedus Labs. Learn how we collect, use, and protect your data.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.8; }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* Nav */
+    nav {
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 28px;
+      padding-right: 28px;
+    }
+    nav .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    /* Header */
+    .page-header {
+      padding: 80px 0 48px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .page-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.25rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .page-header .effective-date {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* Content */
+    .content {
+      padding: 56px 0 100px;
+    }
+    .content section {
+      margin-bottom: 48px;
+    }
+    .content section:last-child {
+      margin-bottom: 0;
+    }
+    .content h2 {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .content h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      margin-top: 24px;
+    }
+    .content p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+    .content ul, .content ol {
+      margin: 12px 0 12px 20px;
+    }
+    .content li {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+    .content li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Data table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.88rem;
+    }
+    .data-table th, .data-table td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--surface);
+    }
+    .data-table td {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* Third-party service cards */
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .service-card h4 {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .service-card p {
+      margin-bottom: 4px;
+    }
+    .service-card a {
+      font-size: 0.85rem;
+    }
+
+    /* Contact box */
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 16px;
+    }
+    .contact-box p {
+      margin-bottom: 6px;
+    }
+    .contact-box .contact-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .contact-box .contact-value {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); }
+    footer a:hover { color: var(--text-secondary); opacity: 1; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page-eyebrow, .page-header h1, .page-header .effective-date {
+      animation: fadeUp 0.5s ease-out both;
+    }
+    .page-header h1 { animation-delay: 0.08s; }
+    .page-header .effective-date { animation-delay: 0.16s; }
+
+    @media (max-width: 640px) {
+      .page-header { padding: 48px 0 32px; }
+      .content { padding: 40px 0 60px; }
+      .data-table th, .data-table td { padding: 10px 12px; font-size: 0.82rem; }
+      .service-card { padding: 16px 18px; }
+      .contact-box { padding: 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-eyebrow">Arc Journal</div>
+    <h1>Privacy Policy</h1>
+    <p class="effective-date">Effective date: April 6, 2026</p>
+  </div>
+</header>
+
+<main class="content">
+  <div class="container">
+
+    <section>
+      <p>This Privacy Policy describes how Raedus Labs (D-U-N-S: 753163623), operated by Diven Rastdus ("we", "us", "our"), collects, uses, and protects your personal information when you use the Arc Journal mobile application (package: <code>com.astraedus.arcjournal</code>).</p>
+      <p>By using Arc Journal, you agree to the collection and use of information in accordance with this policy.</p>
+    </section>
+
+    <section>
+      <h2>1. Information We Collect</h2>
+      <p>Arc Journal collects the following categories of data to provide its core journaling and insight features:</p>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data Type</th>
+              <th>What & Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Account information</strong></td>
+              <td>Email address and authentication credentials, used to create and secure your account.</td>
+            </tr>
+            <tr>
+              <td><strong>Journal entries</strong></td>
+              <td>Text content you write in journal entries. This is the core data of the app.</td>
+            </tr>
+            <tr>
+              <td><strong>Voice recordings</strong></td>
+              <td>Audio captured via your device microphone for voice-to-text journaling. Recordings are transcribed on-device using expo-speech-recognition and are not stored on our servers. Only the resulting text transcription is saved.</td>
+            </tr>
+            <tr>
+              <td><strong>Mood data</strong></td>
+              <td>Mood selections and ratings you provide, used for mood tracking and pattern analysis.</td>
+            </tr>
+            <tr>
+              <td><strong>Calendar events</strong></td>
+              <td>Read-only access to your device calendar (via expo-calendar) to provide contextual journaling prompts. We do not modify or store your full calendar data.</td>
+            </tr>
+            <tr>
+              <td><strong>Location data</strong></td>
+              <td>Approximate location (via expo-location) to add geographic context to journal entries. Location access is optional and can be revoked at any time in your device settings.</td>
+            </tr>
+            <tr>
+              <td><strong>Weather data</strong></td>
+              <td>Current weather conditions fetched from Open-Meteo API based on your approximate location, to enrich journal context.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. How We Use Your Information</h2>
+      <p>We use the data we collect for the following purposes:</p>
+      <ul>
+        <li><strong>Core journaling features:</strong> Storing, organizing, and displaying your journal entries, mood data, and associated context.</li>
+        <li><strong>AI-powered insights:</strong> Processing journal text through Google Gemini Flash API to extract themes, generate action items, identify patterns, and organize entries. This processing occurs on Google's servers (see Section 3).</li>
+        <li><strong>Contextual prompts:</strong> Using calendar events, location, and weather data to suggest relevant journaling prompts and enrich entry metadata.</li>
+        <li><strong>Account management:</strong> Authenticating your identity and securing your account.</li>
+        <li><strong>Service improvement:</strong> Aggregated, anonymized usage analytics to improve app performance and features.</li>
+      </ul>
+      <p>We do <strong>not</strong> use your data for advertising. We do <strong>not</strong> sell, rent, or share your personal data with third parties for their marketing purposes.</p>
+    </section>
+
+    <section>
+      <h2>3. Third-Party Services</h2>
+      <p>Arc Journal relies on the following third-party services to function. Each service only receives the minimum data necessary for its specific purpose:</p>
+
+      <div class="service-card">
+        <h4>Supabase (Authentication & Database)</h4>
+        <p>Provides user authentication and stores your journal entries, mood data, and account information. Data is hosted in the Sydney, Australia (ap-southeast-2) region.</p>
+        <p><a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase Privacy Policy</a></p>
+      </div>
+
+      <div class="service-card">
+        <h4>Google Gemini Flash API (AI Processing)</h4>
+        <p>Journal entry text is sent to Google's Gemini Flash API for theme extraction, action item generation, and content organization. Google processes this data according to their API terms, and data sent via the API is not used to train their models.</p>
+        <p><a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Google Gemini API Terms</a></p>
+      </div>
+
+      <div class="service-card">
+        <h4>Open-Meteo (Weather Data)</h4>
+        <p>Your approximate location coordinates are sent to Open-Meteo to retrieve current weather conditions. Open-Meteo is an open-source weather API that does not require an API key and does not track users.</p>
+        <p><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">Open-Meteo Terms</a></p>
+      </div>
+
+      <div class="service-card">
+        <h4>Expo Services (App Infrastructure)</h4>
+        <p>Arc Journal is built with Expo (React Native). Expo services may be used for push notifications and over-the-air updates. Expo collects minimal device metadata for these functions.</p>
+        <p><a href="https://expo.dev/privacy" target="_blank" rel="noopener">Expo Privacy Policy</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Data Storage & Security</h2>
+      <p>Your data is stored in Supabase-managed PostgreSQL databases hosted in the <strong>Sydney, Australia (ap-southeast-2)</strong> region. We implement the following security measures:</p>
+      <ul>
+        <li>All data is transmitted over HTTPS/TLS encryption in transit.</li>
+        <li>Database access is protected by Supabase Row Level Security (RLS) policies, ensuring users can only access their own data.</li>
+        <li>Authentication tokens are securely stored on your device.</li>
+        <li>Voice recordings are processed on-device and are not uploaded to our servers.</li>
+      </ul>
+      <p>While we take reasonable measures to protect your data, no method of electronic storage is 100% secure. We cannot guarantee absolute security.</p>
+    </section>
+
+    <section>
+      <h2>5. Data Retention</h2>
+      <p>We retain your data for as long as your account is active. Specifically:</p>
+      <ul>
+        <li><strong>Journal entries and mood data:</strong> Retained for the lifetime of your account.</li>
+        <li><strong>Voice recordings:</strong> Processed on-device in real time. Raw audio is not stored on our servers.</li>
+        <li><strong>Location and weather data:</strong> Stored as metadata attached to journal entries for the lifetime of your account.</li>
+        <li><strong>Account data:</strong> Retained until you delete your account.</li>
+      </ul>
+      <p>When you delete your account, all associated data is permanently removed from our systems within 30 days.</p>
+    </section>
+
+    <section>
+      <h2>6. Your Rights</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Access:</strong> You can view all data associated with your account within the app at any time.</li>
+        <li><strong>Export:</strong> You can request an export of all your journal data by contacting us at the email below.</li>
+        <li><strong>Correction:</strong> You can edit or update your journal entries and account information directly in the app.</li>
+        <li><strong>Deletion:</strong> You can delete individual journal entries within the app, or delete your entire account and all associated data from the app settings.</li>
+        <li><strong>Withdraw consent:</strong> You can revoke location, calendar, or microphone permissions at any time through your device settings. The app will continue to function with reduced features.</li>
+      </ul>
+      <p>For any privacy-related requests, contact us using the information in Section 10.</p>
+    </section>
+
+    <section>
+      <h2>7. Children's Privacy</h2>
+      <p>Arc Journal is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have inadvertently collected data from a child under 13, we will take steps to delete that information as promptly as possible.</p>
+      <p>If you are a parent or guardian and believe your child has provided us with personal information, please contact us at the address below.</p>
+    </section>
+
+    <section>
+      <h2>8. International Data Transfers</h2>
+      <p>Your primary data is stored in Australia (Sydney region). However, journal entry text may be transmitted to Google's Gemini API servers (which may be located outside Australia) for AI processing. Weather API requests are sent to Open-Meteo servers in Europe.</p>
+      <p>By using Arc Journal, you consent to these transfers. We ensure that any international transfers are subject to appropriate safeguards as required by applicable data protection laws.</p>
+    </section>
+
+    <section>
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we make material changes, we will notify you through the app or via email before the changes take effect. The "Effective date" at the top of this page indicates when the policy was last revised.</p>
+      <p>Your continued use of Arc Journal after changes are posted constitutes acceptance of the revised policy.</p>
+    </section>
+
+    <section>
+      <h2>10. Contact Us</h2>
+      <p>If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, contact us:</p>
+
+      <div class="contact-box">
+        <p class="contact-label">Company</p>
+        <p class="contact-value">Raedus Labs (D-U-N-S: 753163623)</p>
+        <br>
+        <p class="contact-label">Operator</p>
+        <p class="contact-value">Diven Rastdus</p>
+        <br>
+        <p class="contact-label">Email</p>
+        <p class="contact-value"><a href="mailto:hello@astraedus.dev">hello@astraedus.dev</a></p>
+        <br>
+        <p class="contact-label">Location</p>
+        <p class="contact-value">Sydney, Australia</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>Raedus Labs / <a href="/">Astraedus</a>, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
