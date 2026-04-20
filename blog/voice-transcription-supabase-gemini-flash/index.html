@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash | Diven Rastdus</title>
+  <meta name="description" content="Switched my journaling app's voice capture from OpenAI Whisper to Gemini 2.5 Flash multimodal. Same accuracy, 7x cheaper, uses GCP credits already on account. Full edge function + per-user rate limit code.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash">
+  <meta property="og:description" content="Swapped Whisper for Gemini 2.5 Flash multimodal. 7x cheaper, one less third-party account, uses GCP credits already on the billing account.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="article:published_time" content="2026-04-20">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="nav-cta" target="_blank" rel="noopener">Book a call</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">April 20, 2026</span>
+        <span class="article-tag">Edge Functions</span>
+        <span class="article-reading">10 min read</span>
+      </div>
+      <h1>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash</h1>
+      <p class="article-lede">Switched my journaling app's voice capture from OpenAI Whisper to Gemini 2.5 Flash multimodal. Same accuracy, roughly 7x cheaper at the default rate, and it runs on GCP credits that were already sitting on the billing account. Here's the full edge function, the per-user rate limit, and why I passed on the more obvious choices.</p>
+    </header>
+
+    <div class="article-body">
+
+      <p>I'm building a journaling app where the killer feature is: yap your thoughts into your phone, get back clean text that an AI can organise later. Speech-to-text is the most-trafficked path in the product, so the cost math matters from day one.</p>
+
+      <p>The default everyone reaches for is OpenAI Whisper at $0.006/min. Deepgram Nova-3 is $0.0059/min real-time. Groq's Whisper Large v3 Turbo is the discount option at ~$0.0008/min.</p>
+
+      <p>I shipped on <strong>Gemini 2.5 Flash multimodal</strong> instead. Roughly $0.001/min, completely free under my existing GCP credits, and one less third-party account to manage because the same key already powers other features in my app.</p>
+
+      <p>Here's exactly what I did, the full edge function, and why I rejected the more obvious choices.</p>
+
+      <h2>The "use what you already have" check</h2>
+
+      <p>Before picking a transcription provider, I looked at what was already wired in:</p>
+
+      <ul>
+        <li><strong>Supabase project</strong>: yes, with a <code>GEMINI_API_KEY</code> already set as a secret (used by my AI features)</li>
+        <li><strong>GCP free credits</strong>: $522 sitting on the same billing account that funds the Gemini API</li>
+        <li><strong>OpenAI account</strong>: I'd have to create one and bill it</li>
+        <li><strong>Groq account</strong>: same, plus a separate API to learn</li>
+      </ul>
+
+      <p>Every new third-party SaaS account is a future maintenance cost: a new dashboard, a new key to rotate, a new bill to forget about until the credit card statement arrives. If the Gemini key I already had could do voice, that was a strong default.</p>
+
+      <p>It can. Gemini 2.5 Flash accepts audio inputs natively as multimodal parts. Same <code>generateContent</code> endpoint that my existing AI features use, just with an <code>inline_data</code> part that carries the audio bytes.</p>
+
+      <h2>Why not Web Speech API (the "free" option)?</h2>
+
+      <p>The browser actually ships a <code>SpeechRecognition</code> API. It's free. So why not use that?</p>
+
+      <p>Three reasons that killed it for my use case:</p>
+
+      <ol>
+        <li><strong>Browser support</strong>: Chrome and Edge only. Firefox doesn't implement it. Safari has partial support. For a journaling app where users are likely on whatever browser they prefer, that's a non-starter.</li>
+        <li><strong>Privacy</strong>: Chrome's implementation routes audio to Google's servers. My app's whole pitch is "your honest journal, not a feed for ad targeting." I'm not handing the most intimate audio my users produce to an ad company by default.</li>
+        <li><strong>Control</strong>: I can't tune the model, can't set retention, can't see what was sent. With my own backend in front of Gemini, I control all three.</li>
+      </ol>
+
+      <p>Native mobile is different. <code>expo-speech-recognition</code> runs on-device using iOS Speech and Android SpeechRecognizer. That's free and local and good. So my architecture is hybrid: native STT on mobile, Gemini on web.</p>
+
+      <h2>The edge function</h2>
+
+      <p>Here's the meaningful core. Full file is ~200 lines; I've stripped boilerplate.</p>
+
+      <pre><code>// supabase/functions/transcribe-audio/index.ts
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.101.1';
+
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// Inline audio parts up to 20 MB; ~25+ min of opus speech.
+const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
+
+Deno.serve(async (req: Request) =&gt; {
+  if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  // 1. Verify the user JWT ourselves (config.toml has verify_jwt = false because
+  //    we need to parse multipart audio and read the Authorization header in
+  //    one place; the platform's pre-check would conflict).
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return jsonResponse({ error: 'Unauthorized' }, 401);
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: { user }, error } = await supabase.auth.getUser(
+    authHeader.slice('Bearer '.length),
+  );
+  if (error || !user) return jsonResponse({ error: 'Unauthorized' }, 401);
+
+  // 2. Parse the upload
+  const formData = await req.formData();
+  const audio = formData.get('audio');
+  if (!(audio instanceof Blob) || audio.size === 0) {
+    return jsonResponse({ error: 'Missing audio' }, 400);
+  }
+  if (audio.size &gt; MAX_AUDIO_BYTES) {
+    return jsonResponse({ error: 'Audio too large' }, 413);
+  }
+
+  // 3. ... rate-limit check goes here, see below ...
+
+  // 4. Encode for Gemini inline
+  const base64Audio = bufferToBase64(new Uint8Array(await audio.arrayBuffer()));
+  const mimeType = (audio.type || 'audio/webm').split(';')[0].trim().toLowerCase();
+
+  // 5. Call Gemini
+  const body = {
+    contents: [{
+      role: 'user',
+      parts: [
+        { text: 'Transcribe this audio. Return ONLY the words spoken, with normal punctuation.' },
+        { inline_data: { mime_type: mimeType, data: base64Audio } },
+      ],
+    }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
+  };
+
+  const res = await fetch(`${GEMINI_URL}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) return jsonResponse({ error: `Gemini ${res.status}` }, 502);
+
+  const parsed = await res.json();
+  const transcript = (parsed.candidates?.[0]?.content?.parts?.[0]?.text ?? '').trim();
+  if (!transcript) return jsonResponse({ error: 'Empty transcript' }, 502);
+
+  // 6. ... usage logging goes here ...
+
+  return jsonResponse({ transcript, source: 'gemini_flash' });
+});
+
+// btoa() blows the stack on large arrays, build the binary string in chunks
+function bufferToBase64(buf: Uint8Array): string {
+  const CHUNK = 0x8000;
+  const parts: string[] = [];
+  for (let i = 0; i &lt; buf.length; i += CHUNK) {
+    parts.push(String.fromCharCode(...buf.subarray(i, i + CHUNK)));
+  }
+  return btoa(parts.join(''));
+}
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}</code></pre>
+
+      <p>Three small things worth flagging:</p>
+
+      <p><strong>The <code>Authorization</code> parse.</strong> If you let Supabase's edge runtime verify the JWT for you, it adds a step before your function runs. With <code>multipart/form-data</code> and a custom auth check we want side-by-side, it's cleaner to set <code>verify_jwt = false</code> in <code>config.toml</code> and do it ourselves. One less moving piece.</p>
+
+      <p><strong><code>bufferToBase64</code> chunking.</strong> I learned the hard way that <code>btoa(String.fromCharCode(...largeArray))</code> will throw a stack overflow on a 5 MB buffer. The chunked variant above handles inputs up to the API's 20 MB cap fine.</p>
+
+      <p><strong>The prompt.</strong> You'd be surprised how often the model wants to add commentary like "Here's the transcript:". Insisting on "ONLY the words spoken" with normal punctuation cuts this down to near-zero. Setting <code>temperature: 0.2</code> further pins it.</p>
+
+      <h2>Per-user rate limit (so one bad-faith account can't burn your credits)</h2>
+
+      <p>The version of the function above will happily transcribe any audio you throw at it, indefinitely, until your Gemini bill goes vertical. For a public app you need a per-user budget.</p>
+
+      <p>I added a tiny <code>transcription_usage</code> table:</p>
+
+      <pre><code>CREATE TABLE transcription_usage (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  bytes INT NOT NULL DEFAULT 0,
+  source TEXT NOT NULL DEFAULT 'gemini_flash',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_transcription_usage_user_time
+  ON transcription_usage (user_id, created_at DESC);
+
+ALTER TABLE transcription_usage ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users read own transcription usage"
+  ON transcription_usage FOR SELECT USING (auth.uid() = user_id);
+-- No INSERT policy: only the service role (the edge function) writes.</code></pre>
+
+      <p>Then in the function, between the auth/parse step and the Gemini call:</p>
+
+      <pre><code>const DAILY_REQUEST_LIMIT = 50;
+const DAILY_BYTES_LIMIT = 100 * 1024 * 1024; // 100 MB
+const ROLLING_WINDOW_HOURS = 24;
+
+const sinceIso = new Date(
+  Date.now() - ROLLING_WINDOW_HOURS * 60 * 60 * 1000,
+).toISOString();
+
+const { data: usageRows, error: usageErr } = await supabase
+  .from('transcription_usage')
+  .select('bytes')
+  .eq('user_id', user.id)
+  .gte('created_at', sinceIso);
+
+if (usageErr) {
+  // Fail-closed: better to block one request than risk uncapped spend.
+  return jsonResponse({ error: 'Usage check failed' }, 503);
+}
+
+const requestCount = usageRows?.length ?? 0;
+const bytesUsed = usageRows.reduce((sum, r) =&gt; sum + (r.bytes ?? 0), 0);
+
+if (requestCount &gt;= DAILY_REQUEST_LIMIT) {
+  return jsonResponse({
+    error: 'Daily transcription limit reached',
+    limit: DAILY_REQUEST_LIMIT,
+    used: requestCount,
+    window_hours: ROLLING_WINDOW_HOURS,
+  }, 429);
+}
+if (bytesUsed + audio.size &gt; DAILY_BYTES_LIMIT) {
+  return jsonResponse({ error: 'Daily transcription size budget reached' }, 429);
+}</code></pre>
+
+      <p>And after a successful Gemini call:</p>
+
+      <pre><code>await supabase.from('transcription_usage').insert({
+  user_id: user.id,
+  bytes: audio.size,
+  source: 'gemini_flash',
+});</code></pre>
+
+      <p>A few things I learned about this pattern:</p>
+
+      <ul>
+        <li><strong>Fail closed on the usage check.</strong> If the table query fails, return 503 and refuse to call Gemini. The opposite (call Gemini anyway, log nothing) opens an uncapped-spend hole if your DB has a bad day.</li>
+        <li><strong>Bytes is a better budget unit than seconds.</strong> I don't trust my client's audio metadata, but I always know how many bytes I uploaded.</li>
+        <li><strong>Don't put the limit number in the user-facing error.</strong> I do it above for code clarity, but production should say "Daily transcription limit reached. Try again later." A bad-faith user gets less information for crafting a bypass.</li>
+        <li><strong>Belt and braces with a GCP budget alert.</strong> Set a $5/month cap on the Gemini project at <code>console.cloud.google.com/billing</code>, alerts at 50/90/100%. If my edge-function rate limit ever has a bug, the budget catches it.</li>
+      </ul>
+
+      <p>For my own usage (~5 voice notes/day at 30 seconds each) the actual Gemini bill is about $0.06/month. The 50/100 MB cap is generous-honest, tight-enough-to-not-bleed.</p>
+
+      <h2>Browser side</h2>
+
+      <p>The web client is a thin wrapper around <code>MediaRecorder</code>:</p>
+
+      <pre><code>// pickAudioMimeType() picks the first one MediaRecorder.isTypeSupported() returns true for:
+//   audio/webm;codecs=opus -&gt; Chrome/Edge/Firefox
+//   audio/mp4;codecs=mp4a.40.2 -&gt; Safari
+//   ...
+const recorder = new MediaRecorder(stream, { mimeType: pickAudioMimeType() });
+
+recorder.ondataavailable = (e) =&gt; {
+  if (e.data && e.data.size &gt; 0) chunks.push(e.data);
+};
+
+recorder.onstop = async () =&gt; {
+  const blob = new Blob(chunks, { type: mimeType });
+  const form = new FormData();
+  form.set('audio', blob, 'audio.webm');
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/transcribe-audio`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: form,
+  });
+  const { transcript } = await res.json();
+  // ... do something with transcript ...
+};
+
+recorder.start();</code></pre>
+
+      <p>Two real-world tweaks I had to make:</p>
+
+      <ul>
+        <li><strong>Mime sniffing per browser.</strong> Chrome emits <code>audio/webm;codecs=opus</code>, Safari emits <code>audio/mp4;codecs=mp4a.40.2</code>. Probe with <code>MediaRecorder.isTypeSupported()</code> and pick the first one that passes. Pass the same mime to Gemini's <code>inline_data.mime_type</code>.</li>
+        <li><strong>Permission fail messages.</strong> <code>getUserMedia</code> rejects with <code>NotAllowedError</code> when the user denied mic access, <code>SecurityError</code> on insecure context. Handle them with friendlier copy than "DOMException: blah blah".</li>
+      </ul>
+
+      <h2>What I keep on disk vs throw away</h2>
+
+      <p>This is a journaling app, so privacy matters more than typical voice apps. My defaults:</p>
+
+      <ul>
+        <li><strong>Audio</strong>: never persisted server-side. The blob is uploaded for one-shot transcription, sent to Gemini, then dropped. Nothing in Supabase Storage by default.</li>
+        <li><strong>Raw transcript</strong>: persisted in <code>journal_entries.metadata.raw_transcript</code> JSONB column, alongside the (possibly AI-organised) <code>content</code>. This way the user can always toggle back to "what they actually said" if the AI cleaned the wrong thing.</li>
+        <li><strong>Provenance flag</strong>: <code>metadata.transcription_source</code> is one of <code>gemini_flash</code>, <code>native_ios</code>, <code>native_android</code>, <code>manual</code>. Useful for later analysis ("are users on the native STT path getting better quality?") and for an honest UI badge.</li>
+      </ul>
+
+      <h2>TL;DR cost comparison at the scale of one happy user</h2>
+
+      <p>5 voice entries per day, 30 seconds each = 2.5 minutes per day per user.</p>
+
+      <table>
+        <thead>
+          <tr><th>Provider</th><th>Cost / month / user</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>OpenAI Whisper API</td><td>~$0.45</td></tr>
+          <tr><td>Deepgram Nova-3 batch</td><td>~$0.44</td></tr>
+          <tr><td>Groq Whisper Large v3 Turbo</td><td>~$0.06</td></tr>
+          <tr><td>Gemini 2.5 Flash multimodal</td><td>~$0.06 (and free under my existing GCP credits)</td></tr>
+        </tbody>
+      </table>
+
+      <p>For a journaling app at single-user scale, none of these are scary. But the difference between $0.06 and $0.45 starts to matter when you cross 1,000 active users a month. And the Gemini path uses credits I'd already paid for elsewhere by being in the GCP free tier.</p>
+
+      <hr>
+
+      <p>I build this kind of glue for indie products and small teams. If you are untangling a similar choice, or you want a similar edge function on your own stack, I am at <a href="https://astraedus.dev">astraedus.dev</a>.</p>
+
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>Writing more posts like this one on <a href="/blog" style="color: var(--accent); text-decoration: none;">the blog</a>. If you are building something voice-first, cost-sensitive, or AI-heavy and want a thinking partner, the call button below is the fastest way in.</p>
+      <div class="footer-links">
+        <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" target="_blank" rel="noopener">Book a call</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
