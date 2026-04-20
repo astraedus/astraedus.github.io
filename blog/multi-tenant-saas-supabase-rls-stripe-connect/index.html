@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect | Diven Rastdus</title>
+  <meta name="description" content="A real-world pattern for running platform billing and tenant billing side by side with Supabase auth, RLS, Stripe Checkout, and Stripe Connect.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect">
+  <meta property="og:description" content="A real-world pattern for running platform billing and tenant billing side by side with Supabase auth, RLS, Stripe Checkout, and Stripe Connect.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="article:published_time" content="2026-04-21">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" class="nav-cta" target="_blank" rel="noopener">Book a call</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">April 21, 2026</span>
+        <span class="article-tag">Stripe Connect</span>
+        <span class="article-reading">12 min read</span>
+      </div>
+      <h1>How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect</h1>
+      <p class="article-lede">A real-world pattern for running platform billing and tenant billing side by side with Supabase auth, RLS, Stripe Checkout, and Stripe Connect.</p>
+    </header>
+
+    <div class="article-body">
+
+<p>If your SaaS charges customers and also plugs into those customers' billing stack, you do not have one billing problem. You have two.</p>
+<p>You need to bill your own customer for your product. Then you need to safely ingest billing events from that customer's Stripe account without letting tenants see each other's data, leaking service-role access into the frontend, or building a fragile webhook mess you cannot debug later.</p>
+<p>That was the shape of Rebill for me. Rebill is a failed-payment recovery SaaS. Founders sign up, connect their Stripe account, and Rebill listens for failed invoices, card-expiry events, and recovery events so it can send dunning emails and track recovered revenue.</p>
+<p>The interesting part was not the UI. It was getting four moving parts to agree on who owns what:</p>
+<ul>
+<li>Supabase Auth identifies the user.</li>
+<li>Supabase RLS scopes product data to that user's tenant rows.</li>
+<li>Stripe Checkout bills the user for Rebill itself.</li>
+<li>Stripe Connect pipes in billing events from the user's own Stripe account.</li>
+</ul>
+<p>Most tutorials cover one of those. Very few show all four in the same app.</p>
+<h2>Why Existing Solutions Fall Short</h2>
+<p>Most examples break down in one of three ways.</p>
+<p>First, they are single-tenant. They show a clean <code>profiles</code> table, a clean <code>checkout.session.completed</code> webhook, and no real thought about who can read what when ten customers are using the same app.</p>
+<p>Second, they treat auth and billing as separate concerns. The login works. The checkout works. The webhook works. But the join points are hand-wavy. You end up relying on random metadata fields, trusting client input too much, or writing "temporary" service-role queries that never leave.</p>
+<p>Third, Stripe Connect examples usually stop at onboarding. They show how to create a connected account and redirect the user to Stripe. They do not show the harder part: how your platform later receives events from connected accounts, maps those events back to a tenant, and keeps your own platform billing separate from tenant billing.</p>
+<p>The Rebill shape forced me to solve the whole chain:</p>
+<ol>
+<li>create the tenant record automatically when the user signs up</li>
+<li>protect product tables with RLS</li>
+<li>charge the user for Rebill with platform billing</li>
+<li>onboard their Stripe account with Connect</li>
+<li>receive events from that connected account in a separate webhook path</li>
+<li>run background jobs with service-role access, without giving that power to the browser</li>
+</ol>
+<p>That split ended up being the whole architecture.</p>
+<h2>The Working Code</h2>
+<h3>1. bootstrap the tenant in Postgres, not in app code</h3>
+<p>I wanted every authenticated user to immediately have an <code>accounts</code> row. Supabase makes that easy with a trigger on <code>auth.users</code>.</p>
+<pre><code class="language-sql">create table accounts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  email text not null,
+  company_name text,
+  plan text not null default 'free' check (plan in ('free', 'starter', 'pro')),
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  created_at timestamptz default now()
+);
+
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.accounts (user_id, email)
+  values (new.id, new.email);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+</code></pre>
+<p>That one decision cleaned up the rest of the app. Signup does not need "create tenant" logic. The dashboard can assume an account exists. Stripe metadata can always point to a stable <code>account_id</code>.</p>
+<h3>2. push tenant isolation down into RLS</h3>
+<p>The core tenant tables in Rebill are <code>accounts</code>, <code>connected_accounts</code>, <code>payment_events</code>, <code>email_sequences</code>, <code>email_sends</code>, and <code>recovery_stats</code>.</p>
+<p>The important part is that the browser-facing client never gets broad access. It gets an authenticated Supabase client plus RLS policies that enforce ownership.</p>
+<pre><code class="language-sql">alter table accounts enable row level security;
+alter table connected_accounts enable row level security;
+alter table payment_events enable row level security;
+
+create policy &quot;Users can view own account&quot; on accounts
+  for select using (auth.uid() = user_id);
+
+create policy &quot;Users can view own connected accounts&quot; on connected_accounts
+  for select using (
+    account_id in (select id from accounts where user_id = auth.uid())
+  );
+
+create policy &quot;Users can view own payment events&quot; on payment_events
+  for select using (
+    connected_account_id in (
+      select ca.id from connected_accounts ca
+      join accounts a on ca.account_id = a.id
+      where a.user_id = auth.uid()
+    )
+  );
+</code></pre>
+<p>This matters because the app code stays boring, which is exactly what you want in a multi-tenant system.</p>
+<p>On the dashboard side, I can do normal authenticated queries:</p>
+<pre><code class="language-tsx">const supabase = await createClient();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+const { data: account } = await supabase
+  .from(&quot;accounts&quot;)
+  .select(&quot;id&quot;)
+  .eq(&quot;user_id&quot;, user.id)
+  .single();
+
+const { data: connectedAccounts } = await supabase
+  .from(&quot;connected_accounts&quot;)
+  .select(&quot;id, stripe_account_id, stripe_email, livemode, is_active&quot;)
+  .eq(&quot;account_id&quot;, account?.id ?? &quot;&quot;)
+  .eq(&quot;is_active&quot;, true);
+</code></pre>
+<p>The browser client can only see rows that flow from that authenticated user. The moment I leave the user-facing path and enter a webhook or cron job, I switch to the admin client on purpose.</p>
+<pre><code class="language-ts">import { createClient } from &quot;@supabase/supabase-js&quot;;
+
+export function createAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+</code></pre>
+<p>That line should never leak into client components. In Rebill it only exists in server routes.</p>
+<h3>3. separate platform billing from tenant billing</h3>
+<p>This is the part a lot of examples blur together.</p>
+<p>Rebill has platform billing for its own plans, and tenant billing events coming from connected accounts. Those are different pipelines and they should stay different.</p>
+<p>For Rebill's own subscriptions, I create a Checkout Session against the platform Stripe account and store the app's <code>account_id</code> in Stripe metadata.</p>
+<pre><code class="language-ts">const session = await stripe.checkout.sessions.create({
+  customer: customerId,
+  payment_method_types: [&quot;card&quot;],
+  line_items: [{ price: priceId, quantity: 1 }],
+  mode: &quot;subscription&quot;,
+  success_url: `${baseUrl}/dashboard?upgraded=true`,
+  cancel_url: `${baseUrl}/dashboard/settings?checkout=cancelled`,
+  metadata: {
+    account_id: accountId,
+    plan,
+  },
+});
+</code></pre>
+<p>Then the platform webhook updates the tenant's plan when Stripe confirms what happened:</p>
+<pre><code class="language-ts">async function handleCheckoutCompleted(
+  admin: ReturnType&lt;typeof createAdminClient&gt;,
+  session: Stripe.Checkout.Session
+) {
+  const accountId = session.metadata?.account_id;
+  const plan = session.metadata?.plan as &quot;starter&quot; | &quot;pro&quot; | undefined;
+
+  if (!accountId || !plan) return;
+
+  const subscriptionId =
+    typeof session.subscription === &quot;string&quot;
+      ? session.subscription
+      : session.subscription?.id ?? null;
+
+  await admin
+    .from(&quot;accounts&quot;)
+    .update({
+      plan,
+      stripe_subscription_id: subscriptionId,
+    })
+    .eq(&quot;id&quot;, accountId);
+}
+</code></pre>
+<p>That webhook knows about the platform customer paying Rebill.</p>
+<p>The Stripe Connect webhook is a different story. That one knows about the founder's customers paying the founder.</p>
+<p>Keeping those paths separate removed a lot of confusion. One route updates my SaaS plans. The other route reacts to tenant events and schedules recovery work.</p>
+<h3>4. onboard tenants with Stripe Connect, not copied API keys</h3>
+<p>I did not want users pasting Stripe secret keys into Rebill. Stripe Connect gives you a better path.</p>
+<p>When a user clicks connect, Rebill creates a Standard connected account if one does not already exist, stores that Stripe account ID, and redirects the user to Stripe-hosted onboarding.</p>
+<pre><code class="language-ts">const stripeAccount = await stripe.accounts.create({
+  type: &quot;standard&quot;,
+  email: user.email,
+});
+
+await admin.from(&quot;connected_accounts&quot;).upsert(
+  {
+    account_id: account.id,
+    stripe_account_id: stripeAccount.id,
+    access_token: &quot;n/a&quot;,
+    livemode: false,
+    is_active: false,
+  },
+  { onConflict: &quot;stripe_account_id&quot; }
+);
+
+const accountLink = await stripe.accountLinks.create({
+  account: stripeAccount.id,
+  refresh_url: `${origin}/api/stripe/connect?action=refresh&amp;account=${stripeAccount.id}`,
+  return_url: `${origin}/api/stripe/connect?action=return&amp;account=${stripeAccount.id}`,
+  type: &quot;account_onboarding&quot;,
+});
+</code></pre>
+<p>On return, Rebill checks the Stripe account state, marks it active, and seeds default email sequences if onboarding actually completed.</p>
+<p>That gave me a clean trust boundary:</p>
+<ul>
+<li>the user authenticates with Supabase</li>
+<li>the user authorizes Stripe access in Stripe's own flow</li>
+<li>Rebill stores only the linked Stripe account ID plus app-specific configuration</li>
+</ul>
+<h3>5. consume tenant events through a dedicated Connect webhook</h3>
+<p>This is where the multi-tenant part becomes real.</p>
+<p>The Connect webhook receives events from many connected accounts in one endpoint. Stripe includes the originating connected account in the event payload. That account ID is the bridge back to my tenant row.</p>
+<p>Two things matter here.</p>
+<p>First, Stripe signature verification in Next.js App Router requires the raw body. If you let anything touch the body first, verification breaks.</p>
+<pre><code class="language-ts">export const runtime = &quot;nodejs&quot;;
+
+async function getRawBody(req: NextRequest): Promise&lt;Buffer&gt; {
+  const chunks: Uint8Array[] = [];
+  const reader = req.body?.getReader();
+  if (!reader) return Buffer.alloc(0);
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) chunks.push(value);
+  }
+  return Buffer.concat(chunks);
+}
+
+const rawBody = await getRawBody(request);
+event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+</code></pre>
+<p>Second, you need to map the Stripe event back to a tenant before doing anything else:</p>
+<pre><code class="language-ts">const stripeAccountId = (event as Stripe.Event &amp; { account?: string }).account;
+if (!stripeAccountId) {
+  return NextResponse.json({ error: &quot;No account in event&quot; }, { status: 400 });
+}
+
+const { data: connectedAccount } = await admin
+  .from(&quot;connected_accounts&quot;)
+  .select(&quot;id, account_id, stripe_account_id&quot;)
+  .eq(&quot;stripe_account_id&quot;, stripeAccountId)
+  .eq(&quot;is_active&quot;, true)
+  .single();
+</code></pre>
+<p>When I need Stripe data that belongs to that tenant, I scope the Stripe client to the connected account instead of pretending the platform account owns everything:</p>
+<pre><code class="language-ts">export function stripeForAccount(stripeAccountId: string) {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    stripeAccount: stripeAccountId,
+  });
+}
+</code></pre>
+<p>From there, the handler can stay tenant-aware.</p>
+<p>On <code>invoice.payment_failed</code>, Rebill stores the event and queues the dunning sequence:</p>
+<pre><code class="language-ts">const { data: paymentEvent } = await admin
+  .from(&quot;payment_events&quot;)
+  .upsert(
+    {
+      connected_account_id: connectedAccount.id,
+      stripe_event_id: eventId,
+      event_type: &quot;invoice.payment_failed&quot;,
+      stripe_customer_id: customerId,
+      stripe_invoice_id: invoice.id,
+      amount: invoice.amount_due ?? 0,
+      currency: invoice.currency ?? &quot;usd&quot;,
+      failure_reason: invoice.last_finalization_error?.message ?? null,
+      attempt_count: invoice.attempt_count ?? 1,
+      customer_email: customerEmail,
+      customer_name: customerName,
+      is_recovered: false,
+      recovered_at: null,
+    },
+    { onConflict: &quot;stripe_event_id&quot; }
+  )
+  .select(&quot;id&quot;)
+  .single();
+
+const emailSends = sequence.emails.map((step, idx) =&gt; {
+  const scheduledAt = new Date();
+  scheduledAt.setDate(scheduledAt.getDate() + Math.max(0, step.delay_days));
+
+  return {
+    connected_account_id: connectedAccount.id,
+    sequence_id: sequence.id,
+    stripe_customer_id: customerId,
+    customer_email: customerEmail,
+    step_index: idx,
+    scheduled_at: scheduledAt.toISOString(),
+    status: &quot;scheduled&quot;,
+  };
+});
+
+await admin.from(&quot;email_sends&quot;).insert(emailSends);
+</code></pre>
+<p>That queue is processed later by a cron route that uses the admin client, fetches all due emails, sends them, and marks them as sent.</p>
+<p>That split is important. The webhook should ingest and enqueue. The cron should deliver. If you try to do everything in the webhook, you turn Stripe retries into email-sending retries, which gets ugly fast.</p>
+<h2>Pitfalls</h2>
+<p>Here are the parts that were easy to get wrong.</p>
+<h3>1. "idempotent event storage" is not the same thing as "idempotent side effects"</h3>
+<p>This is the sharpest bug in the current Rebill code.</p>
+<p><code>payment_events</code> uses <code>stripe_event_id</code> as a unique key, which is good. But the queued emails are inserted every time the handler runs. If Stripe redelivers the same <code>invoice.payment_failed</code> event, the <code>upsert</code> is safe and the <code>email_sends</code> insert is not.</p>
+<p>That means duplicate webhook deliveries can schedule duplicate recovery emails.</p>
+<p>This is a classic billing bug because the event log looks correct while the side effect is not.</p>
+<h3>2. multi-account support is only half-finished</h3>
+<p>The pricing model says Starter supports 3 connected accounts and Pro supports unlimited. Some of the UI supports multiple connected accounts. But <code>/api/stripe/connect</code> still does this:</p>
+<pre><code class="language-ts">const { data: existing } = await admin
+  .from(&quot;connected_accounts&quot;)
+  .select(&quot;stripe_account_id, is_active&quot;)
+  .eq(&quot;account_id&quot;, account.id)
+  .single();
+</code></pre>
+<p>That <code>.single()</code> means the route logic still thinks in terms of one connected account per tenant. So the product surface says "many", while one of the key onboarding paths still assumes "one".</p>
+<h3>3. service-role access needs a very hard boundary</h3>
+<p>RLS is doing real work here, but only because the admin client is confined to webhook and cron routes. The moment you start importing <code>createAdminClient()</code> into regular React components, your tenant story is done.</p>
+<p>The rule I settled on was simple: browser and SSR user paths use the authenticated Supabase client. Background jobs and webhooks use the service role. No crossover.</p>
+<h3>4. Stripe account state fields are easy to misread</h3>
+<p>In the connect return flow, Rebill updates <code>livemode</code> using <code>stripeAccount.charges_enabled</code>. That is probably the wrong source of truth. <code>charges_enabled</code> tells you whether the account can charge, not whether the account is live mode.</p>
+<p>That bug is subtle because the field still changes, so it feels right until you actually need to distinguish test and live environments.</p>
+<h2>What I'd Change</h2>
+<p>If I were hardening this version for a production team today, I would change five things.</p>
+<ul>
+<li>make email scheduling idempotent. I would add a <code>payment_event_id</code> foreign key to <code>email_sends</code> and a unique constraint like <code>(payment_event_id, step_index)</code>, or move scheduling into a transactional job keyed by the Stripe event ID.</li>
+<li>finish multi-account support properly. Replace the <code>.single()</code> assumptions in the connect flow, enforce plan limits in one place, and test the second-account onboarding path before advertising it.</li>
+<li>drop the dead OAuth-token columns. Rebill uses Standard accounts and Account Links now, so <code>access_token</code> and <code>refresh_token</code> are leftover baggage.</li>
+<li>introduce a real organization and membership model if teams are expected. Right now <code>accounts</code> is basically one app user equals one tenant. That is fine for founder-led SaaS, but not for a team product with roles.</li>
+<li>store more event audit data. I would keep the Stripe event payload hash, a processed timestamp, and an explicit processing outcome so support work is easier when a customer says "why did this email send twice?"</li>
+</ul>
+<p>The part I would keep exactly as-is is the overall split.</p>
+<p>Supabase Auth owns identity. RLS owns row visibility. Platform billing is one Stripe pipeline. Tenant billing events are a different Stripe pipeline. Service-role code stays on the server. The browser gets the minimum possible power.</p>
+<p>That shape has held up well because it mirrors the actual business model. When the architecture matches the business boundary, the code stops fighting you.</p>
+<p>If you're building a multi-tenant SaaS that needs both auth and billing, do not treat billing as one blob. Name the two flows early, separate them early, and let your data model enforce the tenant boundary for you.</p>
+
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="https://cal.com/diven-rastdus/15-minute-discovery-call" target="_blank" rel="noopener">Book a call</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
