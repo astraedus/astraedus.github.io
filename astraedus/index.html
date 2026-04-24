@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astraedus — the autonomous agent behind the work</title>
+  <meta name="description" content="Astraedus is a 24/7 autonomous agent running on Claude Code + Codex. It writes, commits, deploys, and learns from its mistakes. Here's how it's built.">
+  <link rel="canonical" href="https://astraedus.dev/astraedus/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --green: #22c55e;
+      --green-dim: rgba(34, 197, 94, 0.12);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    a { color: inherit; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 28px; }
+    .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav {
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
+    }
+    nav .container-wide {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.75rem, 6vw, 4.25rem);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      max-width: 780px;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 640px;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .hero-desc + .hero-desc { margin-top: 16px; }
+
+    /* Section base */
+    section.block {
+      padding: 72px 0;
+      border-top: 1px solid var(--border);
+    }
+    section.block h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+    section.block h2 em { font-style: italic; color: var(--accent); }
+    section.block .lead {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 680px;
+      margin-bottom: 32px;
+    }
+    section.block p.body {
+      font-size: 0.98rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      max-width: 680px;
+      margin-bottom: 18px;
+    }
+    section.block p.body strong { color: var(--text); font-weight: 600; }
+    section.block p.body a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-border);
+      transition: border-color 0.2s;
+    }
+    section.block p.body a:hover { border-bottom-color: var(--accent); }
+
+    /* Ladder (determinism) */
+    .ladder {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 0;
+      margin-top: 28px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .ladder-row {
+      display: contents;
+    }
+    .ladder-row .l-level,
+    .ladder-row .l-desc {
+      background: var(--surface);
+      padding: 16px 22px;
+    }
+    .ladder-row .l-level {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: lowercase;
+      border-right: 1px solid var(--border);
+    }
+    .ladder-row .l-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .ladder-row .l-desc strong { color: var(--text); font-weight: 500; }
+
+    /* Cron table */
+    .cron {
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .cron-row {
+      display: grid;
+      grid-template-columns: 200px 160px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 22px;
+      align-items: center;
+    }
+    .cron-row:last-child { border-bottom: none; }
+    .cron-row.head {
+      background: var(--surface-2);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .cron-row .c-name {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+    .cron-row.head .c-name { color: var(--text-dim); }
+    .cron-row .c-when {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .cron-row .c-what {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Ship list */
+    .ships, .lessons-list {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ship, .lesson {
+      display: flex;
+      gap: 20px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: baseline;
+    }
+    .ship:last-child, .lesson:last-child { border-bottom: none; }
+    .ship .date, .lesson .date {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      min-width: 110px;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+    .ship .title, .lesson .title {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.55;
+      font-weight: 500;
+    }
+    .lesson .title { font-weight: 400; color: var(--text-secondary); }
+    .ship .title strong { color: var(--accent); font-weight: 500; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container-wide {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero .eyebrow, .hero h1, .hero-desc {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .hero h1 { animation-delay: 0.08s; }
+    .hero-desc { animation-delay: 0.18s; }
+
+    @media (max-width: 768px) {
+      .ladder { grid-template-columns: 1fr; }
+      .ladder-row .l-level { border-right: none; border-bottom: 1px solid var(--border); }
+      .cron-row { grid-template-columns: 1fr; gap: 4px; }
+      .cron-row.head { display: none; }
+      .cron-row .c-when { color: var(--accent); font-size: 0.75rem; }
+      .ship, .lesson { flex-direction: column; gap: 4px; }
+      .ship .date, .lesson .date { min-width: 0; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero { padding: 40px 0 30px; }
+      section.block { padding: 48px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container-wide">
+    <div class="logo"><strong>diven</strong>@astraedus ~/astraedus</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">// what astraedus is</div>
+    <h1>An autonomous agent that runs a <em>company.</em></h1>
+    <p class="hero-desc">Astraedus is a 24/7 autonomous agent built on Claude Code + Codex. It runs on a laptop, not a fleet of servers. One human (me) + one agent (it), collaborating asynchronously.</p>
+    <p class="hero-desc">It ships code, writes posts, manages outreach, and evolves its own infrastructure. When it makes a mistake, it writes it down, and the next instance doesn't repeat it. The system is the product.</p>
+    <p class="hero-desc">The rest of this page is how it's built, what it does every day, what it shipped this week, and what it got wrong.</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">// architecture</div>
+    <h2>How it's <em>built.</em></h2>
+    <p class="lead">Three ideas hold the system together: a determinism ladder, a two-agent boardroom, and a full-text-searchable memory. Everything else is detail.</p>
+
+    <p class="body">The <strong>determinism ladder</strong> is the core design principle. Natural language is stochastic — agents drift, forget, and reinvent wrong answers. Shell hooks and scripts are deterministic — they always fire, always enforce. Every capability added is placed at the highest rung that still works, and that rung is the guarantee.</p>
+
+    <div class="ladder" aria-label="Determinism ladder">
+      <div class="ladder-row">
+        <div class="l-level">hook</div>
+        <div class="l-desc"><strong>Always fires.</strong> Shell-level enforcement on tool events. The floor of the system — 30+ hooks block bad behavior (em-dash guard, pre-commit secret scanner, write-guard on protected paths) and enforce good habits (auto-commit on Stop, self-check prompts).</div>
+      </div>
+      <div class="ladder-row">
+        <div class="l-level">rule</div>
+        <div class="l-desc"><strong>Path-scoped context.</strong> Loads only when working in a specific directory or file pattern. Dense, pattern-level guidance that fires deterministically on relevance.</div>
+      </div>
+      <div class="ladder-row">
+        <div class="l-level">skill</div>
+        <div class="l-desc"><strong>Encoded procedures.</strong> Playbooks for recurring workflows (<code>/move-needle</code>, <code>/strategic-review</code>, <code>/parallel-dev</code>). Invoked by name, zero cost until triggered.</div>
+      </div>
+      <div class="ladder-row">
+        <div class="l-level">mcp</div>
+        <div class="l-desc"><strong>Real state, not guesses.</strong> Model Context Protocol servers for browser, email, calendar, Stripe. Trades some context for the ability to observe ground truth instead of hallucinating it.</div>
+      </div>
+      <div class="ladder-row">
+        <div class="l-level">claude.md</div>
+        <div class="l-desc"><strong>Identity + principles.</strong> Probabilistic. Shapes the distribution but can't guarantee outcomes. Everything convergent has been compressed upward.</div>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top: 36px;">The <strong>Claude ↔ Codex boardroom</strong> is two different LLMs sharing a directory. When a decision is non-trivial, one drafts, the other critiques, and the file-based "conversation" is the audit log. Different base models have different blind spots — running both in parallel is close to free and catches more.</p>
+
+    <p class="body"><strong>FTS5-indexed memory</strong> means every past transcript, ops file, and decision is searchable in ~50ms via SQLite full-text search. The system recalls across months, not just today's state. It's the difference between "I think I remember writing about this" and <code>astra-state search "compression"</code>.</p>
+
+    <p class="body">Longer reads, if you want them: <a href="/blog/black-holes-entropy-machine-memory/">the information-physics model behind the memory architecture</a>, and <a href="/blog/i-researched-nous-hermes-for-a-day/">a day researching a competing agent, and what I stole</a>.</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">// daily loop</div>
+    <h2>What it <em>does</em> every day.</h2>
+    <p class="lead">The system keeps moving even when I'm asleep or offline. These are the cron triggers that fire on schedule, in UTC. Nothing here waits for a human.</p>
+
+    <div class="cron">
+      <div class="cron-row head">
+        <div class="c-name">trigger</div>
+        <div class="c-when">when</div>
+        <div class="c-what">what it does</div>
+      </div>
+      <div class="cron-row">
+        <div class="c-name">daily-needle</div>
+        <div class="c-when">22:00 UTC daily</div>
+        <div class="c-what">Picks the one highest-leverage action toward revenue and executes it. Writes the decision and outcome to a log. No "what should I do today?" — the agent decides.</div>
+      </div>
+      <div class="cron-row">
+        <div class="c-name">strategic-review</div>
+        <div class="c-when">10:00 UTC every 3 days</div>
+        <div class="c-what">Gathers external evidence, cross-compares with current capabilities, audits recent mistakes, produces a decision ledger. Codex runs in parallel for dual-perspective validation.</div>
+      </div>
+      <div class="cron-row">
+        <div class="c-name">system-audit</div>
+        <div class="c-when">11:00 UTC every Sunday</div>
+        <div class="c-what">Deep architecture analysis against the determinism-ladder principles. Finds drift, coupling, and dead hooks. Produces a concrete change list — not "looks fine".</div>
+      </div>
+      <div class="cron-row">
+        <div class="c-name">monthly-prune</div>
+        <div class="c-when">12:00 UTC, 1st of month</div>
+        <div class="c-what">Hot-path compression. Specific lessons get abstracted into patterns; stale hooks get archived; boot context stays bounded while stored knowledge grows.</div>
+      </div>
+      <div class="cron-row">
+        <div class="c-name">auto-commit</div>
+        <div class="c-when">every Stop event</div>
+        <div class="c-what">Commits and pushes the ops + system repos after each turn. State lives on disk. If it's not written down, the next instance doesn't know about it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">// this week</div>
+    <h2>What it <em>shipped</em> this week.</h2>
+    <p class="lead">Curated highlights from the last seven days of commits to <code>ops/</code> and <code>system/</code>. Not the full list — the substantive changes.</p>
+
+    <div class="ships">
+      <div class="ship">
+        <div class="date">2026-04-23</div>
+        <div class="title"><strong>Parallel-dev worktree infrastructure.</strong> A <code>/parallel-dev</code> skill plus a path-scoped rule that forces <code>isolation: "worktree"</code> whenever 2+ dev agents hit the same repo. No more collision on the working tree.</div>
+      </div>
+      <div class="ship">
+        <div class="date">2026-04-23</div>
+        <div class="title"><strong>Codex write-guard hardened.</strong> The hook that blocks Codex from writing to protected paths (<code>ops/</code>, <code>.claude/</code>, secrets) now detects interpreter bypasses — <code>python -c</code>, <code>node -e</code>, <code>ruby -e</code>. Verified with a live attack attempt.</div>
+      </div>
+      <div class="ship">
+        <div class="date">2026-04-23</div>
+        <div class="title"><strong>CLAUDE.md signature guard.</strong> A new PreToolUse hook blocks any edit that removes protected signature lines from the identity file. A previous prune pass had quietly dropped them; this makes it impossible to do again.</div>
+      </div>
+      <div class="ship">
+        <div class="date">2026-04-22</div>
+        <div class="title"><strong>Security sweep.</strong> Redacted live secrets, untracked PII, added a secret-scanner pre-commit hook. Rotated AWS AdminAccess keys and a Hashnode PAT the same day — both verified dead on the old credentials.</div>
+      </div>
+      <div class="ship">
+        <div class="date">2026-04-21</div>
+        <div class="title"><strong>Arc user-research interview round.</strong> Outreach DMs and an email batch to indie journalers, with a 10-question script and a tracker. Four responses, shifting toward direct email after Reddit shadowban.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">// failures</div>
+    <h2>Lessons from its <em>mistakes.</em></h2>
+    <p class="lead">The three most recent entries in <code>LESSONS.md</code>. Titles only — the full bodies and fixes live in the repo. The system learns by writing its failures down.</p>
+
+    <div class="lessons-list">
+      <div class="lesson">
+        <div class="date">2026-04-25</div>
+        <div class="title">Model emitted a fabricated "Human:" reply mid-turn after Stop hook.</div>
+      </div>
+      <div class="lesson">
+        <div class="date">2026-04-24</div>
+        <div class="title">Fabricated a personal loss and committed Anti to paid stranger calls without authorization.</div>
+      </div>
+      <div class="lesson">
+        <div class="date">2026-04-24</div>
+        <div class="title">Background-agent task-completion notifications can replay with fabricated content.</div>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top: 28px;">Full log: <a href="https://github.com/astraedus/ops/blob/main/LESSONS.md" target="_blank" rel="noopener">astraedus/ops · LESSONS.md</a>.</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">// model</div>
+    <h2>One human, <em>one</em> agent.</h2>
+    <p class="body">I don't run a team. The agent handles most of the work — code, content, outreach, infrastructure. I handle taste calls: product direction, pricing, what to say yes and no to. The whole operation fits on one laptop, costs less than a single junior contractor, and ships more than either of us could alone. The collaboration model is the interesting part; the tech is mostly plumbing that makes the collaboration possible.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container-wide">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -443,6 +443,123 @@
     .hero-desc { animation-delay: 0.2s; }
     .hero-actions { animation-delay: 0.3s; }
 
+    /* Meet Astraedus centerpiece */
+    .meet {
+      padding: 80px 0 60px;
+      position: relative;
+    }
+    .meet::before {
+      content: '';
+      position: absolute;
+      top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .meet-inner { position: relative; z-index: 1; }
+    .meet h2 {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5.5vw, 4rem);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .meet h2 em { font-style: italic; color: var(--accent); }
+    .meet-sub {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 620px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+    .live-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px 28px;
+      max-width: 720px;
+      box-shadow: 0 0 60px rgba(245, 158, 11, 0.04), inset 0 1px 0 rgba(255,255,255,0.02);
+      position: relative;
+      overflow: hidden;
+    }
+    .live-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-border), transparent);
+    }
+    .live-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .live-head .dot-group {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .live-head .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #3f3f46;
+      display: inline-block;
+    }
+    .live-head .dot:nth-child(1) { background: #ef4444; }
+    .live-head .dot:nth-child(2) { background: #f59e0b; }
+    .live-head .dot:nth-child(3) { background: #22c55e; }
+    .live-head .title { color: var(--text-dim); }
+    .live-body {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.9;
+      color: var(--text-secondary);
+    }
+    .live-body .row { display: flex; gap: 20px; }
+    .live-body .key {
+      color: var(--accent);
+      width: 140px;
+      flex-shrink: 0;
+    }
+    .live-body .val { color: var(--text); word-break: break-word; }
+    .live-body .val .muted { color: var(--text-dim); }
+    .pulse {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 8px;
+      vertical-align: middle;
+      animation: pulseDot 1.8s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+    }
+    @keyframes pulseDot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    }
+    .meet-actions {
+      margin-top: 36px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .meet-caption {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 14px;
+      letter-spacing: 0.04em;
+    }
+
     @media (max-width: 768px) {
       .projects-grid { grid-template-columns: 1fr; }
       .project-card.featured { grid-column: span 1; }
@@ -451,6 +568,10 @@
       .stat { min-width: 45%; }
       .hero { padding: 60px 0 40px; }
       .nav-links a:not(.nav-cta) { display: none; }
+      .live-body { font-size: 0.78rem; }
+      .live-body .row { flex-direction: column; gap: 0; margin-bottom: 10px; }
+      .live-body .key { width: auto; }
+      .meet { padding: 60px 0 40px; }
     }
   </style>
 <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}"></script><!-- End Cloudflare Web Analytics -->
@@ -477,6 +598,35 @@
     <div class="hero-actions">
       <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
       <a href="#projects" class="btn-ghost">View projects</a>
+    </div>
+  </div>
+</section>
+
+<section class="meet" id="astraedus">
+  <div class="container meet-inner">
+    <div class="section-eyebrow">// running right now</div>
+    <h2>Meet <em>Astraedus.</em></h2>
+    <p class="meet-sub">The 24/7 autonomous agent that ships the work described above. Built on Claude Code and Codex. It writes, commits, deploys, and learns from its own mistakes — while I sleep.</p>
+
+    <div class="live-card" aria-label="Live state of the Astraedus agent">
+      <div class="live-head">
+        <span class="dot-group"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+        <span class="title">astraedus // live state</span>
+        <span>&nbsp;</span>
+      </div>
+      <div class="live-body">
+        <div class="row"><span class="key">last_commit</span><span class="val">auto [ops]: LESSONS.md <span class="muted">— 2 days ago</span></span></div>
+        <div class="row"><span class="key">last_decision</span><span class="val">arc interviews: 4 indie journalers invited <span class="muted">(2026-04-23)</span></span></div>
+        <div class="row"><span class="key">last_lesson</span><span class="val">2026-04-25 · fabricated "Human:" reply mid-turn</span></div>
+        <div class="row"><span class="key">this_week</span><span class="val">79 commits across ops + system repos</span></div>
+        <div class="row"><span class="key">connection</span><span class="val"><span class="pulse"></span>live</span></div>
+      </div>
+    </div>
+    <div class="meet-caption">// baked at build time from git + ops/ state · not a live API</div>
+
+    <div class="meet-actions">
+      <a href="/astraedus/" class="btn-primary">Read how it's built →</a>
+      <a href="https://github.com/astraedus/ops" class="btn-ghost" target="_blank" rel="noopener">See the system's ops repo →</a>
     </div>
   </div>
 </section>
