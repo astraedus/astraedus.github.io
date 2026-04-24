@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diven Rastdus | AI Engineer + Full-Stack Developer</title>
-  <meta name="description" content="I build production AI systems, RAG pipelines, and full-stack applications. TypeScript, Python, Next.js, FastAPI. Available for project-based work.">
+  <title>Diven Rastdus | Production AI agent systems</title>
+  <meta name="description" content="I ship production AI agent systems and write about what breaks. 24/7 autonomous agent, RAG pipelines, multi-agent coordination, full-stack. TypeScript, Python, Next.js. Available for project work.">
   <link rel="canonical" href="https://astraedus.dev/">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -472,8 +472,8 @@
 <section class="hero">
   <div class="container">
     <div class="hero-intro">// available for project work</div>
-    <h1>I build production<br>AI systems that <em>ship.</em></h1>
-    <p class="hero-desc">RAG pipelines, AI agents, full-stack applications. TypeScript, Python, Next.js, FastAPI. I write the code, deploy it, and hand you something that works on day one.</p>
+    <h1>I ship production agent systems<br>and write about what <em>breaks.</em></h1>
+    <p class="hero-desc">I run a 24/7 autonomous agent on my own laptop, build multi-agent products end-to-end, and publish the failure modes I find along the way. If it needs an LLM, a queue, a webhook, and someone who will actually own the deploy, that's the work.</p>
     <div class="hero-actions">
       <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
       <a href="#projects" class="btn-ghost">View projects</a>
@@ -485,16 +485,16 @@
   <div class="container">
     <div class="stats-grid">
       <div class="stat">
-        <div class="stat-value">7</div>
+        <div class="stat-value">8</div>
         <div class="stat-label">Live products shipped</div>
       </div>
       <div class="stat">
-        <div class="stat-value">20+</div>
-        <div class="stat-label">Articles on Dev.to</div>
+        <div class="stat-value">30+</div>
+        <div class="stat-label">Technical articles published</div>
       </div>
       <div class="stat">
-        <div class="stat-value">1 book</div>
-        <div class="stat-label">Published on Amazon</div>
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">Autonomous agent running</div>
       </div>
       <div class="stat">
         <div class="stat-value">async</div>
@@ -508,33 +508,33 @@
   <div class="container">
     <div class="section-eyebrow">Shipped</div>
     <h2 class="section-title">Things I built and deployed</h2>
-    <p class="section-desc">Every project here is live, running in production, and you can click through to see it work.</p>
+    <p class="section-desc">Live products, multi-agent hackathons, and the autonomous system I run myself. Every link below goes to a working artifact or a writeup of one.</p>
 
     <div class="projects-grid">
 
       <div class="project-card featured">
-        <div class="project-badge live">Live system</div>
-        <h3>Scout</h3>
-        <p class="project-desc">AI-powered research agent. Feeds it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a searchable knowledge base with semantic vector search. Two Nova models working together: one for synthesis, one for embeddings.</p>
+        <div class="project-badge live">Running 24/7</div>
+        <h3>Astraedus -- autonomous agent system</h3>
+        <p class="project-desc">A 24/7 autonomous agent running on Claude Code on my own laptop. FTS5-indexed memory across 90+ days of transcripts, a dual-judgment skill drafter that proposes new capabilities and blocks bad ones, a determinism-ladder architecture of 30+ hooks that enforce correct behavior at the shell level, and a Claude/Codex "boardroom" where two agents debate decisions before acting. It writes, commits, and deploys while I sleep.</p>
         <div class="project-tech">
+          <span>Claude Code</span>
+          <span>Codex</span>
+          <span>Hooks</span>
+          <span>FTS5</span>
           <span>Python</span>
-          <span>FastAPI</span>
-          <span>Amazon Nova</span>
-          <span>RAG</span>
-          <span>Vector Search</span>
-          <span>AWS EC2</span>
-          <span>Next.js</span>
+          <span>MCP</span>
+          <span>Bash</span>
         </div>
         <div class="project-links">
-          <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
-          <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source code</a>
+          <a href="/blog/i-researched-nous-hermes-for-a-day/" target="_blank" rel="noopener">How it's architected</a>
+          <a href="/blog/black-holes-entropy-machine-memory/" target="_blank" rel="noopener">Memory model</a>
         </div>
       </div>
 
       <div class="project-card">
-        <div class="project-badge live">Live system</div>
+        <div class="project-badge">Hackathon / due May 11</div>
         <h3>MedRecon</h3>
-        <p class="project-desc">Multi-agent medication reconciliation system. 3 AI agents communicate via A2A protocol to cross-reference prescriptions against FHIR health records. 8 MCP tools for drug interaction checks, dose validation, allergy screening, and FHIR output generation.</p>
+        <p class="project-desc">Multi-agent medication reconciliation. 3 AI agents talk over the A2A protocol to cross-reference prescriptions against real FHIR health records, backed by 8 MCP tools for drug-interaction checks, dose validation, allergy screening, and FHIR output. Healthcare-grade inputs, auditable outputs.</p>
         <div class="project-tech">
           <span>Python</span>
           <span>FastAPI</span>
@@ -546,6 +546,41 @@
         </div>
         <div class="project-links">
           <a href="https://frontend-eta-flax-63.vercel.app" target="_blank" rel="noopener">Live demo</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-badge live">Live system</div>
+        <h3>Scout</h3>
+        <p class="project-desc">AI research agent. Feed it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a semantically-searchable knowledge base. Two Nova models working together: one for synthesis, one for embeddings.</p>
+        <div class="project-tech">
+          <span>Python</span>
+          <span>FastAPI</span>
+          <span>Amazon Nova</span>
+          <span>RAG</span>
+          <span>Vector Search</span>
+          <span>AWS EC2</span>
+        </div>
+        <div class="project-links">
+          <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
+          <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-badge">In beta</div>
+        <h3>Arc Journal / The Mirror</h3>
+        <p class="project-desc">An honest diary that gets smarter the more you use it. Two surfaces, one product: a mobile journal for capture (voice + text, wikilinks, optional titles) and a web "Mirror" that reflects longitudinal patterns back at you. Voice transcription runs on Supabase Edge Functions + Gemini 2.5 Flash at ~$0.001/min.</p>
+        <div class="project-tech">
+          <span>Next.js</span>
+          <span>Expo</span>
+          <span>Supabase</span>
+          <span>Edge Functions</span>
+          <span>Gemini</span>
+        </div>
+        <div class="project-links">
+          <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" target="_blank" rel="noopener">Why I built it</a>
+          <a href="/blog/voice-transcription-supabase-gemini-flash/" target="_blank" rel="noopener">Voice pipeline writeup</a>
         </div>
       </div>
 
@@ -682,34 +717,35 @@
 <section class="writing">
   <div class="container">
     <div class="section-eyebrow">Writing</div>
-    <h2 class="section-title">Recent articles</h2>
-    <p class="section-desc">Technical deep-dives on building production AI systems. 20+ articles published.</p>
+    <h2 class="section-title">Recent writing</h2>
+    <p class="section-desc">Technical writeups of systems I actually shipped, and post-mortems on what broke.</p>
 
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/fhir-for-software-engineers-not-just-healthcare-devs-1nmc" class="writing-link" target="_blank" rel="noopener">
-      <h4>FHIR for Software Engineers (Not Just Healthcare Devs)</h4>
-      <span>Apr 2026</span>
+    <a href="/blog/i-researched-nous-hermes-for-a-day/" class="writing-link">
+      <h4>I researched Nous Hermes for a day. Here's what I stole.</h4>
+      <span>Apr 24, 2026</span>
     </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/building-a-multi-tenant-saas-with-stripe-connect-in-2026-jjn" class="writing-link" target="_blank" rel="noopener">
-      <h4>Building a Multi-Tenant SaaS with Stripe Connect in 2026</h4>
-      <span>Apr 2026</span>
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g" class="writing-link" target="_blank" rel="noopener">
+      <h4>I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.</h4>
+      <span>Apr 23, 2026</span>
     </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/why-your-ai-agent-needs-a-kill-switch-and-how-to-build-one-lm2" class="writing-link" target="_blank" rel="noopener">
-      <h4>Why Your AI Agent Needs a Kill Switch (and How to Build One)</h4>
-      <span>Mar 2026</span>
+    <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" class="writing-link" target="_blank" rel="noopener">
+      <h4>The diary you actually keep is the one you're not trying to share</h4>
+      <span>Apr 22, 2026</span>
     </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-determinism-ladder-why-your-ai-agent-keeps-failing-and-the-framework-to-fi-3ipm" class="writing-link" target="_blank" rel="noopener">
-      <h4>The Determinism Ladder: Why Your AI Agent Keeps Failing</h4>
-      <span>Mar 2026</span>
+    <a href="/blog/multi-tenant-saas-supabase-rls-stripe-connect/" class="writing-link">
+      <h4>Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect</h4>
+      <span>Apr 21, 2026</span>
     </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/choosing-the-right-ai-agent-framework-in-2026-a-practical-comparison-3mig" class="writing-link" target="_blank" rel="noopener">
-      <h4>Choosing the Right AI Agent Framework in 2026</h4>
-      <span>Mar 2026</span>
+    <a href="/blog/voice-transcription-supabase-gemini-flash/" class="writing-link">
+      <h4>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash</h4>
+      <span>Apr 20, 2026</span>
     </a>
 
     <div style="margin-top: 24px;">
       <a href="/blog" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px;">All blog posts</a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Dev.to articles</a>
-      <a href="https://astraedus.dev/book" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Book: Production AI Agents</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Dev.to</a>
+      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Hashnode</a>
+      <a href="https://astraedus.dev/book" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Book</a>
     </div>
   </div>
 </section>
@@ -721,6 +757,8 @@
     <div class="cta-actions">
       <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
       <a href="https://github.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener">Dev.to</a>
+      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener">Hashnode</a>
     </div>
     <p class="cta-email">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
   </div>
