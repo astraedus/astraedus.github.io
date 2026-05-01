@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How OR in a Postgres RLS policy leaked every flagged row to every user | Diven Rastdus</title>
+  <meta name="description" content="Two RLS policies on the same table, one own_data and one is_public, get OR'd together. Without an explicit user_id filter at the app layer, every query returned the caller's rows AND every public row across all users. Post-mortem.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/postgres-rls-or-leak/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How OR in a Postgres RLS policy leaked every flagged row to every user">
+  <meta property="og:description" content="Two RLS policies on the same table, one own_data and one is_public, get OR'd together. Without an explicit user_id filter at the app layer, every query returned the caller's rows AND every public row across all users. Post-mortem.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/postgres-rls-or-leak/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="article:published_time" content="2026-04-30">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">April 30, 2026</span>
+        <span class="article-tag">Postgres RLS</span>
+        <span class="article-reading">7 min read</span>
+      </div>
+      <h1>How <code style="font-family:var(--mono);font-size:0.85em;background:var(--surface-2);padding:2px 8px;border-radius:4px;color:var(--accent);">OR</code> in a Postgres RLS policy leaked every flagged row to every user</h1>
+      <p class="article-lede">Two RLS policies on the same table, glued together by OR, returned every public-flagged row to every authenticated user. Post-mortem of how I shipped it, how QA caught it, and the fix.</p>
+    </header>
+
+    <div class="article-body">
+
+<p>A frontend QA pass on a brand-new account opened the library sidebar and saw two notes I had never written. They were public seed entries from a different user. Same UUIDs across every fresh account I tested.</p>
+<p>This is a post-mortem of how multiple Postgres Row Level Security policies on the same table, glued together by <code>OR</code>, returned every flagged row to every authenticated user. And how the application layer trusted RLS to be a backstop and added zero filters of its own.</p>
+<p>The fix shipped a few hours after the bug was found. Here is what happened, what I changed, and what I would do differently next time.</p>
+<hr>
+<h2>The setup</h2>
+<p>Single table, multi-user app. Each row has a <code>user_id</code> and a boolean <code>is_public</code>. The product has a private surface (your own notes) and a planned public surface (a shared atlas of notes you opt-in to publish). The public surface is not built yet, but I added the schema for it on day one because I figured the policies were free to write up front.</p>
+<p>Here are the two policies that lived on the table:</p>
+<pre><code class="language-sql">CREATE POLICY "own_data" ON journal_entries
+  FOR ALL
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "public_entries" ON journal_entries
+  FOR SELECT
+  USING (is_public = TRUE);
+</code></pre>
+<p>Both are correct in isolation. Together they are a leak.</p>
+<h2>How RLS combines policies</h2>
+<p>When a table has multiple permissive policies, Postgres <code>OR</code>s their <code>USING</code> expressions. So the effective <code>SELECT</code> predicate on <code>journal_entries</code> becomes:</p>
+<pre><code class="language-sql">auth.uid() = user_id   -- from "own_data"
+OR
+is_public = TRUE       -- from "public_entries"
+</code></pre>
+<p>Reading that out loud: a row is visible if it belongs to me <strong>or</strong> if anyone in the system marked it public. Which is exactly what I asked for. It is also exactly the bug.</p>
+<p>The expectation was that <code>is_public</code> would only matter on the dedicated public surface. The reality is that RLS does not know which surface my query is coming from. It evaluates the predicate against whatever the caller is doing right now. Every <code>select * from journal_entries</code> from an authenticated session now returned my rows plus every is_public=TRUE row across every user.</p>
+<h2>Why nothing failed loudly</h2>
+<p>Two reasons.</p>
+<p><strong>One</strong>: my code never set <code>is_public = TRUE</code> in the user-facing flow. The flag existed in the schema, the policy existed in the migration, but the only rows in the entire database with the flag set were two seed entries I had inserted by hand months ago for a demo. So in development, on my account, the leak was invisible. Both leaked rows belonged to me.</p>
+<p><strong>Two</strong>: the application code trusted RLS as the access boundary. Every query at the data-access layer looked like this:</p>
+<pre><code class="language-typescript">const { data } = await supabase
+  .from("journal_entries")
+  .select("id, title, body, created_at")
+  .order("created_at", { ascending: false });
+</code></pre>
+<p>No <code>.eq("user_id", user.id)</code>. Nine call sites. The reasoning at the time was "RLS already filters by user_id, doubling up is noise." That reasoning is wrong the moment a second policy enters the picture. The OR semantics turn "RLS filters by user_id" into "RLS filters by user_id OR by something else."</p>
+<h2>How QA found it</h2>
+<p>A new test account, just signed up, no entries written. The library sidebar should have been empty. Instead it had two notes I did not recognize. UUIDs <code>8e0fb236...</code> and <code>a192e2f7...</code>. I tried it on a second new account. Same UUIDs. Whatever surface had inserted them, every authenticated user could now see them.</p>
+<p>Five minutes of <code>git blame</code> on the migration file led me to the public_entries policy. Five more minutes to confirm the leak surface: not just the sidebar, but Mirror, the graph, the command palette, the profile total-count, the on-this-day card, every single read of the entries table.</p>
+<p>Sales had been live for about three days at that point. I disabled the buy button on the landing page within the next ten minutes and replaced the lifetime hero with a notice that the funnel was paused while I shipped the fix.</p>
+<h2>The fix, in two parts</h2>
+<p>I treated this as a defense-in-depth problem. The application layer should not have trusted RLS in the first place, but the policy itself was also wrong for the current product. Both got fixed.</p>
+<h3>Part 1: explicit user_id filters at the app layer</h3>
+<p>Every <code>select</code> from <code>journal_entries</code> got an explicit <code>.eq("user_id", user.id)</code>:</p>
+<pre><code class="language-typescript">const { data: { user } } = await supabase.auth.getUser();
+if (!user) redirect("/login");
+
+const { data } = await supabase
+  .from("journal_entries")
+  .select("id, title, body, created_at")
+  .eq("user_id", user.id)              // &lt;- new
+  .order("created_at", { ascending: false });
+</code></pre>
+<p>Nine sites: library sidebar, Mirror page, Mirror detail, single-note view, graph, profile counter, command palette, on-this-day, and the shared loader that powers the Mirror hero. All paired with an <code>auth.getUser()</code> at the top of the handler so a missing session redirects to login instead of running an unauthenticated query.</p>
+<p>This change is the load-bearing one. Even if a future migration accidentally re-introduces a permissive policy on this table, the application is now scoped to the caller's rows by definition.</p>
+<h3>Part 2: drop the unused policies at the DB layer</h3>
+<p>The public surface is not shipped. There is no production code path that depends on <code>public_entries</code>, <code>public_profiles</code>, or <code>public_goals</code> returning rows. So the policies should not exist on a production table. New migration:</p>
+<pre><code class="language-sql">DROP POLICY IF EXISTS "public_entries" ON journal_entries;
+DROP POLICY IF EXISTS "public_profiles" ON profiles;
+DROP POLICY IF EXISTS "public_goals" ON goals;
+
+UPDATE journal_entries
+SET is_public = FALSE
+WHERE id IN (
+  '8e0fb236-8801-40ec-9e70-5e7dc3a9bf50',
+  'a192e2f7-4523-4c86-be58-7df5314dced9'
+);
+</code></pre>
+<p>Two effects. The OR-combine that was producing the leak is gone, so a future query that forgets the explicit user_id filter is at least scoped to <code>auth.uid() = user_id</code> again. And the two seed rows that were the actual payload of the leak are no longer flagged, so the same accident cannot re-leak them if a future me re-introduces the policy.</p>
+<p>When the public surface ships for real, it will not piggyback on a permissive RLS policy. It will go through a <code>SECURITY DEFINER</code> RPC with explicit access checks, returning only the columns the public view should expose. RLS does one thing well: scope a row to its owner. Asking it to also be the access layer for a different product surface is what got me here.</p>
+<h3>Verification</h3>
+<p>A second QA pass on three brand-new accounts: empty library sidebar, empty Mirror, empty graph, empty everything. The two phantom UUIDs no longer appear anywhere. Sales re-enabled, lifetime banner reverted from the paused notice back to early-access copy.</p>
+<h2>The general lesson</h2>
+<p>RLS is a backstop, not a primary access control mechanism. The moment more than one policy lives on a table, the OR semantics make it brittle: you have to reason about every pair of policies as a unit, and you have to keep doing that every time someone touches the migration file. The cost of an explicit <code>.eq("user_id", user.id)</code> at the app layer is one line. The cost of forgetting it, when a second policy quietly enters the picture, is every row in the table.</p>
+<p>Three things I am going to do differently next time:</p>
+<p><strong>Default to explicit filters at the app layer, even with RLS in place.</strong> RLS catches the case where I forget. The explicit filter catches the case where RLS forgets. Both layers should agree.</p>
+<p><strong>Do not write policies for unbuilt features.</strong> The policy that caused this was for a public surface that does not exist yet. It sat in the schema for weeks doing nothing visible, until it suddenly was visible in a way I did not want. If the feature is not built, the policy should not be either.</p>
+<p><strong>Have a regression test that creates two users and asserts they cannot see each other's data.</strong> Spin up account A, write an entry, spin up account B, query the library, assert the entry is not in the result. This kind of test would have failed the moment the policy was added. It is going on the to-do list this week.</p>
+<p>The fix is live. The seed data is unflagged. The buy button is back on. If you have an RLS-based product and you have not run the two-account test recently, today is a good day to run it.</p>
+
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

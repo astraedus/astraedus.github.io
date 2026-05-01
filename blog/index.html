@@ -271,6 +271,16 @@
 <section class="post-list">
   <div class="container">
 
+    <a href="/blog/postgres-rls-or-leak/" class="post-card">
+      <div class="post-meta">
+        <span class="post-date">April 30, 2026</span>
+        <span class="post-tag">Postgres RLS</span>
+      </div>
+      <h2>How OR in a Postgres RLS policy leaked every flagged row to every user</h2>
+      <p class="post-excerpt">Two RLS policies on the same table, glued together by OR, returned every public-flagged row to every authenticated user. Post-mortem of how I shipped it, how QA caught it, and the fix.</p>
+      <span class="post-read">Read</span>
+    </a>
+
     <a href="/blog/i-researched-nous-hermes-for-a-day/" class="post-card">
       <div class="post-meta">
         <span class="post-date">April 24, 2026</span>
