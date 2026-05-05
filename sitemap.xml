@@ -8,9 +8,15 @@
   </url>
   <url>
     <loc>https://astraedus.dev/blog/</loc>
-    <lastmod>2026-05-01</lastmod>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://astraedus.dev/blog/gmail-agent-bridge/</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://astraedus.dev/blog/postgres-rls-or-leak/</loc>

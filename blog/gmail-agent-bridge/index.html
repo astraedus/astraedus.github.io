@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier) | Diven Rastdus</title>
+  <meta name="description" content="Gmail's users.watch + Cloud Pub/Sub + Cloudflare Tunnel = sub-5-second email delivery into your agent's filesystem. Total monthly cost: $0.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/gmail-agent-bridge/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)">
+  <meta property="og:description" content="Gmail's users.watch + Cloud Pub/Sub + Cloudflare Tunnel = sub-5-second email delivery into your agent's filesystem. Total monthly cost: $0.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/gmail-agent-bridge/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="article:published_time" content="2026-05-05">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">May 5, 2026</span>
+        <span class="article-tag">AI Automation</span>
+        <span class="article-reading">9 min read</span>
+      </div>
+      <h1>How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)</h1>
+      <p class="article-lede">Gmail's users.watch + Cloud Pub/Sub + Cloudflare Tunnel = sub-5-second email delivery into your agent's filesystem. Total monthly cost: $0.</p>
+    </header>
+
+    <div class="article-body">
+
+<p>I missed a prize-notification email by 24 hours because my AI agent only checked Gmail when it booted. The email needed a response within 48 hours. I had 24 left by the time the next session started. That gap nearly cost me real money.</p>
+
+<p>Polling is the obvious fix. Set up a cron that checks Gmail every 5 minutes. But polling Gmail has three problems:</p>
+
+<ol>
+  <li><strong>Latency floor equals poll interval.</strong> 5-minute polling means up to 5 minutes of dead time on urgent messages.</li>
+  <li><strong>Wasted API calls.</strong> 288 API calls per day to catch maybe 3-5 messages that actually matter.</li>
+  <li><strong>Rate limit risk.</strong> Gmail API quotas are generous (15K units/day/user) but polling invites you to burn them on nothing.</li>
+</ol>
+
+<p>What I wanted: sub-5-second email delivery into my agent's filesystem, with classification and priority routing, on a total monthly cost of exactly zero dollars.</p>
+
+<p>Here's what I built.</p>
+
+<h2>Architecture</h2>
+
+<pre><code>Gmail (your-email@gmail.com)
+  | users.watch() -- renew daily, 7d max expiry
+  v
+Cloud Pub/Sub topic
+  | push subscription (OIDC-signed JWT)
+  v
+Cloudflare Tunnel (public URL -&gt; localhost:8090)
+  v
+Python receiver (aiohttp)
+  - verify OIDC JWT from Google
+  - dedupe by Pub/Sub messageId (SQLite)
+  - history.list since last stored historyId
+  - messages.get for each new message
+  - classify by rules engine (YAML, hot-reload)
+  - fan out: urgent -&gt; Telegram ping, info -&gt; digest file</code></pre>
+
+<p>The key insight: Gmail's <code>users.watch()</code> method tells Google "push a notification to this Pub/Sub topic whenever this mailbox changes." Google handles the watching. You handle the reacting.</p>
+
+<h2>Step 1: Set up Pub/Sub</h2>
+
+<pre><code># Create topic and subscription
+gcloud pubsub topics create gmail-notifications
+gcloud pubsub subscriptions create gmail-push \
+  --topic=gmail-notifications \
+  --push-endpoint=https://your-hook.example.com/pubsub \
+  --push-auth-service-account=your-sa@project.iam.gserviceaccount.com
+
+# Grant Gmail permission to publish to your topic
+# (Gmail API uses a fixed service account for this)
+gcloud pubsub topics add-iam-policy-binding gmail-notifications \
+  --member="serviceAccount:gmail-api-push@system.gserviceaccount.com" \
+  --role="roles/pubsub.publisher"</code></pre>
+
+<p>Cost: $0. First 10 GiB/month of Pub/Sub throughput is free. Email notifications are tiny.</p>
+
+<h2>Step 2: Register the Gmail watch</h2>
+
+<pre><code>from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+creds = Credentials.from_authorized_user_file("token.json")
+service = build("gmail", "v1", credentials=creds)
+
+result = service.users().watch(
+    userId="me",
+    body={
+        "topicName": "projects/your-project/topics/gmail-notifications",
+        "labelIds": ["INBOX"],
+    },
+).execute()
+
+print(f"Watch expires: {result['expiration']}")
+# Watch expires: 1714540800000 (7 days from now)</code></pre>
+
+<p>Two catches:</p>
+<ul>
+  <li>The watch expires after 7 days max. Set up a daily cron to renew it.</li>
+  <li>If the watch silently expires (your renewal cron missed a day), you lose notifications until renewal. Build a staleness check.</li>
+</ul>
+
+<h2>Step 3: The receiver</h2>
+
+<p>The receiver is a tiny aiohttp server. When Pub/Sub pushes a notification, it tells you "the mailbox changed" but not what changed. You have to walk the history yourself.</p>
+
+<pre><code>from aiohttp import web
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+PUBSUB_AUDIENCE = "https://your-hook.example.com/pubsub"
+
+async def handle_pubsub(request: web.Request) -&gt; web.Response:
+    # Step 1: Verify the OIDC JWT from Google
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return web.Response(status=401)
+
+    token = auth[7:].strip()
+    claims = id_token.verify_oauth2_token(
+        token, google_requests.Request(), audience=PUBSUB_AUDIENCE
+    )
+
+    # Step 2: Decode the notification
+    envelope = await request.json()
+    data = base64.b64decode(envelope["message"]["data"])
+    notif = json.loads(data)
+    history_id = notif["historyId"]
+
+    # Step 3: Walk history since last known point
+    asyncio.create_task(walk_and_process(history_id))
+
+    # Step 4: ACK immediately (Pub/Sub retries on non-2xx)
+    return web.Response(status=204)</code></pre>
+
+<p>The critical pattern: <strong>ACK fast, process async.</strong> If your handler takes more than 10 seconds, Pub/Sub assumes delivery failed and retries. This creates duplicate processing unless you dedupe. Return 204 immediately, do the expensive work in a background task.</p>
+
+<h2>Step 4: History walking</h2>
+
+<p>Gmail notifications only say "something changed at historyId X." You need to find out what actually changed by walking the history since your last-seen ID.</p>
+
+<pre><code>def list_history(service, start_history_id: str):
+    """Walk history.list, return new message IDs."""
+    added = []
+    page_token = None
+
+    while True:
+        resp = service.users().history().list(
+            userId="me",
+            startHistoryId=start_history_id,
+            historyTypes=["messageAdded"],
+            pageToken=page_token,
+        ).execute()
+
+        for record in resp.get("history", []):
+            for msg in record.get("messagesAdded", []):
+                added.append(msg["message"])
+
+        page_token = resp.get("nextPageToken")
+        if not page_token:
+            break
+
+    return added, resp.get("historyId")</code></pre>
+
+<p>The gotcha: if your stored historyId is older than 7 days, <code>history.list</code> returns 404. You need a fallback:</p>
+
+<pre><code>try:
+    added, latest_id = list_history(service, last_history_id)
+except HttpError as e:
+    if e.resp.status == 404:
+        # historyId expired -- fall back to recent messages
+        added = list_recent_unread(service, days=3)
+        latest_id = current_history_id
+    else:
+        raise</code></pre>
+
+<h2>Step 5: Classification (the useful part)</h2>
+
+<p>Raw email delivery is not enough. You need routing. My classifier uses a YAML rules file that hot-reloads on every call (no restart needed to add rules):</p>
+
+<pre><code>rules:
+  - name: payment-notification
+    match:
+      from_regex: "@stripe\\.com"
+      subject_regex: "(?i)(payment|payout|charge)"
+    classification: REVENUE
+
+  - name: warm-lead-reply
+    match:
+      in_thread_with_outbound: true
+      from_not_regex: "(?i)(noreply|automated|newsletter)"
+    classification: URGENT-HUMAN
+
+  - name: default
+    match: {}
+    classification: INFORMATIONAL</code></pre>
+
+<p>The <code>in_thread_with_outbound</code> check is the clever one. It queries the local SQLite store for "have I previously sent an email in this thread?" If yes, the reply is from someone I contacted -- a warm lead, not spam. Classify it as urgent.</p>
+
+<pre><code>def _has_outbound_in_thread(db_path, thread_id, self_addr):
+    conn = sqlite3.connect(str(db_path))
+    row = conn.execute(
+        "SELECT 1 FROM seen_gmail_msg "
+        "WHERE thread_id = ? AND from_addr LIKE ? LIMIT 1",
+        (thread_id, f"%{self_addr}%"),
+    ).fetchone()
+    conn.close()
+    return row is not None</code></pre>
+
+<p>First match wins. The engine processes 10 rules in under 1ms. No need for a proper NLP pipeline here.</p>
+
+<h2>Step 6: Fan-out</h2>
+
+<p>After classification, messages route to different outputs:</p>
+
+<pre><code>if classification in ("URGENT-HUMAN", "REVENUE"):
+    # Push notification (Telegram, Discord, whatever)
+    await send_alert(f"[{classification}] {from_addr}\n{subject}")
+    # Also write to urgent inbox file
+    append_to_file("~/ops/INBOX-URGENT.md", formatted_entry)
+else:
+    # Quiet digest
+    append_to_file("~/ops/INBOX-DIGEST.md", formatted_entry)
+
+# Always: per-thread markdown file for full history
+write_thread_file(f"~/ops/threads/email/{thread_id}.md", message)</code></pre>
+
+<p>Each thread gets its own markdown file with frontmatter. This makes them searchable, greppable, and compatible with tools like Obsidian.</p>
+
+<h2>The tunnel: Cloudflare (free, stable)</h2>
+
+<p>Google Pub/Sub needs a public HTTPS endpoint. Options:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Cost</th>
+      <th>Reliability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ngrok</td>
+      <td>$8/mo for stable URL</td>
+      <td>Good but paid</td>
+    </tr>
+    <tr>
+      <td>Cloudflare Tunnel</td>
+      <td>$0</td>
+      <td>Excellent. Runs as systemd service.</td>
+    </tr>
+    <tr>
+      <td>Cloud Function</td>
+      <td>$0 (free tier)</td>
+      <td>Adds cold start latency</td>
+    </tr>
+    <tr>
+      <td>Self-hosted VPS</td>
+      <td>$5-20/mo</td>
+      <td>Overkill</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Cloudflare Tunnel wins. Install <code>cloudflared</code>, authenticate, create a tunnel pointing to <code>localhost:8090</code>, add a DNS record. Done. It runs as a systemd service with automatic reconnection.</p>
+
+<pre><code>cloudflared tunnel create gmail-bridge
+cloudflared tunnel route dns gmail-bridge your-hook.example.com
+# Then create a systemd unit that runs:
+# cloudflared tunnel run gmail-bridge</code></pre>
+
+<h2>Failure handling</h2>
+
+<p>The architecture has natural resilience built in:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Failure</th>
+      <th>What happens</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Receiver crashes</td>
+      <td>systemd restarts it. Pub/Sub retries delivery for 7 days.</td>
+    </tr>
+    <tr>
+      <td>Tunnel drops</td>
+      <td>cloudflared reconnects. Pub/Sub retries.</td>
+    </tr>
+    <tr>
+      <td>historyId too old</td>
+      <td>Falls back to <code>messages.list newer_than:3d</code>.</td>
+    </tr>
+    <tr>
+      <td>Duplicate delivery</td>
+      <td>SQLite dedup by Pub/Sub messageId.</td>
+    </tr>
+    <tr>
+      <td>Gmail API 5xx</td>
+      <td>Logged to dead-letter file. Retried on next notification.</td>
+    </tr>
+    <tr>
+      <td>Watch silently expires</td>
+      <td>Daily renewal cron + staleness monitor.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The entire system can be down for a week and recover automatically because Pub/Sub holds undelivered messages for 7 days.</p>
+
+<h2>Results</h2>
+
+<ul>
+  <li><strong>Latency</strong>: sub-5 seconds from Gmail receiving the email to the file appearing on disk</li>
+  <li><strong>Monthly cost</strong>: $0 (all free-tier components)</li>
+  <li><strong>Uptime</strong>: 6 days continuous without intervention so far</li>
+  <li><strong>False positives</strong>: 0 (rule-based classification is deterministic and auditable)</li>
+  <li><strong>Missed emails</strong>: 0 since deployment</li>
+</ul>
+
+<p>The classification system has already caught a Devpost prize email within seconds instead of the 24-hour gap that motivated this build. Telegram pings for urgent items, quiet digest for everything else.</p>
+
+<h2>What I would do differently</h2>
+
+<ol>
+  <li><strong>Start with the classification rules, not the infrastructure.</strong> I spent 2 hours on Pub/Sub setup before thinking about what to do with the emails. Should have designed the rules first.</li>
+  <li><strong>Use a single SQLite DB for everything.</strong> I initially split dedup and thread state across files. Consolidating to one DB simplified the code.</li>
+  <li><strong>Hot-reload from the start.</strong> Editing rules + restarting the service is friction. YAML hot-reload (just re-read the file on every classification call) costs nothing and removes the restart step entirely.</li>
+</ol>
+
+<h2>The code</h2>
+
+<p>The full implementation is ~300 lines across 4 files:</p>
+<ul>
+  <li><code>receiver.py</code>: aiohttp server, OIDC verification, history walking</li>
+  <li><code>gmail_client.py</code>: OAuth, message fetch, history list</li>
+  <li><code>classifier.py</code>: rules engine</li>
+  <li><code>store.py</code>: SQLite dedup + markdown persistence</li>
+</ul>
+
+<p>Total dependencies: <code>aiohttp</code>, <code>google-auth</code>, <code>google-api-python-client</code>, <code>pyyaml</code>. All well-maintained, no exotic packages.</p>
+
+<p>If your agent, automation, or workflow needs to react to emails in real-time without burning API calls on polling, this architecture works. The Gmail watch + Pub/Sub + tunnel pattern is the same one large-scale email processors use -- you just don't need the scale part.</p>
+
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI agent infrastructure. If your team has automation that reacts too slowly to real-world events, let's talk.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
