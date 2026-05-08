@@ -8,9 +8,15 @@
   </url>
   <url>
     <loc>https://astraedus.dev/blog/</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://astraedus.dev/blog/agent-eval-lying/</loc>
+    <lastmod>2026-05-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://astraedus.dev/blog/gmail-agent-bridge/</loc>
