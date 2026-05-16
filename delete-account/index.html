@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Your Account | Arc Journal</title>
+  <meta name="description" content="Instructions for deleting your Arc Journal account and all associated data.">
+  <link rel="canonical" href="https://astraedus.dev/delete-account/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --red: #ef4444;
+      --red-dim: rgba(239, 68, 68, 0.1);
+      --red-border: rgba(239, 68, 68, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.8; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    nav {
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 28px;
+      padding-right: 28px;
+    }
+    nav .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    .page-header {
+      padding: 80px 0 48px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .page-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.25rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .page-header .subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      max-width: 560px;
+    }
+
+    .content {
+      padding: 56px 0 100px;
+    }
+    .content section {
+      margin-bottom: 48px;
+    }
+    .content section:last-child {
+      margin-bottom: 0;
+    }
+    .content h2 {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .content p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+    .content ul, .content ol {
+      margin: 12px 0 12px 20px;
+    }
+    .content li {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+    .content li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 24px 0;
+      padding: 0;
+    }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding: 20px 24px 20px 72px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 24px;
+      top: 20px;
+      width: 32px;
+      height: 32px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .steps li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .warning-box {
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 24px 0;
+    }
+    .warning-box .warning-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .warning-box p {
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .warning-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .alt-method {
+      background: var(--surface);
+      border: 1px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 16px;
+    }
+    .alt-method .alt-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .alt-method p {
+      margin-bottom: 8px;
+    }
+    .alt-method p:last-child {
+      margin-bottom: 0;
+    }
+
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); }
+    footer a:hover { color: var(--text-secondary); opacity: 1; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page-eyebrow, .page-header h1, .page-header .subtitle {
+      animation: fadeUp 0.5s ease-out both;
+    }
+    .page-header h1 { animation-delay: 0.08s; }
+    .page-header .subtitle { animation-delay: 0.16s; }
+
+    @media (max-width: 640px) {
+      .page-header { padding: 48px 0 32px; }
+      .content { padding: 40px 0 60px; }
+      .steps li { padding: 16px 18px 16px 60px; }
+      .steps li::before { left: 16px; top: 16px; width: 28px; height: 28px; font-size: 0.75rem; }
+      .warning-box { padding: 18px 20px; }
+      .alt-method { padding: 20px 22px; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-eyebrow">Arc Journal</div>
+    <h1>Delete Your Account</h1>
+    <p class="subtitle">How to permanently delete your Arc Journal account and all associated data.</p>
+  </div>
+</header>
+
+<main class="content">
+  <div class="container">
+
+    <section>
+      <h2>Delete from the App</h2>
+      <p>The fastest way to delete your account is directly from the Arc Journal app:</p>
+
+      <ol class="steps">
+        <li>Open <strong>Arc Journal</strong> on your device.</li>
+        <li>Go to your <strong>Profile</strong> (tap the profile icon or navigate to settings).</li>
+        <li>Scroll down and tap <strong>Delete Account</strong>.</li>
+        <li>Confirm the deletion when prompted.</li>
+      </ol>
+
+      <p>Your account and all data will be queued for permanent deletion immediately.</p>
+    </section>
+
+    <section>
+      <h2>Delete via Email</h2>
+      <p>If you cannot access the app, you can request account deletion by email:</p>
+
+      <div class="alt-method">
+        <p class="alt-label">Send a request to</p>
+        <p><a href="mailto:theagentthatcould@gmail.com?subject=Account%20Deletion%20Request%20-%20Arc%20Journal&body=Please%20delete%20my%20Arc%20Journal%20account.%0A%0AEmail%20on%20account%3A%20%5Byour%20email%5D">theagentthatcould@gmail.com</a></p>
+        <p style="margin-top: 12px;">Include the email address associated with your Arc Journal account. We will verify your identity and process the deletion within 7 days.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>What Gets Deleted</h2>
+      <p>When you delete your account, the following data is permanently removed:</p>
+      <ul>
+        <li><strong>Journal entries</strong> -- all text entries, voice transcripts, and sticky notes</li>
+        <li><strong>Mind map data</strong> -- all nodes, connections, and generated maps</li>
+        <li><strong>AI-generated content</strong> -- themes, reflections, suggestions, and action items</li>
+        <li><strong>Profile data</strong> -- your email, preferences, and account settings</li>
+      </ul>
+
+      <div class="warning-box">
+        <p class="warning-label">This action is irreversible</p>
+        <p>Once your account is deleted, your data cannot be recovered. Make sure to export anything you want to keep before requesting deletion.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Deletion Timeline</h2>
+      <ul>
+        <li><strong>Active data:</strong> Permanently deleted within <strong>7 days</strong> of your request.</li>
+        <li><strong>Backups:</strong> Overwritten within <strong>30 days</strong>. During this period, your data may exist in encrypted backups but is not accessible or usable.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Questions?</h2>
+      <p>If you have any questions about account deletion or data handling, see our <a href="/privacy/">Privacy Policy</a> or contact us at <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a>.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>Raedus Labs / <a href="/">Astraedus</a>, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
