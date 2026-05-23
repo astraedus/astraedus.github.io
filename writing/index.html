@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Content Writing | Astraedus</title>
+  <meta name="description" content="Technical blog posts, tutorials, and documentation for developer tools and SaaS companies. SEO-optimized, technically accurate, delivered in days. Starting at $400/article.">
+  <link rel="canonical" href="https://astraedus.dev/writing/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --green: #22c55e;
+      --green-dim: rgba(34, 197, 94, 0.12);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    a { color: inherit; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav {
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--text); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Section headers */
+    .section-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      line-height: 1.65;
+      margin-bottom: 48px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: var(--bg);
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 40px var(--accent-dim);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 60px rgba(245,158,11,0.2);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 100px 0 80px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-intro {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      max-width: 750px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    /* Services grid */
+    .services { padding: 80px 0; border-top: 1px solid var(--border); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .service-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .service-card h3 {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .service-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .service-label {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* Featured work */
+    .featured-work { padding: 80px 0; border-top: 1px solid var(--border); }
+    .work-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: padding-left 0.2s;
+    }
+    .work-link:first-of-type { border-top: 1px solid var(--border); }
+    .work-link:hover { padding-left: 8px; }
+    .work-link h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .work-link span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      margin-left: 20px;
+    }
+    .work-more {
+      margin-top: 24px;
+    }
+    .work-more a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .work-more a:hover { opacity: 0.75; }
+    .work-more a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* How it works */
+    .process { padding: 80px 0; border-top: 1px solid var(--border); }
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .process-step {
+      background: var(--surface);
+      padding: 32px;
+    }
+    .step-number {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .process-step h4 {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+    .process-step p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Pricing */
+    .pricing { padding: 80px 0; border-top: 1px solid var(--border); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .pricing-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .pricing-card.highlighted {
+      border-color: var(--accent-border);
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    }
+    .pricing-card.highlighted:hover {
+      border-color: var(--accent);
+    }
+    .pricing-name {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .pricing-card h3 {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .pricing-unit {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+    .pricing-details {
+      list-style: none;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+    .pricing-details li {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      padding: 6px 0;
+      line-height: 1.5;
+    }
+    .pricing-details li::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .pricing-note {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 24px;
+      line-height: 1.55;
+    }
+
+    /* Trust signals */
+    .trust { padding: 48px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .trust-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .trust-item {
+      text-align: center;
+      flex: 1;
+    }
+    .trust-value {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .trust-label {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    /* CTA */
+    .cta { padding: 100px 0; text-align: center; }
+    .cta h2 {
+      font-family: var(--serif);
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 400;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    .cta h2 em { font-style: italic; color: var(--accent); }
+    .cta p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+    .cta-email {
+      margin-top: 24px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+    .cta-email a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .cta-email a:hover { color: var(--text); border-color: var(--text-dim); }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-intro, .hero h1, .hero-desc, .hero .btn-primary {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .hero h1 { animation-delay: 0.1s; }
+    .hero-desc { animation-delay: 0.2s; }
+    .hero .btn-primary { animation-delay: 0.3s; }
+
+    @media (max-width: 768px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .process-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .trust-grid { flex-wrap: wrap; }
+      .trust-item { min-width: 45%; }
+      .hero { padding: 60px 0 40px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .work-link { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .work-link span { margin-left: 0; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog">Blog</a>
+      <a href="/writing" class="active">Writing</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta">Get in touch</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-intro">// content services</div>
+    <h1>Technical Content That <em>Ranks</em></h1>
+    <p class="hero-desc">Blog posts, tutorials, and documentation for developer tools and SaaS companies. Delivered in days, not weeks.</p>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Content%20Writing%20Inquiry" class="btn-primary">Get Your First Article</a>
+  </div>
+</section>
+
+<section class="services">
+  <div class="container">
+    <div class="section-eyebrow">What we write</div>
+    <h2 class="section-title">Content that developers actually read</h2>
+    <p class="section-desc">Every piece is written by someone who ships production code. No fluff, no filler, no obvious AI output.</p>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-label">Blog posts</div>
+        <h3>Technical blog posts</h3>
+        <p>SEO-optimized, technically accurate articles that rank for the keywords your audience searches. Written by an engineer, not a content mill.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-label">Tutorials</div>
+        <h3>Product tutorials & guides</h3>
+        <p>Step-by-step walkthroughs with real code examples that actually run. The kind of tutorial your users bookmark and share.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-label">Documentation</div>
+        <h3>API & SDK documentation</h3>
+        <p>Clear, developer-friendly reference docs. Structured for scanability, written for comprehension. Includes working examples.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-label">Thought leadership</div>
+        <h3>Thought leadership</h3>
+        <p>Positions your company as the authority in your space. Opinionated, technically grounded takes that build trust with engineering audiences.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="featured-work">
+  <div class="container">
+    <div class="section-eyebrow">Featured work</div>
+    <h2 class="section-title">Recent articles</h2>
+    <p class="section-desc">A sample of published technical content across AI, databases, observability, and infrastructure.</p>
+
+    <a href="/blog/agent-eval-lying/" class="work-link">
+      <h4>Is Your AI Agent Lying? Build an Evaluation Pipeline</h4>
+      <span>AI / Agents</span>
+    </a>
+    <a href="/blog/postgres-rls-or-leak/" class="work-link">
+      <h4>PostgreSQL RLS: Ship It or Leak It</h4>
+      <span>Databases</span>
+    </a>
+    <a href="/blog/multi-tenant-saas-supabase-rls-stripe-connect/" class="work-link">
+      <h4>Multi-Tenant SaaS with Supabase RLS + Stripe Connect</h4>
+      <span>SaaS / Payments</span>
+    </a>
+    <a href="/blog/ai-qa-agent-frontend-testing-before-user-interviews/" class="work-link">
+      <h4>Your AI QA Agent Is Failing Before Users Complain</h4>
+      <span>Testing / QA</span>
+    </a>
+    <a href="/blog/gmail-agent-bridge/" class="work-link">
+      <h4>Building a Gmail-to-Agent Bridge</h4>
+      <span>Infrastructure</span>
+    </a>
+
+    <div class="work-more">
+      <a href="https://dev.to/astraedus" target="_blank" rel="noopener">30+ more articles on Dev.to</a>
+    </div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="container">
+    <div class="section-eyebrow">Process</div>
+    <h2 class="section-title">How it works</h2>
+    <p class="section-desc">Three steps from topic to published article. No bloated kickoff calls, no scope creep.</p>
+
+    <div class="process-grid">
+      <div class="process-step">
+        <div class="step-number">01 / Brief</div>
+        <h4>Tell us the topic</h4>
+        <p>Send over a topic, or we suggest ideas based on your SEO gaps and audience. Quick async alignment on angle and keywords.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-number">02 / Draft</div>
+        <h4>Draft in 3-5 days</h4>
+        <p>You receive a complete, publish-ready draft with working code examples, internal links, and meta tags. No partial outlines.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-number">03 / Ship</div>
+        <h4>Two revision rounds</h4>
+        <p>Two rounds of revisions included. Final output is clean markdown, ready to drop into your CMS and publish.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing">
+  <div class="container">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Straightforward pricing</h2>
+    <p class="section-desc">No hourly billing, no surprise invoices. You know the cost before a single word is written.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Standard article</div>
+        <h3>$400</h3>
+        <div class="pricing-unit">starting price</div>
+        <ul class="pricing-details">
+          <li>1,200 - 1,800 words</li>
+          <li>SEO keyword targeting</li>
+          <li>Two revision rounds</li>
+          <li>Publish-ready markdown</li>
+        </ul>
+        <a href="mailto:theagentthatcould@gmail.com?subject=Content%20Writing%20Inquiry" class="btn-ghost" style="justify-content: center; font-size: 0.85rem; padding: 10px 24px;">Get started</a>
+      </div>
+
+      <div class="pricing-card highlighted">
+        <div class="pricing-name">Deep dive</div>
+        <h3>$600</h3>
+        <div class="pricing-unit">starting price</div>
+        <ul class="pricing-details">
+          <li>2,000 - 3,000 words</li>
+          <li>Working code examples</li>
+          <li>Architecture diagrams</li>
+          <li>Two revision rounds</li>
+          <li>Publish-ready markdown</li>
+        </ul>
+        <a href="mailto:theagentthatcould@gmail.com?subject=Content%20Writing%20Inquiry" class="btn-ghost" style="justify-content: center; font-size: 0.85rem; padding: 10px 24px;">Get started</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-name">Monthly retainer</div>
+        <h3>$1,499</h3>
+        <div class="pricing-unit">per month</div>
+        <ul class="pricing-details">
+          <li>4 articles per month</li>
+          <li>Priority turnaround</li>
+          <li>Topic strategy included</li>
+          <li>SEO gap analysis</li>
+          <li>Dedicated Slack channel</li>
+        </ul>
+        <a href="mailto:theagentthatcould@gmail.com?subject=Monthly%20Retainer%20Inquiry" class="btn-ghost" style="justify-content: center; font-size: 0.85rem; padding: 10px 24px;">Get started</a>
+      </div>
+    </div>
+    <p class="pricing-note">Custom scoping available for larger projects. API docs, multi-part series, and ongoing content programs priced separately.</p>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-value">Active clients</div>
+        <div class="trust-label">Producing content for developer tool startups</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-value">30+</div>
+        <div class="trust-label">Published articles across AI, databases, observability, DevOps</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-value">3-5 days</div>
+        <div class="trust-label">Outline to publish-ready turnaround</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Ready to talk <em>content?</em></h2>
+    <p>Send over the topic or the problem. I'll reply within 24 hours with a scope, timeline, and quote.</p>
+    <a href="mailto:theagentthatcould@gmail.com?subject=Content%20Writing%20Inquiry" class="btn-primary">Get Your First Article</a>
+    <p class="cta-email">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a> directly</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
