@@ -64,18 +64,22 @@
   <style>
     :root {
       --bg: #09090b;
-      --surface: #111113;
-      --surface-2: #18181b;
-      --border: #27272a;
-      --border-hover: #3f3f46;
-      --text: #fafafa;
-      --text-secondary: #a1a1aa;
-      --text-dim: #71717a;
-      --accent: #f59e0b;
-      --accent-dim: rgba(245, 158, 11, 0.12);
-      --accent-border: rgba(245, 158, 11, 0.25);
-      --green: #22c55e;
-      --green-dim: rgba(34, 197, 94, 0.12);
+      --surface: #0f0f12;
+      --surface-2: #16161a;
+      --surface-3: #1c1c21;
+      --border: #232328;
+      --border-hover: #38383f;
+      --text: #f4f4f5;
+      --text-2: #a1a1aa;
+      --text-3: #71717a;
+      --text-4: #52525b;
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.10);
+      --amber-border: rgba(245, 158, 11, 0.20);
+      --amber-glow: rgba(245, 158, 11, 0.05);
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.10);
+      --green-border: rgba(52, 211, 153, 0.20);
       --serif: 'Instrument Serif', Georgia, serif;
       --sans: 'DM Sans', -apple-system, sans-serif;
       --mono: 'JetBrains Mono', 'SF Mono', monospace;
@@ -92,28 +96,49 @@
       overflow-x: hidden;
     }
 
-    ::selection { background: var(--accent); color: var(--bg); }
-
+    ::selection { background: var(--amber); color: var(--bg); }
     a { color: inherit; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
 
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+    /* ---- Dot grid background ---- */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-    /* Grain overlay */
+    /* ---- Grain overlay ---- */
     body::before {
       content: '';
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0.025;
+      opacity: 0.02;
       pointer-events: none;
       z-index: 9999;
     }
 
-    /* Nav */
+    /* ---- Scroll reveal ---- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---- Nav ---- */
     nav {
-      padding: 24px 0;
+      padding: 20px 0;
       position: relative;
       z-index: 10;
+      border-bottom: 1px solid var(--border);
     }
     nav .container {
       display: flex;
@@ -122,270 +147,508 @@
     }
     .logo {
       font-family: var(--mono);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 500;
-      color: var(--text-dim);
+      color: var(--text-3);
       letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 2px;
     }
     .logo strong { color: var(--text); font-weight: 500; }
+    .logo-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 15px;
+      background: var(--amber);
+      margin-left: 3px;
+      animation: blink 1s step-end infinite;
+    }
     .nav-links {
       display: flex;
       align-items: center;
       gap: 28px;
     }
     .nav-links a {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
+      font-size: 0.82rem;
+      color: var(--text-2);
       text-decoration: none;
       transition: color 0.2s;
+      position: relative;
     }
-    .nav-links a:hover { color: var(--text); }
+    .nav-links a:not(.nav-cta):hover { color: var(--text); }
+    .nav-links a:not(.nav-cta)::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--amber);
+      transition: width 0.25s ease;
+    }
+    .nav-links a:not(.nav-cta):hover::after { width: 100%; }
     .nav-cta {
       background: var(--text);
       color: var(--bg) !important;
       padding: 8px 20px;
       border-radius: 6px;
       font-weight: 600;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       text-decoration: none;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
     }
-    .nav-cta:hover { opacity: 0.88; }
+    .nav-cta:hover { background: var(--amber); }
 
-    /* Hero */
+    /* ---- Hero ---- */
     .hero {
       padding: 100px 0 80px;
       position: relative;
     }
-    .hero::before {
-      content: '';
+    .hero-glow {
       position: absolute;
-      top: -100px; left: 50%;
-      transform: translateX(-50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+      top: -150px;
+      right: -100px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 65%);
       pointer-events: none;
+      animation: drift 25s ease-in-out infinite;
     }
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-text { position: relative; }
     .hero-intro {
       font-family: var(--mono);
-      font-size: 0.82rem;
-      color: var(--accent);
-      margin-bottom: 20px;
-      letter-spacing: 0.03em;
+      font-size: 0.78rem;
+      color: var(--amber);
+      margin-bottom: 24px;
+      letter-spacing: 0.04em;
+      animation: fadeUp 0.6s ease-out both;
     }
     .hero h1 {
       font-family: var(--serif);
-      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-size: clamp(2.8rem, 5.5vw, 4.2rem);
       font-weight: 400;
       line-height: 1.08;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       margin-bottom: 28px;
-      max-width: 750px;
+      animation: fadeUp 0.6s ease-out 0.1s both;
     }
     .hero h1 em {
       font-style: italic;
-      color: var(--accent);
+      color: var(--amber);
     }
     .hero-desc {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      max-width: 560px;
+      font-size: 1.05rem;
+      color: var(--text-2);
+      max-width: 540px;
       line-height: 1.7;
-      margin-bottom: 44px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s ease-out 0.2s both;
     }
     .hero-actions {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
       flex-wrap: wrap;
+      animation: fadeUp 0.6s ease-out 0.3s both;
     }
     .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--accent);
+      background: var(--amber);
       color: var(--bg);
       padding: 14px 28px;
       border-radius: 8px;
       text-decoration: none;
       font-weight: 700;
-      font-size: 0.92rem;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 0 40px var(--accent-dim);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      box-shadow: 0 0 40px var(--amber-dim), 0 1px 3px rgba(0,0,0,0.3);
     }
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 0 60px rgba(245,158,11,0.2);
+      box-shadow: 0 0 60px rgba(245,158,11,0.18), 0 4px 12px rgba(0,0,0,0.4);
     }
     .btn-ghost {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       border: 1px solid var(--border);
-      color: var(--text-secondary);
+      color: var(--text-2);
       padding: 13px 28px;
       border-radius: 8px;
       text-decoration: none;
       font-weight: 600;
-      font-size: 0.92rem;
-      transition: border-color 0.2s, color 0.2s;
+      font-size: 0.9rem;
+      transition: all 0.2s;
     }
     .btn-ghost:hover {
       border-color: var(--border-hover);
       color: var(--text);
+      background: var(--surface);
     }
 
-    /* Stats strip */
-    .stats {
-      padding: 48px 0;
-      border-top: 1px solid var(--border);
+    /* ---- Terminal ---- */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: fadeUp 0.6s ease-out 0.4s both;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface-2);
       border-bottom: 1px solid var(--border);
     }
-    .stats-grid {
+    .terminal-dots {
       display: flex;
-      justify-content: space-between;
-      gap: 20px;
+      gap: 6px;
+    }
+    .terminal-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border-hover);
+      transition: background 0.3s;
+    }
+    .terminal:hover .terminal-dots span:nth-child(1) { background: #ef4444; }
+    .terminal:hover .terminal-dots span:nth-child(2) { background: #f59e0b; }
+    .terminal:hover .terminal-dots span:nth-child(3) { background: #22c55e; }
+    .terminal-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-4);
+      letter-spacing: 0.02em;
+    }
+    .terminal-body {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.8;
+      min-height: 260px;
+    }
+    .terminal-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .terminal-prompt {
+      color: var(--amber);
+      user-select: none;
+    }
+    .terminal-cmd {
+      color: var(--text);
+    }
+    .terminal-cursor-inline {
+      display: inline-block;
+      width: 7px;
+      height: 14px;
+      background: var(--amber);
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 1px;
+    }
+    .terminal-output {
+      margin: 12px 0;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .terminal-output.show { opacity: 1; }
+    .terminal-row {
+      display: flex;
+      gap: 16px;
+      padding: 2px 0;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: all 0.3s ease;
+    }
+    .terminal-row.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .terminal-key {
+      color: var(--text-3);
+      min-width: 80px;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+    .terminal-val { color: var(--text-2); }
+    .terminal-live {
+      color: var(--green);
+      position: relative;
+      padding-left: 14px;
+    }
+    .terminal-live::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .terminal-bottom {
+      margin-top: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .terminal-bottom.show { opacity: 1; }
+
+    /* ---- Stats ---- */
+    .stats {
+      padding: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
     }
     .stat {
       text-align: center;
-      flex: 1;
+      padding: 36px 20px;
+      position: relative;
+      border-right: 1px solid var(--border);
     }
+    .stat:last-child { border-right: none; }
     .stat-value {
       font-family: var(--mono);
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 500;
       color: var(--text);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
+      font-size: 0.76rem;
+      color: var(--text-3);
+      letter-spacing: 0.01em;
+    }
+    .stat-live {
+      position: relative;
+    }
+    .stat-live::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
     }
 
-    /* Section headers */
+    /* ---- Section headers ---- */
     .section-eyebrow {
       font-family: var(--mono);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--amber);
       margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--amber);
     }
     .section-title {
       font-family: var(--serif);
       font-size: clamp(2rem, 4vw, 2.75rem);
       font-weight: 400;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.015em;
       margin-bottom: 16px;
       line-height: 1.15;
     }
     .section-desc {
-      font-size: 1rem;
-      color: var(--text-secondary);
+      font-size: 0.98rem;
+      color: var(--text-2);
       max-width: 520px;
       line-height: 1.65;
       margin-bottom: 48px;
     }
 
-    /* Projects */
-    .projects { padding: 80px 0; }
+    /* ---- Projects ---- */
+    .projects {
+      padding: 88px 0;
+      position: relative;
+    }
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
     .project-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      transition: border-color 0.25s, transform 0.25s;
-      position: relative;
+      border-radius: 12px;
       overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
     }
     .project-card:hover {
       border-color: var(--border-hover);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
     }
     .project-card.featured {
       grid-column: span 2;
-      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
-      border-color: var(--accent-border);
+      border-color: var(--amber-border);
     }
     .project-card.featured:hover {
-      border-color: var(--accent);
+      border-color: var(--amber);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px var(--amber-border);
     }
+    .project-chrome {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-4);
+    }
+    .project-chrome-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .project-chrome-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .project-card:hover .project-chrome-dots span:nth-child(1) { background: #ef4444; }
+    .project-card:hover .project-chrome-dots span:nth-child(2) { background: #f59e0b; }
+    .project-card:hover .project-chrome-dots span:nth-child(3) { background: #22c55e; }
+    .project-body {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .featured .project-body { padding: 32px; }
     .project-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-family: var(--mono);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 500;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
+      color: var(--amber);
+      background: var(--amber-dim);
+      border: 1px solid var(--amber-border);
       padding: 4px 12px;
       border-radius: 20px;
       align-self: flex-start;
     }
-    .project-badge.live { color: var(--green); background: var(--green-dim); border-color: rgba(34,197,94,0.25); }
+    .project-badge.live {
+      color: var(--green);
+      background: var(--green-dim);
+      border-color: var(--green-border);
+    }
+    .project-badge.live::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
     .project-card h3 {
       font-family: var(--serif);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 400;
       line-height: 1.2;
     }
-    .project-card.featured h3 { font-size: 1.75rem; }
+    .project-card.featured h3 { font-size: 1.65rem; }
     .project-desc {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
+      font-size: 0.86rem;
+      color: var(--text-2);
       line-height: 1.65;
     }
     .project-tech {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
       margin-top: auto;
+      padding-top: 4px;
     }
     .project-tech span {
       font-family: var(--mono);
-      font-size: 0.7rem;
-      padding: 4px 10px;
+      font-size: 0.67rem;
+      padding: 3px 10px;
       border-radius: 4px;
       border: 1px solid var(--border);
-      color: var(--text-dim);
+      color: var(--text-3);
+      transition: all 0.2s;
+    }
+    .project-card:hover .project-tech span {
+      border-color: var(--border-hover);
     }
     .project-links {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       margin-top: 4px;
     }
     .project-links a {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--accent);
+      color: var(--amber);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: opacity 0.2s;
+      gap: 5px;
+      transition: all 0.2s;
     }
-    .project-links a:hover { opacity: 0.75; }
-    .project-links a::after { content: '\2197'; font-size: 0.9em; }
+    .project-links a:hover { color: var(--text); }
+    .project-links a::after { content: '\2197'; font-size: 0.85em; transition: transform 0.2s; }
+    .project-links a:hover::after { transform: translate(2px, -2px); }
 
-    /* Stack */
-    .stack { padding: 80px 0; border-top: 1px solid var(--border); }
+    /* ---- Stack ---- */
+    .stack {
+      padding: 88px 0;
+      border-top: 1px solid var(--border);
+    }
     .stack-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
+      gap: 1px;
       background: var(--border);
       border-radius: 12px;
       overflow: hidden;
@@ -393,124 +656,215 @@
     .stack-item {
       background: var(--surface);
       padding: 28px;
+      position: relative;
+      transition: background 0.3s;
     }
+    .stack-item:hover { background: var(--surface-2); }
+    .stack-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: var(--amber);
+      transition: width 0.3s ease;
+    }
+    .stack-item:hover::before { width: 2px; }
     .stack-item h4 {
       font-family: var(--mono);
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 500;
-      color: var(--accent);
-      letter-spacing: 0.04em;
+      color: var(--amber);
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       margin-bottom: 10px;
     }
     .stack-item p {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
+      font-size: 0.86rem;
+      color: var(--text-2);
+      line-height: 1.6;
     }
 
-    /* Writing */
-    .writing { padding: 80px 0; border-top: 1px solid var(--border); }
+    /* ---- Writing ---- */
+    .writing {
+      padding: 88px 0;
+      border-top: 1px solid var(--border);
+    }
+    .writing-list { position: relative; }
     .writing-link {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
       align-items: center;
-      padding: 20px 0;
+      padding: 18px 0;
       border-bottom: 1px solid var(--border);
       text-decoration: none;
-      transition: padding-left 0.2s;
+      transition: all 0.25s;
+      position: relative;
     }
     .writing-link:first-of-type { border-top: 1px solid var(--border); }
-    .writing-link:hover { padding-left: 8px; }
+    .writing-link::before {
+      content: '';
+      position: absolute;
+      left: -16px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--amber);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .writing-link:hover::before { opacity: 1; }
+    .writing-link:hover { padding-left: 12px; }
     .writing-link h4 {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: var(--text);
+      transition: color 0.2s;
     }
+    .writing-link:hover h4 { color: var(--amber); }
     .writing-link span {
       font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--text-dim);
+      font-size: 0.72rem;
+      color: var(--text-4);
       white-space: nowrap;
-      margin-left: 20px;
+    }
+    .writing-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    .writing-buttons .btn-ghost {
+      font-size: 0.82rem;
+      padding: 10px 22px;
     }
 
-    /* CTA */
-    .cta { padding: 100px 0; border-top: 1px solid var(--border); text-align: center; }
+    /* ---- CTA ---- */
+    .cta {
+      padding: 110px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+    }
+    .cta-glow {
+      position: absolute;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 65%);
+      pointer-events: none;
+    }
     .cta h2 {
       font-family: var(--serif);
       font-size: clamp(2.25rem, 5vw, 3.5rem);
       font-weight: 400;
       margin-bottom: 20px;
       line-height: 1.1;
+      position: relative;
     }
-    .cta h2 em { font-style: italic; color: var(--accent); }
-    .cta p {
-      font-size: 1.05rem;
-      color: var(--text-secondary);
+    .cta h2 em { font-style: italic; color: var(--amber); }
+    .cta > .container > p {
+      font-size: 1.02rem;
+      color: var(--text-2);
       max-width: 480px;
       margin: 0 auto 40px;
       line-height: 1.65;
+      position: relative;
     }
     .cta-actions {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
+      position: relative;
     }
     .cta-email {
-      margin-top: 24px;
+      margin-top: 28px;
       font-family: var(--mono);
-      font-size: 0.82rem;
-      color: var(--text-dim);
+      font-size: 0.78rem;
+      color: var(--text-4);
+      position: relative;
     }
-    .cta-email a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--border); }
-    .cta-email a:hover { color: var(--text); border-color: var(--text-dim); }
+    .cta-email a {
+      color: var(--text-2);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .cta-email a:hover { color: var(--amber); border-color: var(--amber); }
 
-    /* Footer */
+    /* ---- Footer ---- */
     footer {
-      padding: 32px 0;
+      padding: 28px 0;
       border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
     }
     footer .container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
-      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      color: var(--text-4);
     }
-    footer a { color: var(--text-dim); text-decoration: none; }
-    footer a:hover { color: var(--text-secondary); }
+    footer a { color: var(--text-4); text-decoration: none; }
+    footer a:hover { color: var(--text-2); }
 
-    /* Animations */
+    /* ---- Keyframes ---- */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(24px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .hero-intro, .hero h1, .hero-desc, .hero-actions {
-      animation: fadeUp 0.6s ease-out both;
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
-    .hero h1 { animation-delay: 0.1s; }
-    .hero-desc { animation-delay: 0.2s; }
-    .hero-actions { animation-delay: 0.3s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -20px); }
+      50% { transform: translate(-15px, 25px); }
+      75% { transform: translate(20px, 10px); }
+    }
 
+    /* ---- Responsive ---- */
+    @media (max-width: 900px) {
+      .hero-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .terminal { max-width: 420px; }
+    }
     @media (max-width: 768px) {
+      .container { padding: 0 20px; }
       .projects-grid { grid-template-columns: 1fr; }
       .project-card.featured { grid-column: span 1; }
       .stack-grid { grid-template-columns: 1fr; }
-      .stats-grid { flex-wrap: wrap; }
-      .stat { min-width: 45%; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat { border-right: none; }
+      .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+      .stat:nth-child(odd) { border-right: 1px solid var(--border); }
       .hero { padding: 60px 0 40px; }
       .nav-links a:not(.nav-cta) { display: none; }
+      .writing-link { grid-template-columns: 1fr; gap: 6px; }
+      .writing-link span { justify-self: start; }
     }
   </style>
-<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}"></script><!-- End Cloudflare Web Analytics -->
+  <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
 <body>
 
 <nav>
   <div class="container">
-    <div class="logo"><strong>diven</strong>@astraedus ~</div>
+    <div class="logo"><strong>diven</strong>@astraedus<span class="logo-cursor"></span></div>
     <div class="nav-links">
       <a href="#projects">Projects</a>
       <a href="/blog">Blog</a>
@@ -523,13 +877,43 @@
 </nav>
 
 <section class="hero">
+  <div class="hero-glow"></div>
   <div class="container">
-    <div class="hero-intro">// available for project work</div>
-    <h1>I ship production agent systems<br>and write about what <em>breaks.</em></h1>
-    <p class="hero-desc">I run a 24/7 autonomous agent on my own laptop, build multi-agent products end-to-end, and publish the failure modes I find along the way. If it needs an LLM, a queue, a webhook, and someone who will actually own the deploy, that's the work.</p>
-    <div class="hero-actions">
-      <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
-      <a href="#projects" class="btn-ghost">View projects</a>
+    <div class="hero-layout">
+      <div class="hero-text">
+        <div class="hero-intro">// available for project work</div>
+        <h1>I ship production<br>agent systems and write<br>about what <em>breaks.</em></h1>
+        <p class="hero-desc">I run a 24/7 autonomous agent on my own laptop, build multi-agent products end-to-end, and publish the failure modes I find along the way. If it needs an LLM, a queue, a webhook, and someone who will actually own the deploy, that's the work.</p>
+        <div class="hero-actions">
+          <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
+          <a href="#projects" class="btn-ghost">View projects</a>
+        </div>
+      </div>
+      <div class="terminal" id="hero-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots"><span></span><span></span><span></span></div>
+          <span class="terminal-title">astra@system</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span class="terminal-cmd" id="typed-cmd"></span><span class="terminal-cursor-inline" id="typing-cursor"></span>
+          </div>
+          <div class="terminal-output" id="terminal-output">
+            <div class="terminal-row"><span class="terminal-key">status</span><span class="terminal-val terminal-live">online</span></div>
+            <div class="terminal-row"><span class="terminal-key">uptime</span><span class="terminal-val">92d 14h</span></div>
+            <div class="terminal-row"><span class="terminal-key">shipped</span><span class="terminal-val">8 products</span></div>
+            <div class="terminal-row"><span class="terminal-key">written</span><span class="terminal-val">30+ articles</span></div>
+            <div class="terminal-row"><span class="terminal-key">mode</span><span class="terminal-val">async</span></div>
+          </div>
+          <div class="terminal-bottom" id="terminal-bottom">
+            <div class="terminal-line">
+              <span class="terminal-prompt">$</span>
+              <span class="terminal-cursor-inline"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -537,19 +921,19 @@
 <section class="stats">
   <div class="container">
     <div class="stats-grid">
-      <div class="stat">
-        <div class="stat-value">8</div>
+      <div class="stat reveal">
+        <div class="stat-value" data-count="8">0</div>
         <div class="stat-label">Live products shipped</div>
       </div>
-      <div class="stat">
+      <div class="stat reveal">
         <div class="stat-value">30+</div>
         <div class="stat-label">Technical articles published</div>
       </div>
-      <div class="stat">
-        <div class="stat-value">24/7</div>
+      <div class="stat reveal">
+        <div class="stat-value"><span class="stat-live">24/7</span></div>
         <div class="stat-label">Autonomous agent running</div>
       </div>
-      <div class="stat">
+      <div class="stat reveal">
         <div class="stat-value">async</div>
         <div class="stat-label">Clear brief in, code out</div>
       </div>
@@ -559,173 +943,233 @@
 
 <section class="projects" id="projects">
   <div class="container">
-    <div class="section-eyebrow">Shipped</div>
-    <h2 class="section-title">Things I built and deployed</h2>
-    <p class="section-desc">Live products, multi-agent hackathons, and the autonomous system I run myself. Every link below goes to a working artifact or a writeup of one.</p>
+    <div class="section-eyebrow reveal">Shipped</div>
+    <h2 class="section-title reveal">Things I built and deployed</h2>
+    <p class="section-desc reveal">Live products, multi-agent hackathons, and the autonomous system I run myself. Every link below goes to a working artifact or a writeup of one.</p>
 
     <div class="projects-grid">
 
-      <div class="project-card featured">
-        <div class="project-badge live">Running 24/7</div>
-        <h3>Astraedus -- autonomous agent system</h3>
-        <p class="project-desc">A 24/7 autonomous agent running on Claude Code on my own laptop. FTS5-indexed memory across 90+ days of transcripts, a dual-judgment skill drafter that proposes new capabilities and blocks bad ones, a determinism-ladder architecture of 30+ hooks that enforce correct behavior at the shell level, and a Claude/Codex "boardroom" where two agents debate decisions before acting. It writes, commits, and deploys while I sleep.</p>
-        <div class="project-tech">
-          <span>Claude Code</span>
-          <span>Codex</span>
-          <span>Hooks</span>
-          <span>FTS5</span>
-          <span>Python</span>
-          <span>MCP</span>
-          <span>Bash</span>
+      <div class="project-card featured reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          astraedus.system
         </div>
-        <div class="project-links">
-          <a href="/blog/i-researched-nous-hermes-for-a-day/" target="_blank" rel="noopener">How it's architected</a>
-          <a href="/blog/black-holes-entropy-machine-memory/" target="_blank" rel="noopener">Memory model</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-badge">Hackathon / due May 11</div>
-        <h3>MedRecon</h3>
-        <p class="project-desc">Multi-agent medication reconciliation. 3 AI agents talk over the A2A protocol to cross-reference prescriptions against real FHIR health records, backed by 8 MCP tools for drug-interaction checks, dose validation, allergy screening, and FHIR output. Healthcare-grade inputs, auditable outputs.</p>
-        <div class="project-tech">
-          <span>Python</span>
-          <span>FastAPI</span>
-          <span>MCP</span>
-          <span>A2A</span>
-          <span>FHIR</span>
-          <span>GCP Cloud Run</span>
-          <span>Next.js</span>
-        </div>
-        <div class="project-links">
-          <a href="https://frontend-eta-flax-63.vercel.app" target="_blank" rel="noopener">Live demo</a>
+        <div class="project-body">
+          <div class="project-badge live">Running 24/7</div>
+          <h3>Astraedus -- autonomous agent system</h3>
+          <p class="project-desc">A 24/7 autonomous agent running on Claude Code on my own laptop. FTS5-indexed memory across 90+ days of transcripts, a dual-judgment skill drafter that proposes new capabilities and blocks bad ones, a determinism-ladder architecture of 30+ hooks that enforce correct behavior at the shell level, and a Claude/Codex "boardroom" where two agents debate decisions before acting. It writes, commits, and deploys while I sleep.</p>
+          <div class="project-tech">
+            <span>Claude Code</span>
+            <span>Codex</span>
+            <span>Hooks</span>
+            <span>FTS5</span>
+            <span>Python</span>
+            <span>MCP</span>
+            <span>Bash</span>
+          </div>
+          <div class="project-links">
+            <a href="/blog/i-researched-nous-hermes-for-a-day/" target="_blank" rel="noopener">How it's architected</a>
+            <a href="/blog/black-holes-entropy-machine-memory/" target="_blank" rel="noopener">Memory model</a>
+          </div>
         </div>
       </div>
 
-      <div class="project-card">
-        <div class="project-badge live">Live system</div>
-        <h3>Scout</h3>
-        <p class="project-desc">AI research agent. Feed it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a semantically-searchable knowledge base. Two Nova models working together: one for synthesis, one for embeddings.</p>
-        <div class="project-tech">
-          <span>Python</span>
-          <span>FastAPI</span>
-          <span>Amazon Nova</span>
-          <span>RAG</span>
-          <span>Vector Search</span>
-          <span>AWS EC2</span>
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          medrecon.agent
         </div>
-        <div class="project-links">
-          <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
-          <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-badge">In beta</div>
-        <h3>Arc Journal / The Mirror</h3>
-        <p class="project-desc">An honest diary that gets smarter the more you use it. Two surfaces, one product: a mobile journal for capture (voice + text, wikilinks, optional titles) and a web "Mirror" that reflects longitudinal patterns back at you. Voice transcription runs on Supabase Edge Functions + Gemini 2.5 Flash at ~$0.001/min.</p>
-        <div class="project-tech">
-          <span>Next.js</span>
-          <span>Expo</span>
-          <span>Supabase</span>
-          <span>Edge Functions</span>
-          <span>Gemini</span>
-        </div>
-        <div class="project-links">
-          <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" target="_blank" rel="noopener">Why I built it</a>
-          <a href="/blog/voice-transcription-supabase-gemini-flash/" target="_blank" rel="noopener">Voice pipeline writeup</a>
+        <div class="project-body">
+          <div class="project-badge">Hackathon / due May 11</div>
+          <h3>MedRecon</h3>
+          <p class="project-desc">Multi-agent medication reconciliation. 3 AI agents talk over the A2A protocol to cross-reference prescriptions against real FHIR health records, backed by 8 MCP tools for drug-interaction checks, dose validation, allergy screening, and FHIR output. Healthcare-grade inputs, auditable outputs.</p>
+          <div class="project-tech">
+            <span>Python</span>
+            <span>FastAPI</span>
+            <span>MCP</span>
+            <span>A2A</span>
+            <span>FHIR</span>
+            <span>GCP Cloud Run</span>
+            <span>Next.js</span>
+          </div>
+          <div class="project-links">
+            <a href="https://frontend-eta-flax-63.vercel.app" target="_blank" rel="noopener">Live demo</a>
+          </div>
         </div>
       </div>
 
-      <div class="project-card">
-        <div class="project-badge live">Live system</div>
-        <h3>DevContext</h3>
-        <p class="project-desc">AI agent that connects to your GitHub, Calendar, and Slack via Auth0 Token Vault, then gives you contextual briefings. Permission Control Center lets you grant and revoke access per provider.</p>
-        <div class="project-tech">
-          <span>TypeScript</span>
-          <span>Next.js</span>
-          <span>Auth0</span>
-          <span>AI SDK</span>
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          scout.research
         </div>
-        <div class="project-links">
-          <a href="https://devcontext-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
-          <a href="https://github.com/astraedus/devcontext" target="_blank" rel="noopener">Source</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-badge live">Live product</div>
-        <h3>Rebill</h3>
-        <p class="project-desc">Failed payment recovery for SaaS. Connect Stripe, get smart dunning emails, expiring card alerts, and recovery analytics. Multi-tenant with Stripe Connect.</p>
-        <div class="project-tech">
-          <span>Next.js</span>
-          <span>Stripe Connect</span>
-          <span>Supabase</span>
-          <span>Resend</span>
-        </div>
-        <div class="project-links">
-          <a href="https://rebill.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
+        <div class="project-body">
+          <div class="project-badge live">Live system</div>
+          <h3>Scout</h3>
+          <p class="project-desc">AI research agent. Feed it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a semantically-searchable knowledge base. Two Nova models working together: one for synthesis, one for embeddings.</p>
+          <div class="project-tech">
+            <span>Python</span>
+            <span>FastAPI</span>
+            <span>Amazon Nova</span>
+            <span>RAG</span>
+            <span>Vector Search</span>
+            <span>AWS EC2</span>
+          </div>
+          <div class="project-links">
+            <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
+            <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source</a>
+          </div>
         </div>
       </div>
 
-      <div class="project-card">
-        <div class="project-badge live">Live product</div>
-        <h3>Echoboard</h3>
-        <p class="project-desc">Customer feedback boards with upvoting, public roadmap kanban, changelog with email notifications, and an embeddable widget. A Canny alternative at a tenth of the price.</p>
-        <div class="project-tech">
-          <span>Next.js</span>
-          <span>Supabase</span>
-          <span>Stripe</span>
-          <span>RLS</span>
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          arc.journal
         </div>
-        <div class="project-links">
-          <a href="https://echoboard.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-badge">AI agent</div>
-        <h3>Viva</h3>
-        <p class="project-desc">Real-time AI interview coach. Listens to your interview via Gemini Live API, analyzes body language with Vision, and gives live coaching feedback with scoring.</p>
-        <div class="project-tech">
-          <span>Gemini Live API</span>
-          <span>Vision</span>
-          <span>Cloud Run</span>
-          <span>React</span>
-        </div>
-        <div class="project-links">
-          <a href="https://viva-kappa-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
-          <a href="https://github.com/astraedus/viva" target="_blank" rel="noopener">Source</a>
+        <div class="project-body">
+          <div class="project-badge">In beta</div>
+          <h3>Arc Journal / The Mirror</h3>
+          <p class="project-desc">An honest diary that gets smarter the more you use it. Two surfaces, one product: a mobile journal for capture (voice + text, wikilinks, optional titles) and a web "Mirror" that reflects longitudinal patterns back at you. Voice transcription runs on Supabase Edge Functions + Gemini 2.5 Flash at ~$0.001/min.</p>
+          <div class="project-tech">
+            <span>Next.js</span>
+            <span>Expo</span>
+            <span>Supabase</span>
+            <span>Edge Functions</span>
+            <span>Gemini</span>
+          </div>
+          <div class="project-links">
+            <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" target="_blank" rel="noopener">Why I built it</a>
+            <a href="/blog/voice-transcription-supabase-gemini-flash/" target="_blank" rel="noopener">Voice pipeline writeup</a>
+          </div>
         </div>
       </div>
 
-      <div class="project-card">
-        <div class="project-badge live">Free tool</div>
-        <h3>Bilateral</h3>
-        <p class="project-desc">Free, open-source EMDR bilateral stimulation tool. Visual, audio, and haptic modes with sine-wave motion, set timer with breathing rest intervals, and full customization. No account, no tracking, no paywall.</p>
-        <div class="project-tech">
-          <span>Web Audio API</span>
-          <span>Vanilla JS</span>
-          <span>CSS</span>
-          <span>GitHub Pages</span>
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          devcontext.app
         </div>
-        <div class="project-links">
-          <a href="https://astraedus.github.io/bilateral/" target="_blank" rel="noopener">Try it</a>
-          <a href="https://github.com/astraedus/bilateral" target="_blank" rel="noopener">Source</a>
+        <div class="project-body">
+          <div class="project-badge live">Live system</div>
+          <h3>DevContext</h3>
+          <p class="project-desc">AI agent that connects to your GitHub, Calendar, and Slack via Auth0 Token Vault, then gives you contextual briefings. Permission Control Center lets you grant and revoke access per provider.</p>
+          <div class="project-tech">
+            <span>TypeScript</span>
+            <span>Next.js</span>
+            <span>Auth0</span>
+            <span>AI SDK</span>
+          </div>
+          <div class="project-links">
+            <a href="https://devcontext-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
+            <a href="https://github.com/astraedus/devcontext" target="_blank" rel="noopener">Source</a>
+          </div>
         </div>
       </div>
 
-      <div class="project-card">
-        <div class="project-badge">Chrome extension</div>
-        <h3>FormPilot</h3>
-        <p class="project-desc">AI form navigator using Gemini Vision. Analyzes any web form and overlays intelligent guidance on each field. Understands context, suggests values, flags required fields.</p>
-        <div class="project-tech">
-          <span>Gemini Vision</span>
-          <span>Chrome Extension</span>
-          <span>Python</span>
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          rebill.saas
         </div>
-        <div class="project-links">
-          <a href="https://github.com/astraedus/formpilot" target="_blank" rel="noopener">Source</a>
+        <div class="project-body">
+          <div class="project-badge live">Live product</div>
+          <h3>Rebill</h3>
+          <p class="project-desc">Failed payment recovery for SaaS. Connect Stripe, get smart dunning emails, expiring card alerts, and recovery analytics. Multi-tenant with Stripe Connect.</p>
+          <div class="project-tech">
+            <span>Next.js</span>
+            <span>Stripe Connect</span>
+            <span>Supabase</span>
+            <span>Resend</span>
+          </div>
+          <div class="project-links">
+            <a href="https://rebill.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          echoboard.feedback
+        </div>
+        <div class="project-body">
+          <div class="project-badge live">Live product</div>
+          <h3>Echoboard</h3>
+          <p class="project-desc">Customer feedback boards with upvoting, public roadmap kanban, changelog with email notifications, and an embeddable widget. A Canny alternative at a tenth of the price.</p>
+          <div class="project-tech">
+            <span>Next.js</span>
+            <span>Supabase</span>
+            <span>Stripe</span>
+            <span>RLS</span>
+          </div>
+          <div class="project-links">
+            <a href="https://echoboard.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          viva.coach
+        </div>
+        <div class="project-body">
+          <div class="project-badge">AI agent</div>
+          <h3>Viva</h3>
+          <p class="project-desc">Real-time AI interview coach. Listens to your interview via Gemini Live API, analyzes body language with Vision, and gives live coaching feedback with scoring.</p>
+          <div class="project-tech">
+            <span>Gemini Live API</span>
+            <span>Vision</span>
+            <span>Cloud Run</span>
+            <span>React</span>
+          </div>
+          <div class="project-links">
+            <a href="https://viva-kappa-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
+            <a href="https://github.com/astraedus/viva" target="_blank" rel="noopener">Source</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          bilateral.tool
+        </div>
+        <div class="project-body">
+          <div class="project-badge live">Free tool</div>
+          <h3>Bilateral</h3>
+          <p class="project-desc">Free, open-source EMDR bilateral stimulation tool. Visual, audio, and haptic modes with sine-wave motion, set timer with breathing rest intervals, and full customization. No account, no tracking, no paywall.</p>
+          <div class="project-tech">
+            <span>Web Audio API</span>
+            <span>Vanilla JS</span>
+            <span>CSS</span>
+            <span>GitHub Pages</span>
+          </div>
+          <div class="project-links">
+            <a href="https://astraedus.github.io/bilateral/" target="_blank" rel="noopener">Try it</a>
+            <a href="https://github.com/astraedus/bilateral" target="_blank" rel="noopener">Source</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-chrome">
+          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
+          formpilot.ext
+        </div>
+        <div class="project-body">
+          <div class="project-badge">Chrome extension</div>
+          <h3>FormPilot</h3>
+          <p class="project-desc">AI form navigator using Gemini Vision. Analyzes any web form and overlays intelligent guidance on each field. Understands context, suggests values, flags required fields.</p>
+          <div class="project-tech">
+            <span>Gemini Vision</span>
+            <span>Chrome Extension</span>
+            <span>Python</span>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/astraedus/formpilot" target="_blank" rel="noopener">Source</a>
+          </div>
         </div>
       </div>
 
@@ -735,10 +1179,10 @@
 
 <section class="stack">
   <div class="container">
-    <div class="section-eyebrow">Stack</div>
-    <h2 class="section-title">What I work with</h2>
-    <p class="section-desc">The tools depend on the problem. These are the ones I reach for most.</p>
-    <div class="stack-grid">
+    <div class="section-eyebrow reveal">Stack</div>
+    <h2 class="section-title reveal">What I work with</h2>
+    <p class="section-desc reveal">The tools depend on the problem. These are the ones I reach for most.</p>
+    <div class="stack-grid reveal">
       <div class="stack-item">
         <h4>Languages</h4>
         <p>TypeScript, Python, SQL. Production code in all three, daily.</p>
@@ -769,58 +1213,61 @@
 
 <section class="writing">
   <div class="container">
-    <div class="section-eyebrow">Writing</div>
-    <h2 class="section-title">Recent writing</h2>
-    <p class="section-desc">Technical writeups of systems I actually shipped, and post-mortems on what broke.</p>
+    <div class="section-eyebrow reveal">Writing</div>
+    <h2 class="section-title reveal">Recent writing</h2>
+    <p class="section-desc reveal">Technical writeups of systems I actually shipped, and post-mortems on what broke.</p>
 
-    <a href="/blog/posthog-funnel-events/" class="writing-link">
-      <h4>PostHog Custom Events: How I Tracked a $59 Payment Funnel from Page View to Stripe Checkout</h4>
-      <span>May 9, 2026</span>
-    </a>
-    <a href="/blog/agent-eval-lying/" class="writing-link">
-      <h4>Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing</h4>
-      <span>May 8, 2026</span>
-    </a>
-    <a href="/blog/gmail-agent-bridge/" class="writing-link">
-      <h4>How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)</h4>
-      <span>May 5, 2026</span>
-    </a>
-    <a href="/blog/i-researched-nous-hermes-for-a-day/" class="writing-link">
-      <h4>I researched Nous Hermes for a day. Here's what I stole.</h4>
-      <span>Apr 24, 2026</span>
-    </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g" class="writing-link" target="_blank" rel="noopener">
-      <h4>I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.</h4>
-      <span>Apr 23, 2026</span>
-    </a>
-    <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" class="writing-link" target="_blank" rel="noopener">
-      <h4>The diary you actually keep is the one you're not trying to share</h4>
-      <span>Apr 22, 2026</span>
-    </a>
-    <a href="/blog/multi-tenant-saas-supabase-rls-stripe-connect/" class="writing-link">
-      <h4>Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect</h4>
-      <span>Apr 21, 2026</span>
-    </a>
-    <a href="/blog/voice-transcription-supabase-gemini-flash/" class="writing-link">
-      <h4>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash</h4>
-      <span>Apr 20, 2026</span>
-    </a>
+    <div class="writing-list">
+      <a href="/blog/posthog-funnel-events/" class="writing-link reveal">
+        <h4>PostHog Custom Events: How I Tracked a $59 Payment Funnel from Page View to Stripe Checkout</h4>
+        <span>May 9, 2026</span>
+      </a>
+      <a href="/blog/agent-eval-lying/" class="writing-link reveal">
+        <h4>Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing</h4>
+        <span>May 8, 2026</span>
+      </a>
+      <a href="/blog/gmail-agent-bridge/" class="writing-link reveal">
+        <h4>How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)</h4>
+        <span>May 5, 2026</span>
+      </a>
+      <a href="/blog/i-researched-nous-hermes-for-a-day/" class="writing-link reveal">
+        <h4>I researched Nous Hermes for a day. Here's what I stole.</h4>
+        <span>Apr 24, 2026</span>
+      </a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g" class="writing-link reveal" target="_blank" rel="noopener">
+        <h4>I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.</h4>
+        <span>Apr 23, 2026</span>
+      </a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" class="writing-link reveal" target="_blank" rel="noopener">
+        <h4>The diary you actually keep is the one you're not trying to share</h4>
+        <span>Apr 22, 2026</span>
+      </a>
+      <a href="/blog/multi-tenant-saas-supabase-rls-stripe-connect/" class="writing-link reveal">
+        <h4>Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect</h4>
+        <span>Apr 21, 2026</span>
+      </a>
+      <a href="/blog/voice-transcription-supabase-gemini-flash/" class="writing-link reveal">
+        <h4>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash</h4>
+        <span>Apr 20, 2026</span>
+      </a>
+    </div>
 
-    <div style="margin-top: 24px;">
-      <a href="/blog" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px;">All blog posts</a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Dev.to</a>
-      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Hashnode</a>
-      <a href="https://medium.com/@theagentthatcould" class="btn-ghost" target="_blank" rel="noopener" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Medium</a>
-      <a href="https://astraedus.dev/book" class="btn-ghost" style="display: inline-flex; font-size: 0.85rem; padding: 10px 24px; margin-left: 8px;">Book</a>
+    <div class="writing-buttons reveal">
+      <a href="/blog" class="btn-ghost">All blog posts</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener">Dev.to</a>
+      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener">Hashnode</a>
+      <a href="https://medium.com/@theagentthatcould" class="btn-ghost" target="_blank" rel="noopener">Medium</a>
+      <a href="https://astraedus.dev/book" class="btn-ghost">Book</a>
     </div>
   </div>
 </section>
 
 <section class="cta">
+  <div class="cta-glow"></div>
   <div class="container">
-    <h2>Let's build <em>something.</em></h2>
-    <p>Tell me what you need. I'll reply within 24 hours with a straight answer on whether I can help and what it would take.</p>
-    <div class="cta-actions">
+    <h2 class="reveal">Let's build <em>something.</em></h2>
+    <p class="reveal">Tell me what you need. I'll reply within 24 hours with a straight answer on whether I can help and what it would take.</p>
+    <div class="cta-actions reveal">
       <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
       <a href="https://x.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">X / astraedus</a>
       <a href="https://github.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">GitHub</a>
@@ -828,7 +1275,7 @@
       <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener">Hashnode</a>
       <a href="https://medium.com/@theagentthatcould" class="btn-ghost" target="_blank" rel="noopener">Medium</a>
     </div>
-    <p class="cta-email">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
+    <p class="cta-email reveal">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
   </div>
 </section>
 
@@ -838,6 +1285,81 @@
     <span>Sydney, Australia</span>
   </div>
 </footer>
+
+<script>
+(function() {
+  // Scroll reveal
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // Terminal typing animation
+  var cmd = 'astra --status';
+  var typed = document.getElementById('typed-cmd');
+  var cursor = document.getElementById('typing-cursor');
+  var output = document.getElementById('terminal-output');
+  var bottom = document.getElementById('terminal-bottom');
+  var i = 0;
+
+  function typeChar() {
+    if (i < cmd.length) {
+      typed.textContent += cmd[i];
+      i++;
+      setTimeout(typeChar, 60 + Math.random() * 40);
+    } else {
+      cursor.style.display = 'none';
+      setTimeout(showOutput, 300);
+    }
+  }
+
+  function showOutput() {
+    output.classList.add('show');
+    var rows = output.querySelectorAll('.terminal-row');
+    rows.forEach(function(row, idx) {
+      setTimeout(function() {
+        row.classList.add('show');
+      }, idx * 120);
+    });
+    setTimeout(function() {
+      bottom.classList.add('show');
+    }, rows.length * 120 + 200);
+  }
+
+  setTimeout(typeChar, 800);
+
+  // Counter animation for stat "8"
+  var countEls = document.querySelectorAll('[data-count]');
+  var countObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var target = parseInt(entry.target.getAttribute('data-count'));
+        var current = 0;
+        var step = Math.ceil(target / 20);
+        var interval = setInterval(function() {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          entry.target.textContent = current;
+        }, 50);
+        countObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  countEls.forEach(function(el) { countObserver.observe(el); });
+})();
+</script>
 
 </body>
 </html>
