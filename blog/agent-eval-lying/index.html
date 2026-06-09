@@ -411,6 +411,37 @@
     }
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing", "item": "https://dev.to/diven_rastdus_c5af27d68f3/your-ai-agent-evaluation-is-lying-to-you-why-10-test-runs-prove-nothing-1ij2" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -429,6 +460,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -441,12 +473,23 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-win-rate-trap">The win-rate trap</a></li>
+          <li><a href="#trueskill-makes-the-same-mistake-look-different">TrueSkill makes the same mistake look different</a></li>
+          <li><a href="#the-fix-three-rules">The fix: three rules</a></li>
+          <li><a href="#what-this-actually-looks-like-in-practice">What this actually looks like in practice</a></li>
+          <li><a href="#the-deeper-problem">The deeper problem</a></li>
+        </ul>
+      </nav>
+
 
 <p>I ran 10 games between two AI agents. Agent v3 went 5-5 against Agent v1. I reported "v3 ties v1, no measurable improvement, don't merge."</p>
 <p>That conclusion was wrong. Not because v3 was secretly better or worse, but because 10 games told me almost nothing at all.</p>
 <p>Here's the math I should have done first.</p>
 
-<h2>The win-rate trap</h2>
+<h2 id="the-win-rate-trap"><a class="anchor" href="#the-win-rate-trap" aria-label="Link to this section"></a>The win-rate trap</h2>
 
 <p>The obvious metric for comparing two agents is win rate. Agent A beats Agent B 50% of the time? They're even. 70%? A is better. Simple.</p>
 <p>Except win rate has a confidence interval, and at small N that interval is enormous.</p>
@@ -487,7 +530,7 @@ def min_games(p_true, z=1.96):
 
 <p>Most agent improvements are in the 52-58% range against the prior version. You need hundreds of games, not ten.</p>
 
-<h2>TrueSkill makes the same mistake look different</h2>
+<h2 id="trueskill-makes-the-same-mistake-look-different"><a class="anchor" href="#trueskill-makes-the-same-mistake-look-different" aria-label="Link to this section"></a>TrueSkill makes the same mistake look different</h2>
 
 <p>If you're running a multi-agent ladder (like I am for a Kaggle competition), you're probably using TrueSkill or Elo instead of raw win rate. These feel more sophisticated. They give you a single number -- the mu rating -- and you compare it across agents.</p>
 <p>But TrueSkill also tracks sigma, the uncertainty in that rating. And at low game counts, sigma is so large that the ratings are meaningless.</p>
@@ -528,7 +571,7 @@ False
 ... )
 True</code></pre>
 
-<h2>The fix: three rules</h2>
+<h2 id="the-fix-three-rules"><a class="anchor" href="#the-fix-three-rules" aria-label="Link to this section"></a>The fix: three rules</h2>
 
 <p>After burning a day on a wrong conclusion, I now follow three rules for agent evaluation.</p>
 
@@ -579,7 +622,7 @@ if not (is_converged(ratings["v1"]) and is_converged(ratings["v3"])):
 # "v3: 560 +/- 72 (sigma=36.0)"   -- don't trust this
 # "v3: 560 +/- 16 (sigma=8.0)"    -- now we're talking</code></pre>
 
-<h2>What this actually looks like in practice</h2>
+<h2 id="what-this-actually-looks-like-in-practice"><a class="anchor" href="#what-this-actually-looks-like-in-practice" aria-label="Link to this section"></a>What this actually looks like in practice</h2>
 
 <p>I'm building game AI agents for a Kaggle competition. My ladder now persists ratings across sessions and prints a convergence status alongside every ranking:</p>
 
@@ -591,7 +634,7 @@ v19_lp          |  798  |  18.3 | [761, 835]    |    51 | No</code></pre>
 
 <p>The "Converged" column is the gate. I don't merge a new agent variant until its sigma is below 15 and the CI doesn't overlap with the agent it's trying to beat. This costs more compute upfront (running 100+ games instead of 10) but saves me from merging regressions and spending days debugging phantom improvements.</p>
 
-<h2>The deeper problem</h2>
+<h2 id="the-deeper-problem"><a class="anchor" href="#the-deeper-problem" aria-label="Link to this section"></a>The deeper problem</h2>
 
 <p>This isn't just a statistics issue. It's a workflow issue. When you run 10 tests, get a number, and make a decision, you feel like you evaluated something. The ritual of "run tests, look at results, decide" creates false confidence even when the test itself had zero statistical power.</p>
 <p>The fix is mechanical: compute the confidence interval, display it, and refuse to decide when it's too wide. Make the uncertainty impossible to ignore. If your evaluation pipeline doesn't show you how uncertain it is, it's not an evaluation pipeline. It's a random number generator with a nice UI.</p>

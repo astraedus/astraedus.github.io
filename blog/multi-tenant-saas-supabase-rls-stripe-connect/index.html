@@ -411,6 +411,37 @@
     }
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect", "item": "https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -429,6 +460,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -441,6 +473,16 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#why-existing-solutions-fall-short">Why Existing Solutions Fall Short</a></li>
+          <li><a href="#the-working-code">The Working Code</a></li>
+          <li><a href="#pitfalls">Pitfalls</a></li>
+          <li><a href="#what-id-change">What I'd Change</a></li>
+        </ul>
+      </nav>
+
 
 <p>If your SaaS charges customers and also plugs into those customers' billing stack, you do not have one billing problem. You have two.</p>
 <p>You need to bill your own customer for your product. Then you need to safely ingest billing events from that customer's Stripe account without letting tenants see each other's data, leaking service-role access into the frontend, or building a fragile webhook mess you cannot debug later.</p>
@@ -453,7 +495,7 @@
 <li>Stripe Connect pipes in billing events from the user's own Stripe account.</li>
 </ul>
 <p>Most tutorials cover one of those. Very few show all four in the same app.</p>
-<h2>Why Existing Solutions Fall Short</h2>
+<h2 id="why-existing-solutions-fall-short"><a class="anchor" href="#why-existing-solutions-fall-short" aria-label="Link to this section"></a>Why Existing Solutions Fall Short</h2>
 <p>Most examples break down in one of three ways.</p>
 <p>First, they are single-tenant. They show a clean <code>profiles</code> table, a clean <code>checkout.session.completed</code> webhook, and no real thought about who can read what when ten customers are using the same app.</p>
 <p>Second, they treat auth and billing as separate concerns. The login works. The checkout works. The webhook works. But the join points are hand-wavy. You end up relying on random metadata fields, trusting client input too much, or writing "temporary" service-role queries that never leave.</p>
@@ -468,8 +510,8 @@
 <li>run background jobs with service-role access, without giving that power to the browser</li>
 </ol>
 <p>That split ended up being the whole architecture.</p>
-<h2>The Working Code</h2>
-<h3>1. bootstrap the tenant in Postgres, not in app code</h3>
+<h2 id="the-working-code"><a class="anchor" href="#the-working-code" aria-label="Link to this section"></a>The Working Code</h2>
+<h3 id="1-bootstrap-the-tenant-in-postgres-not-in-app-code"><a class="anchor" href="#1-bootstrap-the-tenant-in-postgres-not-in-app-code" aria-label="Link to this section"></a>1. bootstrap the tenant in Postgres, not in app code</h3>
 <p>I wanted every authenticated user to immediately have an <code>accounts</code> row. Supabase makes that easy with a trigger on <code>auth.users</code>.</p>
 <pre><code class="language-sql">create table accounts (
   id uuid primary key default gen_random_uuid(),
@@ -483,20 +525,20 @@
 );
 
 create or replace function public.handle_new_user()
-returns trigger as $$
+returns trigger as $
 begin
   insert into public.accounts (user_id, email)
   values (new.id, new.email);
   return new;
 end;
-$$ language plpgsql security definer;
+$ language plpgsql security definer;
 
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 </code></pre>
 <p>That one decision cleaned up the rest of the app. Signup does not need "create tenant" logic. The dashboard can assume an account exists. Stripe metadata can always point to a stable <code>account_id</code>.</p>
-<h3>2. push tenant isolation down into RLS</h3>
+<h3 id="2-push-tenant-isolation-down-into-rls"><a class="anchor" href="#2-push-tenant-isolation-down-into-rls" aria-label="Link to this section"></a>2. push tenant isolation down into RLS</h3>
 <p>The core tenant tables in Rebill are <code>accounts</code>, <code>connected_accounts</code>, <code>payment_events</code>, <code>email_sequences</code>, <code>email_sends</code>, and <code>recovery_stats</code>.</p>
 <p>The important part is that the browser-facing client never gets broad access. It gets an authenticated Supabase client plus RLS policies that enforce ownership.</p>
 <pre><code class="language-sql">alter table accounts enable row level security;
@@ -550,7 +592,7 @@ export function createAdminClient() {
 }
 </code></pre>
 <p>That line should never leak into client components. In Rebill it only exists in server routes.</p>
-<h3>3. separate platform billing from tenant billing</h3>
+<h3 id="3-separate-platform-billing-from-tenant-billing"><a class="anchor" href="#3-separate-platform-billing-from-tenant-billing" aria-label="Link to this section"></a>3. separate platform billing from tenant billing</h3>
 <p>This is the part a lot of examples blur together.</p>
 <p>Rebill has platform billing for its own plans, and tenant billing events coming from connected accounts. Those are different pipelines and they should stay different.</p>
 <p>For Rebill's own subscriptions, I create a Checkout Session against the platform Stripe account and store the app's <code>account_id</code> in Stripe metadata.</p>
@@ -594,7 +636,7 @@ export function createAdminClient() {
 <p>That webhook knows about the platform customer paying Rebill.</p>
 <p>The Stripe Connect webhook is a different story. That one knows about the founder's customers paying the founder.</p>
 <p>Keeping those paths separate removed a lot of confusion. One route updates my SaaS plans. The other route reacts to tenant events and schedules recovery work.</p>
-<h3>4. onboard tenants with Stripe Connect, not copied API keys</h3>
+<h3 id="4-onboard-tenants-with-stripe-connect-not-copied-api-keys"><a class="anchor" href="#4-onboard-tenants-with-stripe-connect-not-copied-api-keys" aria-label="Link to this section"></a>4. onboard tenants with Stripe Connect, not copied API keys</h3>
 <p>I did not want users pasting Stripe secret keys into Rebill. Stripe Connect gives you a better path.</p>
 <p>When a user clicks connect, Rebill creates a Standard connected account if one does not already exist, stores that Stripe account ID, and redirects the user to Stripe-hosted onboarding.</p>
 <pre><code class="language-ts">const stripeAccount = await stripe.accounts.create({
@@ -627,7 +669,7 @@ const accountLink = await stripe.accountLinks.create({
 <li>the user authorizes Stripe access in Stripe's own flow</li>
 <li>Rebill stores only the linked Stripe account ID plus app-specific configuration</li>
 </ul>
-<h3>5. consume tenant events through a dedicated Connect webhook</h3>
+<h3 id="5-consume-tenant-events-through-a-dedicated-connect-webhook"><a class="anchor" href="#5-consume-tenant-events-through-a-dedicated-connect-webhook" aria-label="Link to this section"></a>5. consume tenant events through a dedicated Connect webhook</h3>
 <p>This is where the multi-tenant part becomes real.</p>
 <p>The Connect webhook receives events from many connected accounts in one endpoint. Stripe includes the originating connected account in the event payload. That account ID is the bridge back to my tenant row.</p>
 <p>Two things matter here.</p>
@@ -713,14 +755,14 @@ await admin.from(&quot;email_sends&quot;).insert(emailSends);
 </code></pre>
 <p>That queue is processed later by a cron route that uses the admin client, fetches all due emails, sends them, and marks them as sent.</p>
 <p>That split is important. The webhook should ingest and enqueue. The cron should deliver. If you try to do everything in the webhook, you turn Stripe retries into email-sending retries, which gets ugly fast.</p>
-<h2>Pitfalls</h2>
+<h2 id="pitfalls"><a class="anchor" href="#pitfalls" aria-label="Link to this section"></a>Pitfalls</h2>
 <p>Here are the parts that were easy to get wrong.</p>
-<h3>1. "idempotent event storage" is not the same thing as "idempotent side effects"</h3>
+<h3 id="1-idempotent-event-storage-is-not-the-same-thing-as-idempotent-side-effects"><a class="anchor" href="#1-idempotent-event-storage-is-not-the-same-thing-as-idempotent-side-effects" aria-label="Link to this section"></a>1. "idempotent event storage" is not the same thing as "idempotent side effects"</h3>
 <p>This is the sharpest bug in the current Rebill code.</p>
 <p><code>payment_events</code> uses <code>stripe_event_id</code> as a unique key, which is good. But the queued emails are inserted every time the handler runs. If Stripe redelivers the same <code>invoice.payment_failed</code> event, the <code>upsert</code> is safe and the <code>email_sends</code> insert is not.</p>
 <p>That means duplicate webhook deliveries can schedule duplicate recovery emails.</p>
 <p>This is a classic billing bug because the event log looks correct while the side effect is not.</p>
-<h3>2. multi-account support is only half-finished</h3>
+<h3 id="2-multi-account-support-is-only-half-finished"><a class="anchor" href="#2-multi-account-support-is-only-half-finished" aria-label="Link to this section"></a>2. multi-account support is only half-finished</h3>
 <p>The pricing model says Starter supports 3 connected accounts and Pro supports unlimited. Some of the UI supports multiple connected accounts. But <code>/api/stripe/connect</code> still does this:</p>
 <pre><code class="language-ts">const { data: existing } = await admin
   .from(&quot;connected_accounts&quot;)
@@ -729,13 +771,13 @@ await admin.from(&quot;email_sends&quot;).insert(emailSends);
   .single();
 </code></pre>
 <p>That <code>.single()</code> means the route logic still thinks in terms of one connected account per tenant. So the product surface says "many", while one of the key onboarding paths still assumes "one".</p>
-<h3>3. service-role access needs a very hard boundary</h3>
+<h3 id="3-service-role-access-needs-a-very-hard-boundary"><a class="anchor" href="#3-service-role-access-needs-a-very-hard-boundary" aria-label="Link to this section"></a>3. service-role access needs a very hard boundary</h3>
 <p>RLS is doing real work here, but only because the admin client is confined to webhook and cron routes. The moment you start importing <code>createAdminClient()</code> into regular React components, your tenant story is done.</p>
 <p>The rule I settled on was simple: browser and SSR user paths use the authenticated Supabase client. Background jobs and webhooks use the service role. No crossover.</p>
-<h3>4. Stripe account state fields are easy to misread</h3>
+<h3 id="4-stripe-account-state-fields-are-easy-to-misread"><a class="anchor" href="#4-stripe-account-state-fields-are-easy-to-misread" aria-label="Link to this section"></a>4. Stripe account state fields are easy to misread</h3>
 <p>In the connect return flow, Rebill updates <code>livemode</code> using <code>stripeAccount.charges_enabled</code>. That is probably the wrong source of truth. <code>charges_enabled</code> tells you whether the account can charge, not whether the account is live mode.</p>
 <p>That bug is subtle because the field still changes, so it feels right until you actually need to distinguish test and live environments.</p>
-<h2>What I'd Change</h2>
+<h2 id="what-id-change"><a class="anchor" href="#what-id-change" aria-label="Link to this section"></a>What I'd Change</h2>
 <p>If I were hardening this version for a production team today, I would change five things.</p>
 <ul>
 <li>make email scheduling idempotent. I would add a <code>payment_event_id</code> foreign key to <code>email_sends</code> and a unique constraint like <code>(payment_event_id, step_index)</code>, or move scheduling into a transactional job keyed by the Stripe event ID.</li>

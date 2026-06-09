@@ -411,6 +411,37 @@
     }
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash", "item": "https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -429,6 +460,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -441,6 +473,19 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-use-what-you-already-have-check">The "use what you already have" check</a></li>
+          <li><a href="#why-not-web-speech-api-the-free-option">Why not Web Speech API (the "free" option)?</a></li>
+          <li><a href="#the-edge-function">The edge function</a></li>
+          <li><a href="#per-user-rate-limit-so-one-bad-faith-account-cant-burn-your-credits">Per-user rate limit (so one bad-faith account can't burn your credits)</a></li>
+          <li><a href="#browser-side">Browser side</a></li>
+          <li><a href="#what-i-keep-on-disk-vs-throw-away">What I keep on disk vs throw away</a></li>
+          <li><a href="#tldr-cost-comparison-at-the-scale-of-one-happy-user">TL;DR cost comparison at the scale of one happy user</a></li>
+        </ul>
+      </nav>
+
 
       <p>I'm building a journaling app where the killer feature is: yap your thoughts into your phone, get back clean text that an AI can organise later. Speech-to-text is the most-trafficked path in the product, so the cost math matters from day one.</p>
 
@@ -450,7 +495,7 @@
 
       <p>Here's exactly what I did, the full edge function, and why I rejected the more obvious choices.</p>
 
-      <h2>The "use what you already have" check</h2>
+      <h2 id="the-use-what-you-already-have-check"><a class="anchor" href="#the-use-what-you-already-have-check" aria-label="Link to this section"></a>The "use what you already have" check</h2>
 
       <p>Before picking a transcription provider, I looked at what was already wired in:</p>
 
@@ -465,7 +510,7 @@
 
       <p>It can. Gemini 2.5 Flash accepts audio inputs natively as multimodal parts. Same <code>generateContent</code> endpoint that my existing AI features use, just with an <code>inline_data</code> part that carries the audio bytes.</p>
 
-      <h2>Why not Web Speech API (the "free" option)?</h2>
+      <h2 id="why-not-web-speech-api-the-free-option"><a class="anchor" href="#why-not-web-speech-api-the-free-option" aria-label="Link to this section"></a>Why not Web Speech API (the "free" option)?</h2>
 
       <p>The browser actually ships a <code>SpeechRecognition</code> API. It's free. So why not use that?</p>
 
@@ -479,7 +524,7 @@
 
       <p>Native mobile is different. <code>expo-speech-recognition</code> runs on-device using iOS Speech and Android SpeechRecognizer. That's free and local and good. So my architecture is hybrid: native STT on mobile, Gemini on web.</p>
 
-      <h2>The edge function</h2>
+      <h2 id="the-edge-function"><a class="anchor" href="#the-edge-function" aria-label="Link to this section"></a>The edge function</h2>
 
       <p>Here's the meaningful core. Full file is ~200 lines; I've stripped boilerplate.</p>
 
@@ -583,7 +628,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 
       <p><strong>The prompt.</strong> You'd be surprised how often the model wants to add commentary like "Here's the transcript:". Insisting on "ONLY the words spoken" with normal punctuation cuts this down to near-zero. Setting <code>temperature: 0.2</code> further pins it.</p>
 
-      <h2>Per-user rate limit (so one bad-faith account can't burn your credits)</h2>
+      <h2 id="per-user-rate-limit-so-one-bad-faith-account-cant-burn-your-credits"><a class="anchor" href="#per-user-rate-limit-so-one-bad-faith-account-cant-burn-your-credits" aria-label="Link to this section"></a>Per-user rate limit (so one bad-faith account can't burn your credits)</h2>
 
       <p>The version of the function above will happily transcribe any audio you throw at it, indefinitely, until your Gemini bill goes vertical. For a public app you need a per-user budget.</p>
 
@@ -661,7 +706,7 @@ if (bytesUsed + audio.size &gt; DAILY_BYTES_LIMIT) {
 
       <p>For my own usage (~5 voice notes/day at 30 seconds each) the actual Gemini bill is about $0.06/month. The 50/100 MB cap is generous-honest, tight-enough-to-not-bleed.</p>
 
-      <h2>Browser side</h2>
+      <h2 id="browser-side"><a class="anchor" href="#browser-side" aria-label="Link to this section"></a>Browser side</h2>
 
       <p>The web client is a thin wrapper around <code>MediaRecorder</code>:</p>
 
@@ -698,7 +743,7 @@ recorder.start();</code></pre>
         <li><strong>Permission fail messages.</strong> <code>getUserMedia</code> rejects with <code>NotAllowedError</code> when the user denied mic access, <code>SecurityError</code> on insecure context. Handle them with friendlier copy than "DOMException: blah blah".</li>
       </ul>
 
-      <h2>What I keep on disk vs throw away</h2>
+      <h2 id="what-i-keep-on-disk-vs-throw-away"><a class="anchor" href="#what-i-keep-on-disk-vs-throw-away" aria-label="Link to this section"></a>What I keep on disk vs throw away</h2>
 
       <p>This is a journaling app, so privacy matters more than typical voice apps. My defaults:</p>
 
@@ -708,7 +753,7 @@ recorder.start();</code></pre>
         <li><strong>Provenance flag</strong>: <code>metadata.transcription_source</code> is one of <code>gemini_flash</code>, <code>native_ios</code>, <code>native_android</code>, <code>manual</code>. Useful for later analysis ("are users on the native STT path getting better quality?") and for an honest UI badge.</li>
       </ul>
 
-      <h2>TL;DR cost comparison at the scale of one happy user</h2>
+      <h2 id="tldr-cost-comparison-at-the-scale-of-one-happy-user"><a class="anchor" href="#tldr-cost-comparison-at-the-scale-of-one-happy-user" aria-label="Link to this section"></a>TL;DR cost comparison at the scale of one happy user</h2>
 
       <p>5 voice entries per day, 30 seconds each = 2.5 minutes per day per user.</p>
 

@@ -426,6 +426,37 @@
     }
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.", "item": "https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -444,6 +475,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -456,6 +488,17 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-setup">The setup</a></li>
+          <li><a href="#what-it-found">What it found</a></li>
+          <li><a href="#what-it-didnt-catch">What it didn't catch</a></li>
+          <li><a href="#interview-readiness-changed-in-one-afternoon">Interview readiness changed in one afternoon</a></li>
+          <li><a href="#the-prompt-template">The prompt template</a></li>
+        </ul>
+      </nav>
+
 
 <p>User interviews are expensive in a way your analytics dashboard never shows.</p>
 
@@ -467,7 +510,7 @@
 
 <p>So before I talked to anyone, I ran a frontend QA agent against the live product with one question: would a new user survive the first five minutes?</p>
 
-<h2>The setup</h2>
+<h2 id="the-setup"><a class="anchor" href="#the-setup" aria-label="Link to this section"></a>The setup</h2>
 
 <p>Not a code review. I didn't want lint. I wanted first-contact truth.</p>
 
@@ -486,9 +529,9 @@
 
 <p>It didn't tell me "this React component is messy." It told me "your first 30 seconds are lying about what the product is."</p>
 
-<h2>What it found</h2>
+<h2 id="what-it-found"><a class="anchor" href="#what-it-found" aria-label="Link to this section"></a>What it found</h2>
 
-<h3>1. The landing page and the app were selling two different products</h3>
+<h3 id="1-the-landing-page-and-the-app-were-selling-two-different-products"><a class="anchor" href="#1-the-landing-page-and-the-app-were-selling-two-different-products" aria-label="Link to this section"></a>1. The landing page and the app were selling two different products</h3>
 
 <p>The landing page said Arc was "An AI that reads your whole story and shows you who you're becoming."</p>
 
@@ -502,7 +545,7 @@
 
 <p>This is exactly the thing a founder stops seeing because both versions sound reasonable in isolation. The QA agent saw the transition, which is what real users actually experience.</p>
 
-<h3>2. Four core routes were dead</h3>
+<h3 id="2-four-core-routes-were-dead"><a class="anchor" href="#2-four-core-routes-were-dead" aria-label="Link to this section"></a>2. Four core routes were dead</h3>
 
 <p>The QA brief told the agent to try Mirror, Constellation, River of Time, Compose, Focus Mode, and Cmd+K.</p>
 
@@ -514,7 +557,7 @@
 
 <p>The agent didn't just say "some routes are broken." It gave exact paths, exact repro steps, exact screenshots. That turned the fix list into a shipping list.</p>
 
-<h3>3. Interview analytics were silently dead</h3>
+<h3 id="3-interview-analytics-were-silently-dead"><a class="anchor" href="#3-interview-analytics-were-silently-dead" aria-label="Link to this section"></a>3. Interview analytics were silently dead</h3>
 
 <p>This one wasn't visual, but it was probably the highest-value catch.</p>
 
@@ -526,7 +569,7 @@
 
 <p>That's the difference between "I think the analytics bug is gone" and "the live site is clean."</p>
 
-<h3>4. Empty states made the product look dead</h3>
+<h3 id="4-empty-states-made-the-product-look-dead"><a class="anchor" href="#4-empty-states-made-the-product-look-dead" aria-label="Link to this section"></a>4. Empty states made the product look dead</h3>
 
 <p>The test account was deliberately below the 10-entry threshold that makes Arc's graph and reflection surfaces interesting.</p>
 
@@ -542,7 +585,7 @@
 
 <p>That single change is a good example of why QA agents are useful for onboarding work. They're ruthless about the emotional read of a screen. Users won't say "your threshold logic needs a better intermediate state." They'll say "I opened the graph and it looked empty."</p>
 
-<h3>5. The landing page had a proof gap right above pricing</h3>
+<h3 id="5-the-landing-page-had-a-proof-gap-right-above-pricing"><a class="anchor" href="#5-the-landing-page-had-a-proof-gap-right-above-pricing" aria-label="Link to this section"></a>5. The landing page had a proof gap right above pricing</h3>
 
 <p>The agent also caught something I'd mentally filed under "design polish" but was really a trust problem.</p>
 
@@ -552,7 +595,7 @@
 
 <p>That one didn't block interviews the way the route failures did. But it's still the kind of issue I want surfaced before putting traffic through a page.</p>
 
-<h2>What it didn't catch</h2>
+<h2 id="what-it-didnt-catch"><a class="anchor" href="#what-it-didnt-catch" aria-label="Link to this section"></a>What it didn't catch</h2>
 
 <p>This matters.</p>
 
@@ -564,7 +607,7 @@
 
 <p>The point isn't to replace interviews. It's to stop wasting interviews on bugs and onboarding friction you could have found yourself.</p>
 
-<h2>Interview readiness changed in one afternoon</h2>
+<h2 id="interview-readiness-changed-in-one-afternoon"><a class="anchor" href="#interview-readiness-changed-in-one-afternoon" aria-label="Link to this section"></a>Interview readiness changed in one afternoon</h2>
 
 <p>The first report's verdict: two focused hours of fixes, then go.</p>
 
@@ -585,7 +628,7 @@
 
 <p>Don't run a QA agent so you can admire the report. Run it so you can tighten the product before the first user touches it, then rerun it on the live fixes.</p>
 
-<h2>The prompt template</h2>
+<h2 id="the-prompt-template"><a class="anchor" href="#the-prompt-template" aria-label="Link to this section"></a>The prompt template</h2>
 
 <p>This is the exact structure I used, with private details swapped for placeholders. Works against any deployed Next.js app or web product.</p>
 

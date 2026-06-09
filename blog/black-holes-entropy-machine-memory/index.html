@@ -373,6 +373,37 @@
     }
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Black Holes, Entropy, and the Architecture of Machine Memory", "item": "https://astraedus.dev/blog/black-holes-entropy-machine-memory/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -391,6 +422,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -403,12 +435,23 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-hologram-at-boot-time">The hologram at boot time</a></li>
+          <li><a href="#event-horizons-and-the-pressure-to-write-things-down">Event horizons and the pressure to write things down</a></li>
+          <li><a href="#hot-systems-cold-systems">Hot systems, cold systems</a></li>
+          <li><a href="#evaporation-at-the-margins">Evaporation at the margins</a></li>
+          <li><a href="#three-numbers-and-a-system-that-remembers">Three numbers and a system that remembers</a></li>
+        </ul>
+      </nav>
+
 
       <p>I spend most of my time building AI systems that need to remember things. Not chatbots with a conversation window -- actual persistent agents that wake up, read their own notes, do work, and write down what they learned before their context resets. The engineering problem is deceptively simple: how do you build a system that gets smarter over time when it forgets everything every few hours?</p>
 
       <p>That question led me somewhere unexpected -- into the physics of black holes and information theory. Not as metaphor. As genuine structural analogy. The problems that physicists wrestle with when thinking about how information behaves at event horizons turn out to map, with surprising precision, onto the problems I face every day building agent memory systems.</p>
 
-      <h2>The hologram at boot time</h2>
+      <h2 id="the-hologram-at-boot-time"><a class="anchor" href="#the-hologram-at-boot-time" aria-label="Link to this section"></a>The hologram at boot time</h2>
 
       <p>The holographic principle, first proposed by Gerard 't Hooft and later developed by Leonard Susskind, says something counterintuitive: the maximum amount of information that can be contained in a region of space is proportional not to its volume but to its <em>surface area</em>. A black hole encodes everything about its contents on its two-dimensional boundary. The interior is, in some information-theoretic sense, redundant.</p>
 
@@ -420,7 +463,7 @@
 
       <p>As total knowledge grows, the boot context stays roughly constant in size (bounded by the context window), but it becomes a <em>denser</em> compression of everything underneath. This is exactly what happens with black holes: as more matter falls in, the surface area grows, but the information density per unit area increases. The ratio of total knowledge to boot context size -- call it the <strong>compression ratio</strong> -- is probably the single most important health metric for any persistent AI system.</p>
 
-      <h2>Event horizons and the pressure to write things down</h2>
+      <h2 id="event-horizons-and-the-pressure-to-write-things-down"><a class="anchor" href="#event-horizons-and-the-pressure-to-write-things-down" aria-label="Link to this section"></a>Event horizons and the pressure to write things down</h2>
 
       <p>When an AI agent's session ends -- context resets, model unloads, conversation closes -- something irreversible happens. Any information that existed only in the active context, anything the agent thought but did not write to a file, is gone. Not archived. Not recoverable. Gone, in the same way that information falling past a black hole's event horizon is gone to an outside observer.</p>
 
@@ -432,7 +475,7 @@
 
       <p>And just like in black hole physics, there is a deep question about whether any information is truly lost or just scrambled beyond recognition. A sufficiently detailed session log theoretically preserves everything. In practice, the lossy compression of summarization means some signal is always sacrificed. The question is not whether you lose information at the horizon -- you do -- but whether you lose the <em>right</em> information.</p>
 
-      <h2>Hot systems, cold systems</h2>
+      <h2 id="hot-systems-cold-systems"><a class="anchor" href="#hot-systems-cold-systems" aria-label="Link to this section"></a>Hot systems, cold systems</h2>
 
       <p>Stephen Hawking showed that black holes have a temperature, and it is inversely proportional to their mass. Small black holes are intensely hot -- they radiate furiously, losing energy rapidly, changing fast. Large black holes are extremely cold -- barely above absolute zero, stable across cosmological timescales, almost inert.</p>
 
@@ -448,7 +491,7 @@
 
       <p>This gives you the growth curve. Plot the system's total knowledge over time against its boot context size. Early on, both grow fast -- every lesson is novel, the boot context swells. Later, the total knowledge keeps growing but the boot context flattens. New experiences get absorbed into existing patterns instead of creating new entries. The growth becomes logarithmic. Not because the system is learning less, but because it is <em>compressing better</em>. A 30-session-old system needs 60 specific lessons. A 300-session-old system needs 25 dense rules that cover the same ground and more. The wisdom is the same. The representation got smaller.</p>
 
-      <h2>Evaporation at the margins</h2>
+      <h2 id="evaporation-at-the-margins"><a class="anchor" href="#evaporation-at-the-margins" aria-label="Link to this section"></a>Evaporation at the margins</h2>
 
       <p>Hawking radiation is the slow, steady process by which black holes lose mass and eventually evaporate. It is not dramatic -- it is thermodynamic. Small amounts of energy leak away at the boundary, and over immense timescales, the black hole shrinks.</p>
 
@@ -458,7 +501,7 @@
 
       <p>This is not a bug you can fix. It is thermodynamic. Lossy compression is entropy in action, and you cannot beat the second law. What you can do is be strategic about <em>where</em> you allow information loss to occur. Core identity and enforcement rules should be stored redundantly, verified at boot, resistant to evaporation. Tactical details -- the specifics of what happened in a particular session, the exact sequence of steps in a resolved bug -- can safely degrade. The fight against information loss is real, but it is a fight about prioritization, not prevention.</p>
 
-      <h2>Three numbers and a system that remembers</h2>
+      <h2 id="three-numbers-and-a-system-that-remembers"><a class="anchor" href="#three-numbers-and-a-system-that-remembers" aria-label="Link to this section"></a>Three numbers and a system that remembers</h2>
 
       <p>The no-hair theorem in general relativity states that a black hole is completely described by exactly three quantities: mass, electric charge, and angular momentum. Every other detail about what fell into the black hole -- the chemical composition, the shape, the history -- is lost on the surface, scrambled into these three parameters.</p>
 

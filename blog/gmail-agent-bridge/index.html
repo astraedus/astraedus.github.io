@@ -411,6 +411,37 @@
     "datePublished": "2026-05-05"
 }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)", "item": "https://astraedus.dev/blog/gmail-agent-bridge/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
 </head>
 <body>
 
@@ -429,6 +460,7 @@
 <article>
   <div class="container">
 
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
     <header class="article-header">
       <a href="/blog" class="back-link">Back to blog</a>
       <div class="article-meta">
@@ -441,6 +473,24 @@
     </header>
 
     <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#step-1-set-up-pubsub">Step 1: Set up Pub/Sub</a></li>
+          <li><a href="#step-2-register-the-gmail-watch">Step 2: Register the Gmail watch</a></li>
+          <li><a href="#step-3-the-receiver">Step 3: The receiver</a></li>
+          <li><a href="#step-4-history-walking">Step 4: History walking</a></li>
+          <li><a href="#step-5-classification-the-useful-part">Step 5: Classification (the useful part)</a></li>
+          <li><a href="#step-6-fan-out">Step 6: Fan-out</a></li>
+          <li><a href="#the-tunnel-cloudflare-free-stable">The tunnel: Cloudflare (free, stable)</a></li>
+          <li><a href="#failure-handling">Failure handling</a></li>
+          <li><a href="#results">Results</a></li>
+          <li><a href="#what-i-would-do-differently">What I would do differently</a></li>
+          <li><a href="#the-code">The code</a></li>
+        </ul>
+      </nav>
+
 
 <p>I missed a prize-notification email by 24 hours because my AI agent only checked Gmail when it booted. The email needed a response within 48 hours. I had 24 left by the time the next session started. That gap nearly cost me real money.</p>
 
@@ -456,7 +506,7 @@
 
 <p>Here's what I built.</p>
 
-<h2>Architecture</h2>
+<h2 id="architecture"><a class="anchor" href="#architecture" aria-label="Link to this section"></a>Architecture</h2>
 
 <pre><code>Gmail (your-email@gmail.com)
   | users.watch() -- renew daily, 7d max expiry
@@ -476,7 +526,7 @@ Python receiver (aiohttp)
 
 <p>The key insight: Gmail's <code>users.watch()</code> method tells Google "push a notification to this Pub/Sub topic whenever this mailbox changes." Google handles the watching. You handle the reacting.</p>
 
-<h2>Step 1: Set up Pub/Sub</h2>
+<h2 id="step-1-set-up-pubsub"><a class="anchor" href="#step-1-set-up-pubsub" aria-label="Link to this section"></a>Step 1: Set up Pub/Sub</h2>
 
 <pre><code># Create topic and subscription
 gcloud pubsub topics create gmail-notifications
@@ -493,7 +543,7 @@ gcloud pubsub topics add-iam-policy-binding gmail-notifications \
 
 <p>Cost: $0. First 10 GiB/month of Pub/Sub throughput is free. Email notifications are tiny.</p>
 
-<h2>Step 2: Register the Gmail watch</h2>
+<h2 id="step-2-register-the-gmail-watch"><a class="anchor" href="#step-2-register-the-gmail-watch" aria-label="Link to this section"></a>Step 2: Register the Gmail watch</h2>
 
 <pre><code>from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -518,7 +568,7 @@ print(f"Watch expires: {result['expiration']}")
   <li>If the watch silently expires (your renewal cron missed a day), you lose notifications until renewal. Build a staleness check.</li>
 </ul>
 
-<h2>Step 3: The receiver</h2>
+<h2 id="step-3-the-receiver"><a class="anchor" href="#step-3-the-receiver" aria-label="Link to this section"></a>Step 3: The receiver</h2>
 
 <p>The receiver is a tiny aiohttp server. When Pub/Sub pushes a notification, it tells you "the mailbox changed" but not what changed. You have to walk the history yourself.</p>
 
@@ -553,7 +603,7 @@ async def handle_pubsub(request: web.Request) -&gt; web.Response:
 
 <p>The critical pattern: <strong>ACK fast, process async.</strong> If your handler takes more than 10 seconds, Pub/Sub assumes delivery failed and retries. This creates duplicate processing unless you dedupe. Return 204 immediately, do the expensive work in a background task.</p>
 
-<h2>Step 4: History walking</h2>
+<h2 id="step-4-history-walking"><a class="anchor" href="#step-4-history-walking" aria-label="Link to this section"></a>Step 4: History walking</h2>
 
 <p>Gmail notifications only say "something changed at historyId X." You need to find out what actually changed by walking the history since your last-seen ID.</p>
 
@@ -592,7 +642,7 @@ except HttpError as e:
     else:
         raise</code></pre>
 
-<h2>Step 5: Classification (the useful part)</h2>
+<h2 id="step-5-classification-the-useful-part"><a class="anchor" href="#step-5-classification-the-useful-part" aria-label="Link to this section"></a>Step 5: Classification (the useful part)</h2>
 
 <p>Raw email delivery is not enough. You need routing. My classifier uses a YAML rules file that hot-reloads on every call (no restart needed to add rules):</p>
 
@@ -627,7 +677,7 @@ except HttpError as e:
 
 <p>First match wins. The engine processes 10 rules in under 1ms. No need for a proper NLP pipeline here.</p>
 
-<h2>Step 6: Fan-out</h2>
+<h2 id="step-6-fan-out"><a class="anchor" href="#step-6-fan-out" aria-label="Link to this section"></a>Step 6: Fan-out</h2>
 
 <p>After classification, messages route to different outputs:</p>
 
@@ -645,7 +695,7 @@ write_thread_file(f"~/ops/threads/email/{thread_id}.md", message)</code></pre>
 
 <p>Each thread gets its own markdown file with frontmatter. This makes them searchable, greppable, and compatible with tools like Obsidian.</p>
 
-<h2>The tunnel: Cloudflare (free, stable)</h2>
+<h2 id="the-tunnel-cloudflare-free-stable"><a class="anchor" href="#the-tunnel-cloudflare-free-stable" aria-label="Link to this section"></a>The tunnel: Cloudflare (free, stable)</h2>
 
 <p>Google Pub/Sub needs a public HTTPS endpoint. Options:</p>
 
@@ -688,7 +738,7 @@ cloudflared tunnel route dns gmail-bridge your-hook.example.com
 # Then create a systemd unit that runs:
 # cloudflared tunnel run gmail-bridge</code></pre>
 
-<h2>Failure handling</h2>
+<h2 id="failure-handling"><a class="anchor" href="#failure-handling" aria-label="Link to this section"></a>Failure handling</h2>
 
 <p>The architecture has natural resilience built in:</p>
 
@@ -729,7 +779,7 @@ cloudflared tunnel route dns gmail-bridge your-hook.example.com
 
 <p>The entire system can be down for a week and recover automatically because Pub/Sub holds undelivered messages for 7 days.</p>
 
-<h2>Results</h2>
+<h2 id="results"><a class="anchor" href="#results" aria-label="Link to this section"></a>Results</h2>
 
 <ul>
   <li><strong>Latency</strong>: sub-5 seconds from Gmail receiving the email to the file appearing on disk</li>
@@ -741,7 +791,7 @@ cloudflared tunnel route dns gmail-bridge your-hook.example.com
 
 <p>The classification system has already caught a Devpost prize email within seconds instead of the 24-hour gap that motivated this build. Telegram pings for urgent items, quiet digest for everything else.</p>
 
-<h2>What I would do differently</h2>
+<h2 id="what-i-would-do-differently"><a class="anchor" href="#what-i-would-do-differently" aria-label="Link to this section"></a>What I would do differently</h2>
 
 <ol>
   <li><strong>Start with the classification rules, not the infrastructure.</strong> I spent 2 hours on Pub/Sub setup before thinking about what to do with the emails. Should have designed the rules first.</li>
@@ -749,7 +799,7 @@ cloudflared tunnel route dns gmail-bridge your-hook.example.com
   <li><strong>Hot-reload from the start.</strong> Editing rules + restarting the service is friction. YAML hot-reload (just re-read the file on every classification call) costs nothing and removes the restart step entirely.</li>
 </ol>
 
-<h2>The code</h2>
+<h2 id="the-code"><a class="anchor" href="#the-code" aria-label="Link to this section"></a>The code</h2>
 
 <p>The full implementation is ~300 lines across 4 files:</p>
 <ul>
