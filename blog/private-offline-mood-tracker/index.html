@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A mood tracker shouldn't need an account or the cloud | Diven Rastdus</title>
+  <meta name="description" content="A private, offline mood tracker with no account and no cloud. How SoulSync keeps 100% of your data on device with SQLite, on-device photos, and JSON export you own.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/private-offline-mood-tracker/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="A mood tracker shouldn't need an account or the cloud">
+  <meta property="og:description" content="How a private, offline mood tracker keeps 100% of your data on device, with SQLite, on-device photos, and JSON export you own.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/private-offline-mood-tracker/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/soulsync/assets/feature-graphic.png">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="500">
+  <meta property="article:published_time" content="2026-06-20">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="A mood tracker shouldn't need an account or the cloud">
+  <meta name="twitter:description" content="How a private, offline mood tracker keeps 100% of your data on device, with SQLite, on-device photos, and JSON export you own.">
+  <meta name="twitter:image" content="https://astraedus.dev/soulsync/assets/feature-graphic.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .article-body figure { margin: 32px 0; }
+    .article-body figure img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      display: block;
+      margin: 0 auto;
+    }
+    .article-body figcaption {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "A mood tracker shouldn't need an account or the cloud",
+    "description": "A private, offline mood tracker with no account and no cloud. How SoulSync keeps 100% of your data on device with SQLite, on-device photos, and JSON export you own.",
+    "url": "https://astraedus.dev/blog/private-offline-mood-tracker/",
+    "image": "https://astraedus.dev/soulsync/assets/feature-graphic.png",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "datePublished": "2026-06-20"
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "A mood tracker shouldn't need an account or the cloud", "item": "https://astraedus.dev/blog/private-offline-mood-tracker/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "A mood tracker shouldn't need an account or the cloud", "item": "https://astraedus.dev/blog/private-offline-mood-tracker/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">June 20, 2026</span>
+        <span class="article-tag">Privacy</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>A mood tracker shouldn't need an account or the cloud</h1>
+      <p class="article-lede">Your moods are about the most private data you can produce. So why does logging them so often mean creating an account and shipping them to someone else's server? It doesn't have to.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-account-is-the-problem-not-a-feature">The account is the problem, not a feature</a></li>
+          <li><a href="#where-your-soulsync-data-actually-lives">Where your SoulSync data actually lives</a></li>
+          <li><a href="#json-export-means-you-actually-own-it">JSON export means you actually own it</a></li>
+          <li><a href="#offline-is-the-normal-state-not-a-fallback">Offline is the normal state, not a fallback</a></li>
+          <li><a href="#try-it">Try it</a></li>
+        </ul>
+      </nav>
+
+
+<p>Think about what's in a mood log after a few months. The days you fell apart. The thing that keeps setting you off. The pattern around a specific person. Read end to end, it's a more honest record of your inner life than anything else on your phone.</p>
+
+<p>Now look at how most apps want you to store it. Make an account. Agree to a privacy policy you won't read. Let it sync to a server so you can "access it anywhere." Trust that the company stays solvent, stays unhacked, and stays honest about what it does with the data.</p>
+
+<p>That's a lot of trust to spend on a place to write down that you felt low on a Tuesday.</p>
+
+<hr>
+
+<h2 id="the-account-is-the-problem-not-a-feature"><a class="anchor" href="#the-account-is-the-problem-not-a-feature" aria-label="Link to this section"></a>The account is the problem, not a feature</h2>
+
+<p>An account sounds like convenience. What it actually is, is a copy of your data living somewhere you don't control, tied to your identity, behind a login that can be breached, locked, or subpoenaed.</p>
+
+<p>Every account is a second copy of the most sensitive thing you've written, sitting on hardware you've never seen. The app doesn't need that copy to do its job. You need it to log a mood and read your trends. None of that requires a server knowing who you are.</p>
+
+<p>So when I built <a href="/soulsync/">SoulSync</a>, the first decision was the easiest one: no account. You open the app and start. There's nothing to sign up for because there's nothing on the other end to sign up to.</p>
+
+<hr>
+
+<h2 id="where-your-soulsync-data-actually-lives"><a class="anchor" href="#where-your-soulsync-data-actually-lives" aria-label="Link to this section"></a>Where your SoulSync data actually lives</h2>
+
+<p>On your phone. That's the whole answer, but it's worth being specific about the parts.</p>
+
+<h3 id="entries-in-local-sqlite"><a class="anchor" href="#entries-in-local-sqlite" aria-label="Link to this section"></a>Entries in local SQLite</h3>
+
+<p>Every mood entry, every note, every activity tag goes into a SQLite database in the app's private storage on your device. SQLite is the same boring, battle-tested database that runs inside your browser and most of the apps you already use. It's a file. It sits on your phone. It does not phone home.</p>
+
+<h3 id="photos-stay-on-device-too"><a class="anchor" href="#photos-stay-on-device-too" aria-label="Link to this section"></a>Photos stay on device too</h3>
+
+<p>You can attach a photo to an entry. That photo also stays local. It is not uploaded, not mirrored to a bucket, not run through anyone's image pipeline. The picture of your dog on a good day is between you and your phone.</p>
+
+<h3 id="no-tracking-no-ads-no-analytics"><a class="anchor" href="#no-tracking-no-ads-no-analytics" aria-label="Link to this section"></a>No tracking, no ads, no analytics</h3>
+
+<p>There's no analytics SDK counting your taps and no ad network watching what you do. Those are the usual quiet channels through which "free" apps move data around. SoulSync doesn't have them. It's free for a different reason, which is that it's open source, not because you're the product.</p>
+
+<figure>
+  <img src="/soulsync/assets/02-stats-heatmap.png" alt="SoulSync mood heatmap computed entirely on device" loading="lazy">
+  <figcaption>The heatmap is computed on your phone, from your local database</figcaption>
+</figure>
+
+<hr>
+
+<h2 id="json-export-means-you-actually-own-it"><a class="anchor" href="#json-export-means-you-actually-own-it" aria-label="Link to this section"></a>JSON export means you actually own it</h2>
+
+<p>Local-first has one fair objection: if it's only on my phone, what happens when I lose my phone? Good question, and the answer is that owning your data means being able to move it.</p>
+
+<p>SoulSync has JSON import and export built in. Your whole history is a plain file you can pull out whenever you want. Back it up to wherever you trust. Move it to a new device. Open it in a script if you're that kind of person. Or delete it, completely, with no copy left behind on a server because there was never a copy on a server.</p>
+
+<p>That's a different kind of ownership than "you can export a PDF if you pay." You hold the actual data, in a format you can read, with no gatekeeper.</p>
+
+<hr>
+
+<h2 id="offline-is-the-normal-state-not-a-fallback"><a class="anchor" href="#offline-is-the-normal-state-not-a-fallback" aria-label="Link to this section"></a>Offline is the normal state, not a fallback</h2>
+
+<p>Because everything runs locally, SoulSync works on a plane, in a tunnel, with the wifi off, on a dead SIM. There's no loading spinner waiting on a server, no "you're offline" screen, no degraded mode. Offline isn't a fallback the app limps along in. It's just how it always works.</p>
+
+<p>Which, when you think about it, is how a private journal should behave. The notebook in your drawer doesn't need a connection either.</p>
+
+<hr>
+
+<h2 id="try-it"><a class="anchor" href="#try-it" aria-label="Link to this section"></a>Try it</h2>
+
+<p>SoulSync is open source under GPL-3.0, with the code public at <a href="https://github.com/Antimatter543/mood-tracker">github.com/Antimatter543/mood-tracker</a>, so the privacy claims here are checkable, not just stated.</p>
+
+<p>It's Android-only for now, with the Play Store listing on the way. <a href="https://github.com/Antimatter543/mood-tracker/releases/latest">Grab the APK from the latest release</a> and your first entry never leaves your phone. If you came from a paid tracker, I wrote about that move in <a href="/blog/free-daylio-alternative-open-source/">building a free, open-source Daylio alternative</a>, and about the pricing side in <a href="/blog/mood-tracker-no-subscription/">why mental-health tracking behind a subscription is backwards</a>.</p>
+
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build private, local-first software and the autonomous systems that ship it. SoulSync is the free one. The links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="/soulsync/">SoulSync</a>
+        <a href="https://github.com/Antimatter543/mood-tracker/releases/latest" target="_blank" rel="noopener">Download APK</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
