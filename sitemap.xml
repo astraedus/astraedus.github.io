@@ -25,6 +25,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://astraedus.dev/blog/bearable-alternative-free-open-source/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://astraedus.dev/blog/free-daylio-alternative-open-source/</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
