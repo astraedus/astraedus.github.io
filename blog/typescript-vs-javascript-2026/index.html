@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly | Diven Rastdus</title>
+  <meta name="description" content="Use TypeScript for code you keep and JavaScript for code you toss. Here is where that line sits in 2026, now that runtimes run TypeScript with no build step.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/typescript-vs-javascript-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly">
+  <meta property="og:description" content="Use TypeScript for code you keep and JavaScript for code you toss. Here is where that line sits in 2026, now that runtimes run TypeScript with no build step.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/typescript-vs-javascript-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-29">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly">
+  <meta name="twitter:description" content="Use TypeScript for code you keep and JavaScript for code you toss. Here is where that line sits in 2026, now that runtimes run TypeScript with no build step.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly",
+      "description": "Use TypeScript for code you keep and JavaScript for code you toss. Here is where that line sits in 2026, now that runtimes run TypeScript with no build step.",
+      "url": "https://astraedus.dev/blog/typescript-vs-javascript-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/typescript-vs-javascript-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-29",
+      "dateModified": "2026-06-29",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What changed in 2025: your runtime reads TypeScript",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The build step is mostly gone. Node 23.6 made native type stripping work with no flag, so node app.ts runs without tsc, ts-node, or a bundler."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "TypeScript earns its keep when code outlives the week",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript wins the moment more than one person, or more than one week, touches the code. The payoff is not \"fewer bugs\" in the abstract."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When the type tax is not worth paying",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Plain JavaScript still wins for code with a short life and a single author. A thirty line script does not earn a tsconfig.json, a pile of @types packages, and a fight with a generic."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The two languages are converging",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript and JavaScript are growing toward each other, not apart. The clearest signal is a flag added in TypeScript 5.8: erasableSyntaxOnly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "So which should you use in 2026?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Default to TypeScript for anything you will maintain, and reach for plain JavaScript or JSDoc for anything you will not. The decision is about lifespan and blast radius, not ideology."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly", "item": "https://astraedus.dev/blog/typescript-vs-javascript-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 29, 2026</span>
+        <span class="article-tag">Typescript</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>TypeScript vs JavaScript in 2026: Now That Node Runs .ts Files Directly</h1>
+      <p class="article-lede">Use TypeScript for code you will still run next month. Use plain JavaScript for code you will throw away by Friday. That is the whole answer, and it has been the answer for a while.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#what-changed-in-2025-your-runtime-reads-typescript">What changed in 2025: your runtime reads TypeScript</a></li>
+          <li><a href="#typescript-earns-its-keep-when-code-outlives-the-week">TypeScript earns its keep when code outlives the week</a></li>
+          <li><a href="#when-the-type-tax-is-not-worth-paying">When the type tax is not worth paying</a></li>
+          <li><a href="#the-two-languages-are-converging">The two languages are converging</a></li>
+          <li><a href="#so-which-should-you-use-in-2026">So which should you use in 2026?</a></li>
+        </ul>
+      </nav>
+
+      <p>The part worth reading is where that line sits in 2026, because it moved. Bun and Deno have run TypeScript directly for years. In late 2024 and into 2025, Node finally caught up and joined them. That quietly deleted the single biggest reason people reached for plain JavaScript: getting started fast.</p>
+      <p>I ship mobile and web apps in TypeScript and reach for plain JavaScript on quick scripts. The decision shows up every time I create a file. Here is how I make the call now, and why the two languages are closer than they have ever been.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Pick by lifespan: throwaway code maps to plain JavaScript, revisited code to JavaScript plus JSDoc, maintained code to TypeScript" src="https://i.imgur.com/lRZgQlF.png"></p>
+      <h2 id="what-changed-in-2025-your-runtime-reads-typescript"><a class="anchor" href="#what-changed-in-2025-your-runtime-reads-typescript" aria-label="Link to this section"></a>What changed in 2025: your runtime reads TypeScript</h2>
+      <p>The build step is mostly gone. Node 23.6 made native type stripping work with no flag, so <code>node app.ts</code> runs without <code>tsc</code>, <code>ts-node</code>, or a bundler. Recent Node 22 LTS builds do it too.</p>
+      <p>Here is the whole setup:</p>
+      <pre><code class="language-bash"># Node 22.6 added --experimental-strip-types.
+      # Node 23.6 made it the default. This just works:
+      node app.ts
+      </code></pre>
+      <p>Type stripping does exactly what the name says. It removes the type annotations and leaves the JavaScript untouched, so your <code>.ts</code> file becomes valid JS at parse time with no separate compile.</p>
+      <pre><code class="language-typescript">// app.ts, runs directly on modern Node, Deno, and Bun
+      function greet(name: string): string {
+        return `hello ${name}`;
+      }
+      console.log(greet(&quot;world&quot;));
+      </code></pre>
+      <p>Two honest catches. First, stripping runs your code but does not check it. The types are deleted, not verified, so you still run <code>tsc --noEmit</code> or lean on your editor to catch type errors. Second, stripping cannot handle syntax that emits real code, like <code>enum</code> and <code>namespace</code>. Those you compile with <code>tsc</code> or avoid. Skip them and your TypeScript runs anywhere JavaScript runs. The TypeScript team turned that second catch into a feature.</p>
+      <h2 id="typescript-earns-its-keep-when-code-outlives-the-week"><a class="anchor" href="#typescript-earns-its-keep-when-code-outlives-the-week" aria-label="Link to this section"></a>TypeScript earns its keep when code outlives the week</h2>
+      <p>TypeScript wins the moment more than one person, or more than one week, touches the code. The payoff is not "fewer bugs" in the abstract. It is the specific bug that ships because a value had the wrong shape and nobody noticed.</p>
+      <pre><code class="language-typescript">function sendInvoice(userId: string, amountCents: number) { /* ... */ }
+
+      // Plain JS: this runs, then misbehaves in production.
+      // You swapped the arguments and nothing warned you.
+      sendInvoice(400, &quot;user_42&quot;);
+
+      // TypeScript: red squiggle before you ever save.
+      // Argument of type 'number' is not assignable to 'string'.
+      </code></pre>
+      <p>The bigger win is refactoring. Rename a field on a shared type and the compiler hands you every one of the forty places that now break. On our own apps the TypeScript line pays for itself the first time a refactor touches that many files. Autocomplete that actually knows your data is the daily version of the same payoff.</p>
+      <h2 id="when-the-type-tax-is-not-worth-paying"><a class="anchor" href="#when-the-type-tax-is-not-worth-paying" aria-label="Link to this section"></a>When the type tax is not worth paying</h2>
+      <p>Plain JavaScript still wins for code with a short life and a single author. A thirty line script does not earn a <code>tsconfig.json</code>, a pile of <code>@types</code> packages, and a fight with a generic. The type tax is real, and on throwaway work it never pays back.</p>
+      <p>The same goes for learning, for a quick prototype you will rewrite anyway, and for the small config file nobody touches again. Reaching for TypeScript there is ceremony, not safety.</p>
+      <p>If you want a middle ground, JSDoc gives you type checking with zero new syntax:</p>
+      <pre><code class="language-javascript">// @ts-check
+      /** @param {string} name */
+      function greet(name) {
+        return `hello ${name}`;
+      }
+
+      greet(42); // editor flags this, and the file is still plain .js
+      </code></pre>
+      <p>Add <code>// @ts-check</code> to the top of a <code>.js</code> file and your editor checks it against JSDoc comments. You get the safety net without the build story. Plenty of large projects ship exactly this way on purpose.</p>
+      <h2 id="the-two-languages-are-converging"><a class="anchor" href="#the-two-languages-are-converging" aria-label="Link to this section"></a>The two languages are converging</h2>
+      <p>TypeScript and JavaScript are growing toward each other, not apart. The clearest signal is a flag added in TypeScript 5.8: <code>erasableSyntaxOnly</code>.</p>
+      <pre><code class="language-json">// tsconfig.json
+      { &quot;compilerOptions&quot;: { &quot;erasableSyntaxOnly&quot;: true } }
+      </code></pre>
+      <p>Turn it on and TypeScript refuses to compile the parts that are not pure types: <code>enum</code>, <code>namespace</code> with runtime values, constructor parameter properties, and <code>import =</code> aliases. It bans exactly the four constructs that native type stripping cannot run. The replacement for an enum is a plain union:</p>
+      <pre><code class="language-typescript">// Not erasable, emits a runtime object:
+      enum Role { Admin, User }
+
+      // Erasable, disappears completely after stripping:
+      type Role = &quot;admin&quot; | &quot;user&quot;;
+      </code></pre>
+      <p>This is the TypeScript team steering the language toward "JavaScript with types you can delete." It lines up with the TC39 Type Annotations proposal, a Microsoft backed effort to let JavaScript engines treat type syntax as comments. That one has sat at Stage 1 since 2023 and stalled there, partly because native type stripping already solved the same problem in practice.</p>
+      <p>Tooling is moving the same way. TypeScript 6.0 shipped in March 2026 as the last release built on the original compiler. Its successor, TypeScript 7.0, is a native port written in Go that Microsoft says is about ten times faster to build. The friction that made TypeScript feel heavy is getting designed out.</p>
+      <h2 id="so-which-should-you-use-in-2026"><a class="anchor" href="#so-which-should-you-use-in-2026" aria-label="Link to this section"></a>So which should you use in 2026?</h2>
+      <p>Default to TypeScript for anything you will maintain, and reach for plain JavaScript or JSDoc for anything you will not. The decision is about lifespan and blast radius, not ideology.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Decision flow: if a file is maintained past this week use TypeScript, otherwise plain JavaScript for one-off files or JSDoc for scripts you will revisit" src="https://i.imgur.com/mGu7Z1d.png"></p>
+      <p>Run the file through one question: will you still be running this past this week? If yes, the safety, the autocomplete, and the safe refactors pay for themselves, and your runtime executes the <code>.ts</code> file directly anyway. If no, and it is a single file or a quick prototype, plain JavaScript keeps you fast. The in-between case, a script you will revisit but do not want to configure, is what JSDoc is for.</p>
+      <p>The old framing was a war: dynamic freedom against static safety. That war is over. TypeScript won the code you keep, JavaScript owns the code you toss, and native type stripping erased the wall that used to stand between them. Pick by how long the code will live, and you will be right almost every time.</p>
+      <hr>
+      <p><em>I make this call every time I create a file, building apps and tools at <a href="https://astraedus.dev">astraedus.dev</a>. If you have a real case where the lifespan rule breaks, I want to hear it: <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox, <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
