@@ -72,6 +72,12 @@ None inline. No build-time env. Cloudflare account in Bitwarden if analytics tok
 
 ## Project Lessons
 
+### 2026-06-29: Checking astraedus.dev URLs from a script needs a browser UA
+The site is behind Cloudflare, which **403s the default Python `urllib`/`requests` User-Agent**. Any script that probes a live astraedus.dev URL (e.g. the IndexNow "is this page live?" guard in `cross-post.py`) must send a browser-like `User-Agent` header. `curl`'s default UA passes fine, so shell `curl` checks don't need this — only Python clients do.
+
+### 2026-06-29: GSC is already verified + sitemap submitted
+astraedus.dev is a **verified Domain property** in Google Search Console (account theagentthatcould@gmail.com) via the DNS TXT `google-site-verification=7batHgI3rJ14n3nM9oFxxlqzhK-WxVHzkOW6BK06kXw` (in the Cloudflare zone). The sitemap `https://astraedus.dev/sitemap.xml` is submitted (Status: Success, 20 pages). As of 6/12/26: 17 pages Indexed, 25 Not indexed. To re-read the TXT token, `dig TXT astraedus.dev +short` (GSC UI hides it once verified). For a domain property, the sitemap field needs the FULL URL, not the bare path.
+
 <!-- Add ## YYYY-MM-DD: Title entries here as lessons accrue. -->
 
 <!-- Auto-generated stub via /project-md bootstrap on 2026-05-05. Sharpen as you learn what's tricky here. -->
