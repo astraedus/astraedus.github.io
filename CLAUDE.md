@@ -78,6 +78,32 @@ The site is behind Cloudflare, which **403s the default Python `urllib`/`request
 ### 2026-06-29: GSC is already verified + sitemap submitted
 astraedus.dev is a **verified Domain property** in Google Search Console (account theagentthatcould@gmail.com) via the DNS TXT `google-site-verification=7batHgI3rJ14n3nM9oFxxlqzhK-WxVHzkOW6BK06kXw` (in the Cloudflare zone). The sitemap `https://astraedus.dev/sitemap.xml` is submitted (Status: Success, 20 pages). As of 6/12/26: 17 pages Indexed, 25 Not indexed. To re-read the TXT token, `dig TXT astraedus.dev +short` (GSC UI hides it once verified). For a domain property, the sitemap field needs the FULL URL, not the bare path.
 
+### 2026-06-29: Dev.to canonicals MUST resolve 200 on this domain (dead-canonical SEO bug)
+Dev.to articles set `canonical_url=https://astraedus.dev/blog/<slug>`. For months, 20 of 23
+such canonicals 404'd (pages never created, or created under a SHORTER hand-slug than the
+canonical declared). Google follows the declared canonical -> a dead page -> the content
+earns ZERO ranking authority on our domain. Likely a major cause of the ~10 pageviews/mo on
+50+ articles.
+- **The slug that matters is the one the Dev.to `canonical_url` declares**, NOT a tidy short
+  dir name. Host the page at the EXACT declared slug or the canonical 404s.
+- **Pages must be SELF-canonical** (`<link rel=canonical href="https://astraedus.dev/blog/<slug>/">`).
+  The old hand-built pages reverse-canonicaled back to Dev.to, which also forfeits authority.
+- **Tooling** (all in `scripts/`, all idempotent):
+  - `build-blog-page.py` — the SINGLE markdown->page renderer (matches the site template,
+    self-canonical). 21 unit tests in `test_build_blog_page.py`. Note: Dev.to `/articles/{id}`
+    returns `tag_list` as a comma-separated STRING while `/articles/me/published` returns a
+    LIST — the renderer normalizes both (a string `tags[0]` silently produced a 1-letter tag chip).
+  - `backfill-canonicals.py` — audits Dev.to API (source of truth) vs local `/blog` dirs and
+    generates every missing canonical page. Re-run any time to catch new gaps.
+  - `update-blog-index.py` — ADDITIVE listing + sitemap updater. NEVER rebuilds existing cards
+    (their excerpts are hand-curated and diverge from page meta-descriptions — a full rebuild
+    would clobber that copy).
+- **Forward-wire**: `~/bin/cross-post.py ensure_canonical_page()` now generates + commits +
+  pushes the astraedus.dev page BEFORE publishing to Dev.to, so a canonical can never be dead
+  again. A WARNING line in its output = page NOT hosted; recover with `backfill-canonicals.py`.
+- After backfilling: `node scripts/enhance-blog-seo.js` (SEO layer) -> `update-blog-index.py`
+  (listing+sitemap) -> commit+push -> verify canonicals curl 200 -> `astra-indexnow.sh <urls>`.
+
 <!-- Add ## YYYY-MM-DD: Title entries here as lessons accrue. -->
 
 <!-- Auto-generated stub via /project-md bootstrap on 2026-05-05. Sharpen as you learn what's tricky here. -->
