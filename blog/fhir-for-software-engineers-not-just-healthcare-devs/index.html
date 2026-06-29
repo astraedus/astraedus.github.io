@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>&quot;FHIR for Software Engineers (Not Just Healthcare Devs)&quot; | Diven Rastdus</title>
+  <meta name="description" content="FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="&quot;FHIR for Software Engineers (Not Just Healthcare Devs)&quot;">
+  <meta property="og:description" content="FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-04-02">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="&quot;FHIR for Software Engineers (Not Just Healthcare Devs)&quot;">
+  <meta name="twitter:description" content="FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "\"FHIR for Software Engineers (Not Just Healthcare Devs)\"",
+    "description": "FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...",
+    "url": "https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-04-02",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "\"FHIR for Software Engineers (Not Just Healthcare Devs)\"", "item": "https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Apr 2, 2026</span>
+        <span class="article-tag">Fhir</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>&quot;FHIR for Software Engineers (Not Just Healthcare Devs)&quot;</h1>
+      <p class="article-lede">FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#what-fhir-actually-is">What FHIR actually is</a></li>
+          <li><a href="#querying-a-fhir-server">Querying a FHIR server</a></li>
+          <li><a href="#the-typescript-client">The TypeScript client</a></li>
+          <li><a href="#understanding-medication-data">Understanding medication data</a></li>
+          <li><a href="#search-parameters-youll-actually-use">Search parameters you'll actually use</a></li>
+          <li><a href="#building-on-top-of-fhir">Building on top of FHIR</a></li>
+          <li><a href="#running-your-own-fhir-server">Running your own FHIR server</a></li>
+          <li><a href="#things-that-tripped-me-up">Things that tripped me up</a></li>
+          <li><a href="#when-to-use-fhir">When to use FHIR</a></li>
+          <li><a href="#resources">Resources</a></li>
+        </ul>
+      </nav>
+
+      <h1>FHIR for Software Engineers (Not Just Healthcare Devs)</h1>
+      <p>FHIR (Fast Healthcare Interoperability Resources) sounds intimidating. It has its own specification site, a 400-page standard, and a community full of people who say "bundle" and "resource" like everyone knows what they mean.</p>
+      <p>Here's the thing: FHIR is just REST + JSON with a standardized schema. If you've built a REST API, you already know 80% of what you need. I'm going to show you the practical parts by building real queries against a FHIR server.</p>
+      <h2 id="what-fhir-actually-is"><a class="anchor" href="#what-fhir-actually-is" aria-label="Link to this section"></a>What FHIR actually is</h2>
+      <p>FHIR defines a set of "resources" (think: database models) for healthcare data. Each resource has a type, a JSON schema, and a REST endpoint. That's it.</p>
+      <p>Common resources you'll use:</p>
+      <ul>
+      <li><strong>Patient</strong>: name, DOB, identifiers, contact info</li>
+      <li><strong>MedicationRequest</strong>: a prescription (what drug, what dose, who prescribed it)</li>
+      <li><strong>MedicationStatement</strong>: what the patient says they're taking</li>
+      <li><strong>AllergyIntolerance</strong>: known allergies and adverse reactions</li>
+      <li><strong>Observation</strong>: lab results, vitals, anything measured</li>
+      <li><strong>Condition</strong>: diagnoses</li>
+      </ul>
+      <p>Every FHIR server exposes these at predictable URLs:</p>
+      <pre><code class="language-http">GET /Patient/123                    # Read one patient
+      GET /Patient?name=Smith             # Search patients
+      GET /MedicationRequest?patient=123  # Get prescriptions for a patient
+      </code></pre>
+      <p>That's standard REST. No custom protocols, no SOAP, no HL7v2 pipe-delimited messages from 1987.</p>
+      <h2 id="querying-a-fhir-server"><a class="anchor" href="#querying-a-fhir-server" aria-label="Link to this section"></a>Querying a FHIR server</h2>
+      <p>Any HTTP client works. Here's a real example using curl against a public FHIR server:</p>
+      <pre><code class="language-bash"># Search for a patient by name
+      curl &quot;https://hapi.fhir.org/baseR4/Patient?name=Smith&amp;_count=3&quot; \
+        -H &quot;Accept: application/fhir+json&quot;
+      </code></pre>
+      <p>The response is a <strong>Bundle</strong> -- FHIR's wrapper for collections:</p>
+      <pre><code class="language-json">{
+        &quot;resourceType&quot;: &quot;Bundle&quot;,
+        &quot;type&quot;: &quot;searchset&quot;,
+        &quot;total&quot;: 1247,
+        &quot;entry&quot;: [
+          {
+            &quot;resource&quot;: {
+              &quot;resourceType&quot;: &quot;Patient&quot;,
+              &quot;id&quot;: &quot;12345&quot;,
+              &quot;name&quot;: [
+                {
+                  &quot;family&quot;: &quot;Smith&quot;,
+                  &quot;given&quot;: [&quot;John&quot;, &quot;Michael&quot;]
+                }
+              ],
+              &quot;birthDate&quot;: &quot;1985-03-15&quot;,
+              &quot;gender&quot;: &quot;male&quot;
+            }
+          }
+        ]
+      }
+      </code></pre>
+      <p>Key patterns:<br>
+      - <code>resourceType</code> tells you what you're looking at<br>
+      - <code>entry[].resource</code> is the actual data<br>
+      - Names are arrays (people have multiple names -- maiden, married, legal)<br>
+      - <code>given</code> is also an array (first + middle names)</p>
+      <h2 id="the-typescript-client"><a class="anchor" href="#the-typescript-client" aria-label="Link to this section"></a>The TypeScript client</h2>
+      <p>Raw HTTP works, but for production code use a typed client. Here's how to set one up:</p>
+      <pre><code class="language-typescript">import Client from &quot;fhir-kit-client&quot;;
+
+      const fhirClient = new Client({
+        baseUrl: &quot;https://your-fhir-server.com/fhir&quot;,
+      });
+
+      // Read a single patient
+      const patient = await fhirClient.read({
+        resourceType: &quot;Patient&quot;,
+        id: &quot;12345&quot;,
+      });
+
+      console.log(patient.name[0].family); // &quot;Smith&quot;
+      console.log(patient.birthDate);       // &quot;1985-03-15&quot;
+      </code></pre>
+      <p>Searching returns Bundles. You'll write this pattern constantly:</p>
+      <pre><code class="language-typescript">// Get all medications for a patient
+      const bundle = await fhirClient.search({
+        resourceType: &quot;MedicationRequest&quot;,
+        searchParams: {
+          patient: patientId,
+          status: &quot;active&quot;,
+          _count: &quot;100&quot;,
+        },
+      });
+
+      // Extract resources from the bundle
+      const medications = (bundle.entry || [])
+        .map((entry: any) =&gt; entry.resource)
+        .filter((r: any) =&gt; r.resourceType === &quot;MedicationRequest&quot;);
+      </code></pre>
+      <p>That <code>bundle.entry || []</code> guard is important. Empty search results return a Bundle with no <code>entry</code> field, not an empty array. This trips up everyone at least once.</p>
+      <h2 id="understanding-medication-data"><a class="anchor" href="#understanding-medication-data" aria-label="Link to this section"></a>Understanding medication data</h2>
+      <p>This is where it gets interesting (and messy). A MedicationRequest looks like this:</p>
+      <pre><code class="language-json">{
+        &quot;resourceType&quot;: &quot;MedicationRequest&quot;,
+        &quot;id&quot;: &quot;med-001&quot;,
+        &quot;status&quot;: &quot;active&quot;,
+        &quot;intent&quot;: &quot;order&quot;,
+        &quot;medicationCodeableConcept&quot;: {
+          &quot;coding&quot;: [
+            {
+              &quot;system&quot;: &quot;http://www.nlm.nih.gov/research/umls/rxnorm&quot;,
+              &quot;code&quot;: &quot;860975&quot;,
+              &quot;display&quot;: &quot;Metformin 500mg Oral Tablet&quot;
+            }
+          ],
+          &quot;text&quot;: &quot;Metformin 500mg&quot;
+        },
+        &quot;subject&quot;: {
+          &quot;reference&quot;: &quot;Patient/12345&quot;
+        },
+        &quot;dosageInstruction&quot;: [
+          {
+            &quot;text&quot;: &quot;Take 1 tablet by mouth twice daily&quot;,
+            &quot;timing&quot;: {
+              &quot;repeat&quot;: {
+                &quot;frequency&quot;: 2,
+                &quot;period&quot;: 1,
+                &quot;periodUnit&quot;: &quot;d&quot;
+              }
+            },
+            &quot;doseAndRate&quot;: [
+              {
+                &quot;doseQuantity&quot;: {
+                  &quot;value&quot;: 500,
+                  &quot;unit&quot;: &quot;mg&quot;,
+                  &quot;system&quot;: &quot;http://unitsofmeasure.org&quot;
+                }
+              }
+            ]
+          }
+        ]
+      }
+      </code></pre>
+      <p>The medication name can live in three places:<br>
+      1. <code>medicationCodeableConcept.text</code> -- human-readable<br>
+      2. <code>medicationCodeableConcept.coding[0].display</code> -- from a coding system<br>
+      3. <code>medicationReference.reference</code> -- points to a separate Medication resource</p>
+      <p>You need to handle all three. In production, I normalize drug names by stripping dose info, salt forms, and route abbreviations:</p>
+      <pre><code class="language-typescript">function normalizeDrugName(name: string): string {
+        return name
+          .toLowerCase()
+          // Remove dose info: &quot;metformin 500mg&quot; -&gt; &quot;metformin&quot;
+          .replace(/\s*\d+\.?\d*\s*(mg|mcg|g|ml|units?)\b.*/i, &quot;&quot;)
+          // Remove salt forms: &quot;metformin hydrochloride&quot; -&gt; &quot;metformin&quot;
+          .replace(
+            /\s+(hydrochloride|hcl|sulfate|sodium|potassium|acetate|besylate|maleate|fumarate|calcium|citrate)\b/gi,
+            &quot;&quot;
+          )
+          // Remove route: &quot;metformin po&quot; -&gt; &quot;metformin&quot;
+          .replace(/\s+(iv|im|po|pr|sl|td|top|inh)\b.*/i, &quot;&quot;)
+          .trim();
+      }
+
+      normalizeDrugName(&quot;Metformin Hydrochloride 500mg BID&quot;);
+      // -&gt; &quot;metformin&quot;
+      </code></pre>
+      <p>This matters because hospitals, pharmacies, and patient self-reports all describe the same drug differently. "Metformin 500mg," "metformin hydrochloride 500mg oral tablet," and "Glucophage 500" are all metformin. Without normalization, your comparison logic sees three different drugs.</p>
+      <h2 id="search-parameters-youll-actually-use"><a class="anchor" href="#search-parameters-youll-actually-use" aria-label="Link to this section"></a>Search parameters you'll actually use</h2>
+      <p>FHIR search has its own syntax, but it maps to query parameters:</p>
+      <pre><code class="language-bash"># Patients born after 1990
+      GET /Patient?birthdate=gt1990-01-01
+
+      # Active prescriptions for patient 123
+      GET /MedicationRequest?patient=123&amp;status=active
+
+      # Allergies marked as high criticality
+      GET /AllergyIntolerance?patient=123&amp;criticality=high
+
+      # Include the referenced medication resource in results
+      GET /MedicationRequest?patient=123&amp;_include=MedicationRequest:medication
+
+      # Paginate with _count and _offset
+      GET /Patient?name=Smith&amp;_count=20&amp;_offset=40
+      </code></pre>
+      <p>The <code>_include</code> parameter is powerful. Without it, a MedicationRequest that uses <code>medicationReference</code> (instead of inline <code>medicationCodeableConcept</code>) just gives you a reference like <code>Medication/abc</code>. With <code>_include</code>, the server resolves the reference and returns the Medication resource in the same Bundle.</p>
+      <p>Date comparisons use prefixes: <code>gt</code> (greater than), <code>lt</code> (less than), <code>ge</code>, <code>le</code>, <code>eq</code>. <code>birthdate=gt1990-01-01</code> means born after January 1, 1990.</p>
+      <h2 id="building-on-top-of-fhir"><a class="anchor" href="#building-on-top-of-fhir" aria-label="Link to this section"></a>Building on top of FHIR</h2>
+      <p>Once you can read FHIR data, you can build tools. Here's a real-world example: a medication reconciliation system that compares what the hospital prescribed vs. what the pharmacy dispensed vs. what the patient reports taking.</p>
+      <pre><code class="language-typescript">async function reconcileMedications(patientId: string) {
+        // Pull from hospital EHR (MedicationRequest = prescriptions)
+        const prescribed = await fhirClient.search({
+          resourceType: &quot;MedicationRequest&quot;,
+          searchParams: { patient: patientId, status: &quot;active&quot; },
+        });
+
+        // Pull from pharmacy (MedicationStatement = what was dispensed/taken)
+        const reported = await fhirClient.search({
+          resourceType: &quot;MedicationStatement&quot;,
+          searchParams: { patient: patientId, status: &quot;active&quot; },
+        });
+
+        const prescribedMeds = extractMedNames(prescribed);
+        const reportedMeds = extractMedNames(reported);
+
+        // Find discrepancies
+        const missingFromPharmacy = prescribedMeds.filter(
+          (med) =&gt; !reportedMeds.some(
+            (r) =&gt; normalizeDrugName(r) === normalizeDrugName(med)
+          )
+        );
+
+        return {
+          prescribed: prescribedMeds,
+          reported: reportedMeds,
+          discrepancies: missingFromPharmacy,
+        };
+      }
+      </code></pre>
+      <p>This is the core of a medication safety tool. Patients fall through the cracks at care transitions -- discharged from hospital with new prescriptions, but the pharmacy never gets updated, or the patient stops taking something and nobody notices. FHIR gives you the data layer to catch these gaps programmatically.</p>
+      <h2 id="running-your-own-fhir-server"><a class="anchor" href="#running-your-own-fhir-server" aria-label="Link to this section"></a>Running your own FHIR server</h2>
+      <p>For development, use HAPI FHIR -- the reference implementation:</p>
+      <pre><code class="language-bash">docker run -p 8080:8080 hapiproject/hapi:latest
+      </code></pre>
+      <p>That gives you a full FHIR R4 server at <code>http://localhost:8080/fhir</code> with a web UI for browsing resources. Load test data with Synthea (synthetic patient generator):</p>
+      <pre><code class="language-bash"># Generate 100 synthetic patients
+      java -jar synthea-with-dependencies.jar -p 100 --exporter.fhir.export true
+
+      # Upload the generated bundles
+      for f in output/fhir/*.json; do
+        curl -X POST &quot;http://localhost:8080/fhir&quot; \
+          -H &quot;Content-Type: application/fhir+json&quot; \
+          -d @&quot;$f&quot;
+      done
+      </code></pre>
+      <p>Synthea generates realistic patient histories -- medications, conditions, allergies, lab results -- all in FHIR format. I loaded 281 synthetic patients this way for testing. Each patient comes with a complete medical timeline you can query.</p>
+      <h2 id="things-that-tripped-me-up"><a class="anchor" href="#things-that-tripped-me-up" aria-label="Link to this section"></a>Things that tripped me up</h2>
+      <p><strong>Bundle pagination.</strong> Large result sets come back paginated. The Bundle has a <code>link</code> array with <code>relation: "next"</code> pointing to the next page. If you only process the first page, you'll silently miss data.</p>
+      <p><strong>Reference resolution.</strong> FHIR uses references between resources: <code>"subject": {"reference": "Patient/123"}</code>. The reference is a relative URL, not an ID. If you're parsing references to extract IDs, split on <code>/</code> and take the last segment.</p>
+      <p><strong>FHIR versions matter.</strong> R4 and R5 have different field names for some resources. Check which version your server runs (usually in the CapabilityStatement at <code>/metadata</code>). Most production servers are still on R4.</p>
+      <p><strong>CodeableConcept vs. Coding.</strong> A CodeableConcept contains a <code>text</code> field (human-readable) and a <code>coding</code> array (machine-readable codes from systems like RxNorm, SNOMED, ICD-10). Always prefer the <code>text</code> field for display. Use <code>coding</code> when you need to match across systems.</p>
+      <p><strong>Empty bundles.</strong> An empty search result is a Bundle with <code>total: 0</code> and no <code>entry</code> field. Not <code>entry: []</code>. Guard against <code>undefined</code>.</p>
+      <h2 id="when-to-use-fhir"><a class="anchor" href="#when-to-use-fhir" aria-label="Link to this section"></a>When to use FHIR</h2>
+      <p>FHIR makes sense when:<br>
+      - You're integrating with healthcare systems (EHRs, pharmacies, labs)<br>
+      - You need a standard data model for health data<br>
+      - Multiple systems need to exchange patient information<br>
+      - You're building tools that operate on medical records</p>
+      <p>It doesn't make sense when:<br>
+      - You're building a simple health tracker app (just use your own schema)<br>
+      - You don't need interoperability with existing healthcare systems<br>
+      - Your data doesn't map to FHIR's resource types</p>
+      <p>The standard is designed for interoperability. If you're not integrating with external systems, the overhead of FHIR compliance isn't worth it.</p>
+      <h2 id="resources"><a class="anchor" href="#resources" aria-label="Link to this section"></a>Resources</h2>
+      <ul>
+      <li><a href="https://hl7.org/fhir/R4/">FHIR R4 Spec</a> -- the actual standard, surprisingly readable</li>
+      <li><a href="https://hapifhir.io/">HAPI FHIR</a> -- Java-based reference server, runs in Docker</li>
+      <li><a href="https://synthetichealth.github.io/synthea/">Synthea</a> -- synthetic patient generator</li>
+      <li><a href="https://github.com/Vermonster/fhir-kit-client">fhir-kit-client</a> -- TypeScript/JS FHIR client</li>
+      <li><a href="https://docs.smarthealthit.org/">SMART on FHIR</a> -- OAuth2 profile for FHIR apps (how real EHR integrations authenticate)</li>
+      </ul>
+      <hr>
+      <p>I build production AI systems, including healthcare tools. If you're working with medical data, I'm at <a href="https://astraedus.dev">astraedus.dev</a>.</p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

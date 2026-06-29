@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Cron Mistakes That Silently Break Your Scheduled Jobs | Diven Rastdus</title>
+  <meta name="description" content="It&#x27;s 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 Cron Mistakes That Silently Break Your Scheduled Jobs">
+  <meta property="og:description" content="It&#x27;s 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-29">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 Cron Mistakes That Silently Break Your Scheduled Jobs">
+  <meta name="twitter:description" content="It&#x27;s 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "5 Cron Mistakes That Silently Break Your Scheduled Jobs",
+    "description": "It's 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...",
+    "url": "https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-06-29",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 Cron Mistakes That Silently Break Your Scheduled Jobs", "item": "https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 29, 2026</span>
+        <span class="article-tag">Devops</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>5 Cron Mistakes That Silently Break Your Scheduled Jobs</h1>
+      <p class="article-lede">It's 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs at noon and find: nothing. No error. No output. Just silence.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-the-timezone-trap">1. The timezone trap</a></li>
+          <li><a href="#2-the-bare-path-problem">2. The bare PATH problem</a></li>
+          <li><a href="#3-no-year-field-means-one-shots-repeat-forever">3. No year field means one-shots repeat forever</a></li>
+          <li><a href="#4-silent-failure-no-one-watching">4. Silent failure, no one watching</a></li>
+          <li><a href="#5-overlapping-runs">5. Overlapping runs</a></li>
+          <li><a href="#why-these-all-share-the-same-root-cause">Why these all share the same root cause</a></li>
+        </ul>
+      </nav>
+
+      <p>That's the thing about cron failures: they don't crash, they don't alert, they just don't happen. And you find out hours (or days) later when someone notices the data didn't update or the emails didn't go out.</p>
+      <p>Here are the five mistakes that cause this. All real, all fixable.</p>
+      <p>First, the one idea that explains all five: cron does not run in your shell.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The environment cron actually runs in vs what you picture in your head" src="https://i.imgur.com/KSq8jsJ.png"></p>
+      <hr>
+      <h2 id="1-the-timezone-trap"><a class="anchor" href="#1-the-timezone-trap" aria-label="Link to this section"></a>1. The timezone trap</h2>
+      <p>Your crontab line says <code>0 9 * * *</code>. You expect it to fire at 9am. It fires at 7pm instead.</p>
+      <p>Cron fires this job when the daemon's clock reads 09:00. On a UTC server, that's 09:00 UTC. In UTC+10, that's 7pm your time, the same day. You wanted 9am local, you got 7pm local: off by exactly your UTC offset. Flip the sign and you'll know which way it slips.</p>
+      <p>First: check your daemon's actual timezone.</p>
+      <pre><code class="language-bash">timedatectl
+      # or just:
+      date
+      </code></pre>
+      <p>Then set <code>CRON_TZ</code> explicitly at the top of your crontab:</p>
+      <pre><code class="language-crontab">CRON_TZ=America/New_York
+      0 9 * * * /path/to/job.sh
+      </code></pre>
+      <p>The most portable approach is to schedule everything in UTC deliberately and convert mentally. UTC doesn't shift for daylight savings. Your jobs fire predictably.</p>
+      <hr>
+      <h2 id="2-the-bare-path-problem"><a class="anchor" href="#2-the-bare-path-problem" aria-label="Link to this section"></a>2. The bare PATH problem</h2>
+      <p>Your script runs perfectly from the terminal. In cron, it fails silently with <code>command not found</code>.</p>
+      <p>Cron starts with a stripped-down environment. No <code>.bashrc</code>, no <code>.profile</code>, nothing sourced. The default <code>PATH</code> is usually just <code>/usr/bin:/bin</code>. That means:</p>
+      <ul>
+      <li><code>node</code> via nvm: not there</li>
+      <li><code>python3</code> from a virtualenv: not there</li>
+      <li>Custom binaries in <code>~/bin</code>: not there</li>
+      <li>Any tool that depends on a configured <code>PATH</code>: broken</li>
+      </ul>
+      <p>The fix is explicit exports at the top of every script cron runs:</p>
+      <pre><code class="language-bash">#!/bin/bash
+      export NVM_DIR=&quot;$HOME/.nvm&quot;
+      [ -s &quot;$NVM_DIR/nvm.sh&quot; ] &amp;&amp; source &quot;$NVM_DIR/nvm.sh&quot;
+      export PATH=/home/youruser/.nvm/versions/node/v20.0.0/bin:/usr/local/bin:/usr/bin:/bin
+      </code></pre>
+      <p>Or use full absolute paths in the crontab itself:</p>
+      <pre><code class="language-crontab">0 9 * * * /home/youruser/.nvm/versions/node/v20.0.0/bin/node /path/to/script.js
+      </code></pre>
+      <p>The absolute-path approach is brittle when you update Node. The export at the top of the script is cleaner for anything non-trivial. Pick one, be consistent.</p>
+      <hr>
+      <h2 id="3-no-year-field-means-one-shots-repeat-forever"><a class="anchor" href="#3-no-year-field-means-one-shots-repeat-forever" aria-label="Link to this section"></a>3. No year field means one-shots repeat forever</h2>
+      <p>You want to run a migration once, on a specific date. You add:</p>
+      <pre><code class="language-crontab">0 10 4 7 * /path/to/migration.sh
+      </code></pre>
+      <p>It runs on July 4th. Then again next year. And the year after.</p>
+      <p>Crontab has no year field. The five columns are: minute, hour, day-of-month, month, day-of-week. There's no way to express "only 2026." Everything in a crontab is a recurring schedule.</p>
+      <p>For genuine one-shots, use <code>systemd-run</code>:</p>
+      <pre><code class="language-bash">systemd-run --user \
+        --on-calendar=&quot;2026-07-04 10:00:00&quot; \
+        --unit=migration-july4 \
+        /path/to/migration.sh
+      </code></pre>
+      <p>Fires once, never repeats. The transient unit will still appear in <code>systemctl --user list-timers</code> until the session restarts or you run <code>systemctl --user reset-failed migration-july4</code> -- harmless, but don't be surprised to see it listed.</p>
+      <p>If systemd isn't available, the <code>at</code> command works:</p>
+      <pre><code class="language-bash">echo &quot;/path/to/migration.sh&quot; | at 10:00 Jul 4
+      </code></pre>
+      <p><code>at</code> isn't installed on a lot of minimal server images (<code>apt install at</code> / <code>apk add at</code> first), and month parsing is finicky -- <code>Jul</code> is safer than <code>July</code>. The fallback of "have the script delete its own crontab line" also works but is fragile. Prefer <code>systemd-run</code> or <code>at</code> for anything that should only run once.</p>
+      <hr>
+      <h2 id="4-silent-failure-no-one-watching"><a class="anchor" href="#4-silent-failure-no-one-watching" aria-label="Link to this section"></a>4. Silent failure, no one watching</h2>
+      <p>A cron job runs. It exits with code 1. Nothing happens. No alert, no log, no indication anything went wrong.</p>
+      <p>By default, cron sends stdout and stderr to a local mail spool at <code>/var/spool/mail/youruser</code>. Nobody reads that. If <code>sendmail</code> isn't configured, output goes nowhere.</p>
+      <p>Your job can fail every single run for a week and you'd never know.</p>
+      <p>Minimum viable fix: redirect output to a log.</p>
+      <pre><code class="language-bash">0 9 * * * /path/to/job.sh &gt;&gt; /var/log/myjob.log 2&gt;&amp;1
+      </code></pre>
+      <p>Add timestamps so you can tell when each run happened:</p>
+      <pre><code class="language-bash">#!/bin/bash
+      echo &quot;[$(date '+%Y-%m-%d %H:%M:%S')] Starting...&quot;
+      # ... your work ...
+      echo &quot;[$(date '+%Y-%m-%d %H:%M:%S')] Done.&quot;
+      </code></pre>
+      <p>For anything that actually matters, add a dead-man's switch. <a href="https://healthchecks.io">Healthchecks.io</a> is free for small setups. Your job pings a URL on success. If no ping arrives in the expected window, you get alerted.</p>
+      <pre><code class="language-bash">#!/bin/bash
+      if /path/to/actual-work.sh; then
+        curl -fsS --retry 3 https://hc-ping.com/your-uuid &gt; /dev/null
+      fi
+      </code></pre>
+      <p>The difference between "job dead for 24 hours before we noticed" and "paged within 5 minutes" is that one curl call at the end.</p>
+      <hr>
+      <h2 id="5-overlapping-runs"><a class="anchor" href="#5-overlapping-runs" aria-label="Link to this section"></a>5. Overlapping runs</h2>
+      <p>Your job is scheduled every 5 minutes. Runs take 2 minutes, usually. But occasionally a database is slow and it takes 7. Now a second copy starts on top of the first.</p>
+      <p>Two instances processing the same queue, writing to the same table, sending the same emails.</p>
+      <p>The fix is a lockfile. An atomic <code>mkdir</code> is the most portable pattern:</p>
+      <pre><code class="language-bash">#!/bin/bash
+      LOCK_DIR=&quot;/tmp/myjob.lock&quot;
+
+      # Try to acquire the lock
+      if ! mkdir &quot;$LOCK_DIR&quot; 2&gt;/dev/null; then
+        echo &quot;[$(date)] Already running, exiting.&quot; &gt;&amp;2
+        exit 1
+      fi
+
+      # Release on exit, including crashes
+      trap &quot;rmdir '$LOCK_DIR'&quot; EXIT
+
+      # ... your actual job logic ...
+      </code></pre>
+      <p>The <code>trap</code> on <code>EXIT</code> is critical. If your script crashes mid-run, the lock gets cleaned up automatically. Without it, the lock directory persists and the job never runs again until someone manually deletes it.</p>
+      <p>If you know <code>flock</code> is available:</p>
+      <pre><code class="language-bash">#!/bin/bash
+      exec 200&gt;/tmp/myjob.flock
+      flock -n 200 || { echo &quot;already running&quot;; exit 1; }
+
+      # ... your job logic ...
+      </code></pre>
+      <p>Either works. The <code>mkdir</code> approach is more portable; <code>flock</code> is marginally cleaner.</p>
+      <hr>
+      <h2 id="why-these-all-share-the-same-root-cause"><a class="anchor" href="#why-these-all-share-the-same-root-cause" aria-label="Link to this section"></a>Why these all share the same root cause</h2>
+      <p>Most of these failures share a single root: cron doesn't run in your shell environment. It runs in a bare, minimal execution context with no profile, a stripped PATH, a daemon timezone, and output going nowhere. The gap between what runs on your terminal and what runs in cron is where all of this lives.</p>
+      <p>Before adding any new cron job, run through this:</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="cron pre-flight checklist: timezone, PATH, one-shot, logging, lockfile" src="https://i.imgur.com/F08UQWh.png"></p>
+      <ul>
+      <li>[ ] Timezone set explicitly (<code>CRON_TZ=</code> or scheduled in UTC)</li>
+      <li>[ ] Full PATH exported at the top of the script</li>
+      <li>[ ] One-shot? Use <code>systemd-run</code> or <code>at</code>, not a crontab line</li>
+      <li>[ ] Output redirected to a log file with <code>&gt;&gt; job.log 2&gt;&amp;1</code></li>
+      <li>[ ] Heartbeat ping for anything production-critical</li>
+      <li>[ ] Lockfile guard if the job runs frequently or takes variable time</li>
+      </ul>
+      <p>Cron is simple enough that none of these traps are obvious until you've hit them. Now you have the list before that happens.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, that's where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

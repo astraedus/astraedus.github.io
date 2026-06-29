@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Offline App&#x27;s Backup Lost Every Photo on a New Phone | Diven Rastdus</title>
+  <meta name="description" content="I shipped a &quot;Backup your data&quot; button for an offline mood tracker. It exported every entry to a JSON...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/device-independent-offline-backups-expo/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Offline App&#x27;s Backup Lost Every Photo on a New Phone">
+  <meta property="og:description" content="I shipped a &quot;Backup your data&quot; button for an offline mood tracker. It exported every entry to a JSON...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/device-independent-offline-backups-expo/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-28">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="My Offline App&#x27;s Backup Lost Every Photo on a New Phone">
+  <meta name="twitter:description" content="I shipped a &quot;Backup your data&quot; button for an offline mood tracker. It exported every entry to a JSON...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "My Offline App's Backup Lost Every Photo on a New Phone",
+    "description": "I shipped a \"Backup your data\" button for an offline mood tracker. It exported every entry to a JSON...",
+    "url": "https://astraedus.dev/blog/device-independent-offline-backups-expo/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-06-28",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "My Offline App's Backup Lost Every Photo on a New Phone", "item": "https://astraedus.dev/blog/device-independent-offline-backups-expo/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 28, 2026</span>
+        <span class="article-tag">Reactnative</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>My Offline App&#x27;s Backup Lost Every Photo on a New Phone</h1>
+      <p class="article-lede">I shipped a "Backup your data" button for an offline mood tracker. It exported every entry to a JSON file. Users could save it, move phones, import it, done.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#why-path-references-quietly-fail">Why path references quietly fail</a></li>
+          <li><a href="#the-fix-carry-the-bytes-not-the-path">The fix: carry the bytes, not the path</a></li>
+          <li><a href="#restore-the-files-before-you-touch-the-database">Restore the files before you touch the database</a></li>
+          <li><a href="#make-it-survive-bad-input">Make it survive bad input</a></li>
+          <li><a href="#the-tradeoff-is-real-and-it-is-fine">The tradeoff is real and it is fine</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>Then I changed the app's Android package id. A new install is a new sandbox. I restored a backup on the fresh install and every photo was gone. The mood entries came back fine. The images attached to them rendered as broken thumbnails.</p>
+      <p>The backup was not actually a backup. It was a list of pointers to files that no longer existed.</p>
+      <h2 id="why-path-references-quietly-fail"><a class="anchor" href="#why-path-references-quietly-fail" aria-label="Link to this section"></a>Why path references quietly fail</h2>
+      <p>The app stores photos on disk and keeps a row in SQLite that points at the file:</p>
+      <pre><code class="language-sql">SELECT entry_id, file_path, media_type FROM entry_media;
+      </code></pre>
+      <p><code>file_path</code> is an absolute path like <code>file:///data/user/0/com.example.app/files/entry_media/1717800000000_a1b2c3.jpg</code>. My v1 export just dumped those rows into JSON. On the SAME install, re-importing works, because the files are still there. The bug hides until the one moment a backup matters: a different device, a reinstall, a restored phone.</p>
+      <p>On a new install none of those paths resolve. The import inserts rows pointing at nothing. The user sees broken images and assumes the app ate their memories.</p>
+      <p>If your "export" only carries file paths, you don't have a portable backup. You have a backup that works on exactly the machine that does not need one.</p>
+      <h2 id="the-fix-carry-the-bytes-not-the-path"><a class="anchor" href="#the-fix-carry-the-bytes-not-the-path" aria-label="Link to this section"></a>The fix: carry the bytes, not the path</h2>
+      <p>A backup is portable only if it contains the actual data. So the export now reads each photo off disk and embeds it as base64 directly in the JSON.</p>
+      <pre><code class="language-typescript">// expo-file-system moved the classic function API to /legacy at SDK 54.
+      // readAsStringAsync, writeAsStringAsync and EncodingType live there.
+      import * as FileSystem from 'expo-file-system/legacy';
+
+      async function readPhotoBase64(filePath: string): Promise&lt;string | null&gt; {
+        try {
+          const info = await FileSystem.getInfoAsync(filePath);
+          if (!info.exists) {
+            console.warn(`Skipping photo export, source missing: ${filePath}`);
+            return null;
+          }
+          return await FileSystem.readAsStringAsync(filePath, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        } catch (error) {
+          console.warn(`Skipping photo export, unreadable: ${filePath}`);
+          return null;
+        }
+      }
+      </code></pre>
+      <p>One detail that bit me first: on Expo SDK 54 and up, <code>readAsStringAsync</code> and <code>EncodingType</code> are not on the default <code>expo-file-system</code> import anymore. They live at the <code>expo-file-system/legacy</code> entrypoint (<a href="https://docs.expo.dev/versions/latest/sdk/filesystem-legacy/">Expo's own docs confirm it</a>, and there is an <a href="https://github.com/expo/expo/issues/39858">open issue</a> for people who hit the missing methods). If your base64 read returns <code>undefined</code>, check that import before anything else.</p>
+      <p>Each photo becomes a small object with the bytes inside it:</p>
+      <pre><code class="language-typescript">interface ExportPhoto {
+        media_type: string;
+        file_path: string;   // original path, informational only
+        ext: string;         // used to name the restored file
+        data_base64: string; // the actual image bytes
+      }
+      </code></pre>
+      <p>I bumped the export to <code>version: 3</code> so the import side can tell embedded backups from the old path-only ones.</p>
+      <h2 id="restore-the-files-before-you-touch-the-database"><a class="anchor" href="#restore-the-files-before-you-touch-the-database" aria-label="Link to this section"></a>Restore the files before you touch the database</h2>
+      <p>The import is where the ordering matters. You have to materialize the photos to the new install's media directory FIRST, then run the database transaction that points rows at the new paths.</p>
+      <pre><code class="language-typescript">export async function writeBase64ToMediaDir(base64: string, ext: string): Promise&lt;string&gt; {
+        await ensureMediaDir();
+        const dest = `${MEDIA_DIR}${Date.now()}_${rand()}.${ext}`;
+        await FileSystem.writeAsStringAsync(dest, base64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        return dest;
+      }
+      </code></pre>
+      <p>Why split it in two phases? Writing tens of base64 images is slow file IO. I do not want that running inside an exclusive SQLite transaction. So the import does all the file writes up front, collects the new local paths, and only then opens the transaction:</p>
+      <pre><code class="language-typescript">// Phase 1: write every embedded photo to disk, OUTSIDE the transaction.
+      const restoredByEntry: Record&lt;number, {newPath: string; media_type: string}[]&gt; = {};
+      for (const entry of importData.data.entries) {
+        for (const photo of entry.photos ?? []) {
+          if (!photo.data_base64) continue;
+          const newPath = await writeBase64ToMediaDir(photo.data_base64, photo.ext);
+          (restoredByEntry[entry.id] ??= []).push({ newPath, media_type: photo.media_type });
+        }
+      }
+
+      // Phase 2: one exclusive transaction inserts rows pointing at the NEW paths.
+      await db.withExclusiveTransactionAsync(async () =&gt; {
+        // ...insert entries, then for each entry insert its restored media rows
+      });
+      </code></pre>
+      <p>The transaction inserts <code>entry_media</code> rows that point at the paths I just wrote on THIS device. The original <code>file_path</code> from the backup never gets used as a real location. It rides along as a debugging reference and nothing more.</p>
+      <h2 id="make-it-survive-bad-input"><a class="anchor" href="#make-it-survive-bad-input" aria-label="Link to this section"></a>Make it survive bad input</h2>
+      <p>Real backups are messy. A user deleted a photo after their last export. A file got truncated. An old v1 backup is the only one they have. None of that should blow up the whole restore.</p>
+      <p>The rule: every step fails soft.</p>
+      <ul>
+      <li>A source file that is missing or unreadable on export is skipped with a warning. One gone image never fails the export.</li>
+      <li>A base64 write that fails on import is skipped. That entry just loses one photo instead of aborting.</li>
+      <li>v1 and v2 backups still import. They keep the old path-reference behavior, best effort, exactly as before. The version number routes them down the legacy branch.</li>
+      </ul>
+      <p>A backup or restore should degrade one record at a time, never crash on the whole file. The person running an import is often a person whose phone just died. That's the worst moment to throw an exception.</p>
+      <h2 id="the-tradeoff-is-real-and-it-is-fine"><a class="anchor" href="#the-tradeoff-is-real-and-it-is-fine" aria-label="Link to this section"></a>The tradeoff is real and it is fine</h2>
+      <p>Base64 inflates the payload by about 33 percent. A library of photos turns a small JSON file into a chunky one. I went back and forth on this and landed on: correctness wins. A backup of tens of megabytes is still easy to share or save to a drive. A 4 KB backup that silently loses every image is worthless.</p>
+      <p>If size ever becomes a real problem, the fix is a zip container with the images as separate files, not a clever pointer scheme.</p>
+      <p>A few edges I did not wave away. Building the export holds every photo's base64 in one JSON string, so a library of hundreds of images is a memory and payload question, not a free lunch. A zip-streamed container is the next step if that ever bites. The restored extension is derived from the original filename and defaults to <code>jpg</code>, never trusted blindly, and every restored file gets a fresh generated name so paths can never collide on the new device.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>Test the one path that matters: export on one install, wipe it, import on a clean install. Not a re-import on the same device. That happy path lies to you.</p>
+      <p>If your photos, attachments, or any file-backed data do not survive a different machine, your export is a list of broken pointers wearing a backup's clothes.</p>
+      <p>This came out of <a href="https://raeduslabs.com/soulsync">SoulSync</a>, a mood tracker that keeps everything on the device with no account and no cloud. When the data never leaves the phone, the backup file is the only way out, so it has to be real.</p>
+      <p>Carry the bytes.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, that's where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

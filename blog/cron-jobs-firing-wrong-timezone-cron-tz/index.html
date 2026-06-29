@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cron Jobs Were Firing 10 Hours Off Their Own Comments | Diven Rastdus</title>
+  <meta name="description" content="I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Cron Jobs Were Firing 10 Hours Off Their Own Comments">
+  <meta property="og:description" content="I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-24">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="My Cron Jobs Were Firing 10 Hours Off Their Own Comments">
+  <meta name="twitter:description" content="I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "My Cron Jobs Were Firing 10 Hours Off Their Own Comments",
+    "description": "I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...",
+    "url": "https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-06-24",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "My Cron Jobs Were Firing 10 Hours Off Their Own Comments", "item": "https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 24, 2026</span>
+        <span class="article-tag">Linux</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>My Cron Jobs Were Firing 10 Hours Off Their Own Comments</h1>
+      <p class="article-lede">I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was using the machine. Weeks later I checked the logs. It had been firing every Saturday at 8pm, right in the middle of my most active hours.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-comment-lied-and-cron-didnt-care">The comment lied, and cron didn't care</a></li>
+          <li><a href="#why-cron-does-this">Why cron does this</a></li>
+          <li><a href="#how-to-detect-it-on-your-own-boxes">How to detect it on your own boxes</a></li>
+          <li><a href="#the-fix-stop-writing-comments-you-arent-enforcing">The fix: stop writing comments you aren't enforcing</a></li>
+          <li><a href="#the-gotcha-that-bit-me-twice-crontz-is-not-tz">The gotcha that bit me twice: CRON_TZ is not TZ</a></li>
+          <li><a href="#daylight-saving-still-wants-to-ruin-your-day">Daylight saving still wants to ruin your day</a></li>
+          <li><a href="#back-to-the-saturday-job">Back to the Saturday job</a></li>
+          <li><a href="#the-actual-lesson">The actual lesson</a></li>
+        </ul>
+      </nav>
+
+      <p>The job was fine. The schedule was fine. My assumption about what the schedule meant was wrong.</p>
+      <h2 id="the-comment-lied-and-cron-didnt-care"><a class="anchor" href="#the-comment-lied-and-cron-didnt-care" aria-label="Link to this section"></a>The comment lied, and cron didn't care</h2>
+      <p>Here is what the crontab line looked like:</p>
+      <pre><code class="language-cron"># Saturday 06:00 UTC -- weekend maintenance, runs while I'm asleep
+      0 6 * * 6 /home/me/bin/weekend-maintenance.sh
+      </code></pre>
+      <p>The comment says UTC. I wrote it that way because I think in UTC for infrastructure. But that comment is just text. Cron never reads it.</p>
+      <p>My machine's local timezone is AEST (UTC+10). I had not set <code>CRON_TZ</code> anywhere in the crontab. So cron read <code>0 6</code> as 6am local AEST, not 6am UTC. The two are 10 hours apart.</p>
+      <p>Every time-of-day job in that crontab was firing 10 hours away from what its comment claimed. Eight of them. A morning report meant to land before I woke up fired in the evening. A "run this when the machine is quiet" job ran at peak. None of them errored, so nothing flagged it.</p>
+      <h2 id="why-cron-does-this"><a class="anchor" href="#why-cron-does-this" aria-label="Link to this section"></a>Why cron does this</h2>
+      <p>Cron schedules in the system's local timezone by default. On Linux that is whatever the system clock is set to, or the <code>TZ</code> the daemon inherited. It is not UTC unless your machine is set to UTC.</p>
+      <p>You can confirm your machine's timezone in one command:</p>
+      <pre><code class="language-bash">timedatectl
+      #                Local time: Sat 2026-06-20 20:00:13 AEST
+      #            Universal time: Sat 2026-06-20 10:00:13 UTC
+      #                  Time zone: Australia/Brisbane (AEST, +1000)
+      </code></pre>
+      <p>There is the 10 hour gap, right in the output. Local 20:00 is 10:00 UTC.</p>
+      <h2 id="how-to-detect-it-on-your-own-boxes"><a class="anchor" href="#how-to-detect-it-on-your-own-boxes" aria-label="Link to this section"></a>How to detect it on your own boxes</h2>
+      <p>The fastest check is to compare what a job's comment claims against when it actually ran. Cron logs each invocation. On most systems:</p>
+      <pre><code class="language-bash"># Debian / Ubuntu
+      grep CRON /var/log/syslog | grep weekend-maintenance
+
+      # RHEL / Fedora, or anything on systemd
+      journalctl -t CRON --since &quot;14 days ago&quot; | grep weekend-maintenance
+      </code></pre>
+      <p>Here is the line that gave me away. The comment promised 06:00 UTC. The log disagreed:</p>
+      <pre><code class="language-text"># crontab comment claims 06:00 UTC. Reality:
+      Jun 20 20:00:01 box CRON[12491]: (me) CMD (/home/me/bin/weekend-maintenance.sh)
+      </code></pre>
+      <p>20:00 local, not 06:00. Line up those timestamps with the hour you THINK the job runs. If they disagree by exactly your UTC offset, you have found it.</p>
+      <h2 id="the-fix-stop-writing-comments-you-arent-enforcing"><a class="anchor" href="#the-fix-stop-writing-comments-you-arent-enforcing" aria-label="Link to this section"></a>The fix: stop writing comments you aren't enforcing</h2>
+      <p>There are two honest ways out, and which one you pick depends on the job.</p>
+      <p>For jobs whose intent is local ("run while I'm asleep", "send before the workday"), write the schedule in local time and label it as local. No surprise, no conversion in your head:</p>
+      <pre><code class="language-cron"># Saturday 06:00 AEST (machine-local) -- weekend maintenance
+      0 6 * * 6 /home/me/bin/weekend-maintenance.sh
+      </code></pre>
+      <p>For jobs whose intent is a real fixed instant (a market-hours alert, a cross-region batch that must line up with UTC), set <code>CRON_TZ</code> explicitly at the top of the block:</p>
+      <pre><code class="language-cron">CRON_TZ=UTC
+      # Now 0 6 genuinely means 06:00 UTC, whatever the machine's clock says
+      0 6 * * 6 /home/me/bin/utc-batch.sh
+      </code></pre>
+      <p><code>CRON_TZ</code> overrides the timezone for every entry below it, until the next <code>CRON_TZ</code>. The standard cron daemons on mainstream Linux (Vixie and cronie) support it. It is not POSIX, so check your daemon if you run something exotic.</p>
+      <h2 id="the-gotcha-that-bit-me-twice-crontz-is-not-tz"><a class="anchor" href="#the-gotcha-that-bit-me-twice-crontz-is-not-tz" aria-label="Link to this section"></a>The gotcha that bit me twice: CRON_TZ is not TZ</h2>
+      <p>One job genuinely needed US market hours, so I reached for <code>CRON_TZ=America/New_York</code>. That is correct, and naming a region handles US daylight saving automatically, which is the whole reason to use a region name instead of a fixed offset.</p>
+      <p>But <code>CRON_TZ</code> only controls WHEN the job fires. It does not set the timezone inside your script. The process still inherits the system <code>TZ</code>. If your script formats a timestamp or does date math, it uses the machine's timezone, not the one you scheduled in. If you need both, set both:</p>
+      <pre><code class="language-cron">CRON_TZ=America/New_York
+      0 9 * * 1-5  TZ=America/New_York /home/me/bin/market-open.sh
+      </code></pre>
+      <p>That inline <code>TZ=</code> works because cron runs each job line through a shell, so a leading <code>VAR=value</code> becomes an environment assignment for the command.</p>
+      <h2 id="daylight-saving-still-wants-to-ruin-your-day"><a class="anchor" href="#daylight-saving-still-wants-to-ruin-your-day" aria-label="Link to this section"></a>Daylight saving still wants to ruin your day</h2>
+      <p>Naming a region (<code>America/New_York</code>) instead of a fixed offset means cron tracks DST for you. Good. But DST itself has two sharp edges, and <code>CRON_TZ</code> does not file them down:</p>
+      <ul>
+      <li>On spring-forward, the 02:00 to 03:00 hour does not exist. A job scheduled at 02:30 just does not run that day.</li>
+      <li>On fall-back, that hour happens twice. A job inside it can run twice.</li>
+      </ul>
+      <p>The boring fix is to keep anything important out of the 01:00 to 03:00 window. Schedule at 04:00 or later and DST never touches you.</p>
+      <h2 id="back-to-the-saturday-job"><a class="anchor" href="#back-to-the-saturday-job" aria-label="Link to this section"></a>Back to the Saturday job</h2>
+      <p>The fix for the job that started all this was the boring one. I rewrote the comment to match the mechanism and left the schedule alone:</p>
+      <pre><code class="language-cron"># Saturday 06:00 AEST (machine-local) -- weekend maintenance
+      0 6 * * 6 /home/me/bin/weekend-maintenance.sh
+      </code></pre>
+      <p>The next Saturday, <code>journalctl -t CRON</code> showed it firing at 06:00 AEST. Machine quiet, me asleep, finally doing what the comment always claimed.</p>
+      <h2 id="the-actual-lesson"><a class="anchor" href="#the-actual-lesson" aria-label="Link to this section"></a>The actual lesson</h2>
+      <p>The bug was not cron. Cron did exactly what it always does. The bug was that I trusted a comment to enforce behavior it had no power over.</p>
+      <p>A <code># runs at 09:00 UTC</code> comment is documentation. It is the weakest thing in the system, because nothing checks it against reality. The schedule is the enforcement. When the two drift apart, the schedule wins, and you do not get an error. You get ten hours of silent wrongness.</p>
+      <p>The rule I follow now is small. Write each schedule in the timezone you actually mean. Set <code>CRON_TZ</code> (and <code>TZ</code>) when correctness depends on it. And never let "the server is probably UTC" be the load-bearing assumption.</p>
+      <p>Go run <code>timedatectl</code> on your boxes, then read your crontab comments back as claims instead of facts. You might have a job that has been quietly firing at the wrong hour for months. I did.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, that's where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

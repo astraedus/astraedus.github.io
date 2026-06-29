@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4 Ways RevenueCat Silently Denies Paying Users Their Entitlements | Diven Rastdus</title>
+  <meta name="description" content="Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="4 Ways RevenueCat Silently Denies Paying Users Their Entitlements">
+  <meta property="og:description" content="Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-16">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="4 Ways RevenueCat Silently Denies Paying Users Their Entitlements">
+  <meta name="twitter:description" content="Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "4 Ways RevenueCat Silently Denies Paying Users Their Entitlements",
+    "description": "Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...",
+    "url": "https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-06-16",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "4 Ways RevenueCat Silently Denies Paying Users Their Entitlements", "item": "https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 16, 2026</span>
+        <span class="article-tag">Revenuecat</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>4 Ways RevenueCat Silently Denies Paying Users Their Entitlements</h1>
+      <p class="article-lede">Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized without throwing. And your paying users are still seeing the free tier.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-purchaseslogin-was-never-called">1. Purchases.logIn() was never called</a></li>
+          <li><a href="#2-no-customerinfo-listener">2. No customerInfo listener</a></li>
+          <li><a href="#3-the-rc-session-leaked-between-users-on-the-same-device">3. The RC session leaked between users on the same device</a></li>
+          <li><a href="#4-the-webhook-handles-purchases-but-ignores-refunds-and-cancellations">4. The webhook handles purchases but ignores refunds and cancellations</a></li>
+          <li><a href="#the-checklist">The checklist</a></li>
+        </ul>
+      </nav>
+
+      <p>This is the second layer of the RevenueCat wiring problem. The one that doesn't produce an error. The first layer (invalid credentials, service account propagation delays) has been written about. This one hasn't. These are four bugs I found building Origo, an AI astrology app on Expo + RevenueCat + Supabase. All four were silent. All four passed tests. All four denied real users real value.</p>
+      <hr>
+      <h2 id="1-purchaseslogin-was-never-called"><a class="anchor" href="#1-purchaseslogin-was-never-called" aria-label="Link to this section"></a>1. <code>Purchases.logIn()</code> was never called</h2>
+      <p>This was the most expensive one. Three days of confused billing debugging before I found it.</p>
+      <p>Every purchase made before you call <code>Purchases.logIn(userId)</code> registers under an anonymous RC identity: <code>$RCAnonymousID:some-uuid</code>. When your RevenueCat webhook fires to update your database, it can't map an anonymous RC id to a real user row. It either skips the event or writes an orphaned record. Your server's entitlement check returns false for that user.</p>
+      <p>The purchase exists in RevenueCat's dashboard. The user paid. Nothing shows up on your backend.</p>
+      <p>The fix requires understanding what RC does with identity. You want RC's <code>app_user_id</code> to be your auth system's stable user id, set BEFORE any purchase happens:</p>
+      <pre><code class="language-typescript">const initialize = useCallback(async (userId?: string) =&gt; {
+        if (!initialized || configuredApiKey !== apiKey) {
+          Purchases.configure({ apiKey, appUserID: userId });
+          initialized = true;
+        } else if (userId &amp;&amp; currentAppUserID !== userId) {
+          // User signed in after RC was already configured; switch identity
+          const loginResult = await Purchases.logIn(userId);
+          currentAppUserID = userId;
+          info = loginResult.customerInfo;
+        }
+      }, []);
+      </code></pre>
+      <p>If your auth flow allows anonymous purchases (user buys before creating an account), call <code>logIn()</code> with the stable user id the moment they sign up. RC handles the client-side transfer from anonymous to identified, but your webhook still has to catch the TRANSFER event and re-key the database row. More on that in #4.</p>
+      <p>In my case, Supabase's anonymous auth preserves the user id across the anon-to-email upgrade (<code>auth.updateUser()</code> keeps the same uuid). So I pass the Supabase uuid to RC from the very first session, before they've ever entered an email. When they eventually link an account, the RC identity is already the final, stable uuid.</p>
+      <hr>
+      <h2 id="2-no-customerinfo-listener"><a class="anchor" href="#2-no-customerinfo-listener" aria-label="Link to this section"></a>2. No <code>customerInfo</code> listener</h2>
+      <p>Here's what happens when you skip a <code>customerInfoUpdateListener</code>:</p>
+      <p>A user purchases through your native paywall (via <code>Purchases.presentPaywall()</code>). The purchase succeeds. Your paywall dismisses. The user is back on the main screen, still seeing the free tier, because the component that owns <code>isPro</code> state hasn't been told anything changed.</p>
+      <p>The listener is how RC pushes out-of-band entitlement changes: purchases through the native paywall, server-side grants, trial conversions, grace-period resolutions. Without it, you're only checking entitlements at cold start.</p>
+      <pre><code class="language-typescript">useEffect(() =&gt; {
+        let active = true;
+
+        const onCustomerInfo = (info: CustomerInfo) =&gt; {
+          if (active) checkEntitlements(info);
+        };
+
+        (async () =&gt; {
+          await initialize();
+          try {
+            Purchases.addCustomerInfoUpdateListener(onCustomerInfo);
+          } catch {
+            // SDK not configured in dev; nothing to listen to
+          }
+        })();
+
+        return () =&gt; {
+          active = false;
+          try {
+            Purchases.removeCustomerInfoUpdateListener(onCustomerInfo);
+          } catch {}
+        };
+      }, [initialize, checkEntitlements]);
+      </code></pre>
+      <p><code>react-native-purchases</code> v10 gotcha: <code>addCustomerInfoUpdateListener</code> returns void. You can't call <code>.remove()</code> on the return value. Cleanup is <code>removeCustomerInfoUpdateListener(sameRef)</code>, and sameRef has to be the exact same function reference. Define the listener inside the effect, close over it, pass the same reference to both add and remove.</p>
+      <hr>
+      <h2 id="3-the-rc-session-leaked-between-users-on-the-same-device"><a class="anchor" href="#3-the-rc-session-leaked-between-users-on-the-same-device" aria-label="Link to this section"></a>3. The RC session leaked between users on the same device</h2>
+      <p>This bug is invisible to unit tests. You'd need an integration test that calls <code>configure()</code>, then <code>logOut()</code>, then signs in as a different user and checks their entitlements. Most test suites don't go there.</p>
+      <p>RC's SDK uses module-level state. Once <code>Purchases.configure()</code> has run with User A's identity, that configuration persists until you explicitly clear it. If User A signs out and User B signs in, and your initialization check says "already initialized, skip". User B inherits User A's RC session. If User A was a paying subscriber, User B gets <code>isPro: true</code>.</p>
+      <p>Reset your initialization bookkeeping on sign-out, right after calling <code>Purchases.logOut()</code>:</p>
+      <pre><code class="language-typescript">// Call this on every sign-out, after Purchases.logOut()
+      export function resetRCSession() {
+        initialized = false;
+        configuredApiKey = null;
+        currentAppUserID = undefined;
+      }
+      </code></pre>
+      <p><code>Purchases.logOut()</code> returns RC to an anonymous identity. <code>resetRCSession()</code> clears your bookkeeping so the next <code>initialize()</code> doesn't short-circuit on the previous user's state.</p>
+      <hr>
+      <h2 id="4-the-webhook-handles-purchases-but-ignores-refunds-and-cancellations"><a class="anchor" href="#4-the-webhook-handles-purchases-but-ignores-refunds-and-cancellations" aria-label="Link to this section"></a>4. The webhook handles purchases but ignores refunds and cancellations</h2>
+      <p>The first three bugs are client-side. This one is server-side, and it's the one that keeps denying access after everything else is right.</p>
+      <p>Your subscription table probably gets written on <code>INITIAL_PURCHASE</code> and <code>RENEWAL</code>. If you're not handling <code>CANCELLATION</code>, <code>REFUND</code>, and <code>TRANSFER</code>, your database will say <code>is_active: true</code> for users whose subscriptions have ended. They lose access only when <code>expires_at</code> passes (if you even store that field).</p>
+      <p>The full event set you need, at minimum:</p>
+      <ul>
+      <li><code>INITIAL_PURCHASE</code>: create the subscription row</li>
+      <li><code>RENEWAL</code>: extend <code>expires_at</code></li>
+      <li><code>CANCELLATION</code>: mark inactive (keep the row; they may have time remaining)</li>
+      <li><code>REFUND</code>: mark inactive immediately</li>
+      <li><code>TRANSFER</code>: re-key the row when RC reassigns <code>app_user_id</code></li>
+      </ul>
+      <p><code>TRANSFER</code> is the one that closes the loop from bug #1. When an anonymous user creates an account and RC transfers their purchase history to a named identity, a TRANSFER event fires with <code>transferred_from</code> (the old anonymous id) and <code>app_user_id</code> (the new identified one). Ignore it, and the purchase stays associated with an id that doesn't map to any user row.</p>
+      <pre><code class="language-typescript">switch (event.type) {
+        case 'INITIAL_PURCHASE':
+        case 'RENEWAL': {
+          const expiresAt = event.expiration_at_ms
+            ? new Date(event.expiration_at_ms).toISOString()
+            : null;
+          await upsertSubscription(event.app_user_id, { is_active: true, expires_at: expiresAt });
+          break;
+        }
+        case 'CANCELLATION':
+          await updateSubscription(event.app_user_id, { is_active: false });
+          break;
+        case 'REFUND':
+          await updateSubscription(event.app_user_id, { is_active: false, refunded: true });
+          break;
+        case 'TRANSFER':
+          // transferred_from is an array; the relevant old id is [0]
+          await transferSubscription(event.transferred_from[0], event.app_user_id);
+          break;
+      }
+      </code></pre>
+      <hr>
+      <h2 id="the-checklist"><a class="anchor" href="#the-checklist" aria-label="Link to this section"></a>The checklist</h2>
+      <p>Before shipping a RevenueCat-gated feature:</p>
+      <ol>
+      <li>Is <code>Purchases.logIn(userId)</code> called with the stable auth user id before any purchase can happen?</li>
+      <li>Is there an active <code>customerInfoUpdateListener</code> on every screen that gates on <code>isPro</code>?</li>
+      <li>Does sign-out call <code>Purchases.logOut()</code> AND reset your initialization bookkeeping?</li>
+      <li>Does the webhook handler cover CANCELLATION, REFUND, and TRANSFER, not just INITIAL_PURCHASE?</li>
+      </ol>
+      <p>Credentials being valid is table stakes. The silent failures come after.</p>
+      <hr>
+      <p>Building with RevenueCat on Expo/React Native and hit a different version of these? Comments are open. Also at <a href="https://raeduslabs.com">raeduslabs.com</a>.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, that's where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>

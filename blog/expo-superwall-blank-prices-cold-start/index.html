@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default. | Diven Rastdus</title>
+  <meta name="description" content="My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.">
+  <meta property="og:description" content="My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-06-22">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.">
+  <meta name="twitter:description" content="My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.",
+    "description": "My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...",
+    "url": "https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/",
+    "image": "https://astraedus.dev/og-image.png",
+    "datePublished": "2026-06-22",
+    "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+    }
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.", "item": "https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jun 22, 2026</span>
+        <span class="article-tag">Reactnative</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.</h1>
+      <p class="article-lede">My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem: the subscription prices were blank.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#the-setup">The setup</a></li>
+          <li><a href="#why-i-was-blind-for-so-long">Why I was blind for so long</a></li>
+          <li><a href="#bug-one-the-entitlement-status-was-stuck-on-unknown">Bug one: the entitlement status was stuck on Unknown</a></li>
+          <li><a href="#bug-two-a-default-that-flips-between-platforms">Bug two: a default that flips between platforms</a></li>
+          <li><a href="#the-red-herring">The red herring</a></li>
+          <li><a href="#why-lifetime-rendered-and-subscriptions-did-not">Why lifetime rendered and subscriptions did not</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>Weekly, monthly, annual: each tier showed its period label ("/wk", "/mo", "/yr") and an empty space where the price should be. Here is the strange part. RevenueCat, running side by side in the same app, had already fetched every real price a second earlier. The lifetime tier, sitting in the same paywall, rendered its price fine ($184.99). So the prices existed. Superwall just refused to draw three of them.</p>
+      <p>That mismatch took nine rounds of debugging to crack. Here is what was actually wrong, so you can skip the nine rounds.</p>
+      <h2 id="the-setup"><a class="anchor" href="#the-setup" aria-label="Link to this section"></a>The setup</h2>
+      <p>The app is an Expo / React Native app. The paywall stack is <code>expo-superwall</code> for presentation and A/B testing, with RevenueCat as the single source of truth for entitlements. They talk through Superwall's recommended <code>CustomPurchaseControllerProvider</code>, so a Superwall purchase routes through <code>react-native-purchases</code> and fires RevenueCat's normal listener.</p>
+      <p>This is a common combination. Superwall owns the paywall UI, RevenueCat owns "who is paying". If you run it, you can hit both of the bugs below.</p>
+      <p>One Superwall detail matters for the rest of this story. Superwall renders the paywall in a webview and fills in values like <code>{{ products.primary.price }}</code> from a product-variable map it builds from the loaded store products. If that map is empty, the template renders an empty string. An empty string is your blank price. So "blank prices" really means "Superwall built an empty product-variable map", and the whole hunt is about why that map came up empty.</p>
+      <h2 id="why-i-was-blind-for-so-long"><a class="anchor" href="#why-i-was-blind-for-so-long" aria-label="Link to this section"></a>Why I was blind for so long</h2>
+      <p>The first real unlock was not a fix. It was visibility.</p>
+      <p>Superwall's SDK logs are invisible at the default log level. In my app only RevenueCat logged anything, so logcat looked like Superwall was barely running. "No Superwall product query in the logs" felt like proof of a dead SDK. It was not. The SDK was busy, just silent.</p>
+      <pre><code class="language-typescript">&lt;SuperwallProvider
+        apiKeys={apiKeys}
+        options={{
+          logging: { level: 'debug', scopes: ['all'] },
+        }}
+      &gt;
+      </code></pre>
+      <p>With <code>level: 'debug'</code> and <code>scopes: ['all']</code>, the productsManager, storeKit, and paywallPresentation lines all appeared. Now I could see Superwall building its product variables and coming up empty, right next to RevenueCat fetching the same prices without trouble:</p>
+      <pre><code class="language-text">[Superwall] [productsManager] ERROR: Billing client not ready
+      [RevenueCat] Retrieved productDetailsList: annual ... $85.99 ... freeTrial:7d
+      [Superwall] [paywallPresentation] productVariables: null
+      </code></pre>
+      <p>Two billing clients, one ready and one not, in the same process. Lesson one: before you theorize, turn the logs on. A quiet SDK is not an idle SDK.</p>
+      <h2 id="bug-one-the-entitlement-status-was-stuck-on-unknown"><a class="anchor" href="#bug-one-the-entitlement-status-was-stuck-on-unknown" aria-label="Link to this section"></a>Bug one: the entitlement status was stuck on Unknown</h2>
+      <p>With a custom purchase controller, you are responsible for telling Superwall the subscription status. Superwall defaults that status to <code>SubscriptionStatus.Unknown</code> at configure time. Its presentation pipeline has an operator, <code>WaitForSubsStatusAndConfig</code>, that blocks until the status is anything other than Unknown. The SDK's own error text says it plainly: if you use a custom purchase controller, set the entitlement status on time.</p>
+      <p>My sync code did call RevenueCat's <code>getCustomerInfo()</code> once at startup and pushed the result into Superwall. The problem was timing. <code>Purchases.configure</code> in my app is gated behind auth, but the Superwall provider mounts outside the auth provider. So the initial <code>getCustomerInfo()</code> could run before RevenueCat was configured, throw, and get swallowed. The change listener only fires on a change, so the status never moved off Unknown.</p>
+      <p>While the status sat at Unknown, the present pipeline stalled and the product-variable map came out empty. Empty variables render as blank prices in the webview. That matched exactly what the debug logs showed.</p>
+      <p>The fix was to seed a concrete status before any paywall can present, retrying until RevenueCat is actually configured:</p>
+      <pre><code class="language-typescript">// retries getCustomerInfo() until RC is configured (bounded ~6s),
+      // then pushes a concrete ACTIVE / INACTIVE into Superwall
+      async function seedInitialSubscriptionStatus() {
+        const info = await getCustomerInfoWhenReady(); // bounded retry loop
+        const isActive = hasProEntitlement(info);
+        Superwall.shared.setSubscriptionStatus(
+          isActive ? activeStatus : inactiveStatus,
+        );
+      }
+      </code></pre>
+      <p>If RevenueCat never configures within the bound, the seed falls back to INACTIVE, so a non-paying user still sees the paywall (the safe default), and the change listener owns every later transition. That was the real fix. The status now reaches Superwall as a known value before the first present, so the pipeline stops stalling.</p>
+      <h2 id="bug-two-a-default-that-flips-between-platforms"><a class="anchor" href="#bug-two-a-default-that-flips-between-platforms" aria-label="Link to this section"></a>Bug two: a default that flips between platforms</h2>
+      <p>After the status fix, prices rendered. Sometimes. If I let the app sit for the better part of a minute before opening the paywall, every price showed. Open the paywall fast after a cold launch and it went blank again.</p>
+      <p>The debug logs explained it. On a fast view, Superwall computed the paywall's product variables before its own store manager had loaded the products. No loaded products meant a null variable map, which meant blank prices. When I waited, RevenueCat had incidentally warmed the shared Google Play product cache by then, so Superwall's later fetch was a cache hit. My "fix" was riding on luck and a warm cache.</p>
+      <p>The root cause is a default value. In <code>expo-superwall@1.1.5</code>, the default options ship <code>shouldPreload: false</code>. You can read it straight from the package:</p>
+      <pre><code class="language-javascript">// node_modules/expo-superwall/build/src/SuperwallOptions.js:15
+      DefaultSuperwallOptions.paywalls.shouldPreload = false;
+      // merge in useSuperwall: { ...DefaultSuperwallOptions.paywalls, ...yourOptions.paywalls }
+      </code></pre>
+      <p>The native <code>superwall-android</code> SDK preloads paywalls by default, so the expo wrapper quietly flips the behavior. If you pass <code>options</code> without a <code>paywalls</code> key, the merge keeps the <code>false</code>, preload stays off, and products only load at trigger time. The fix is one line, set explicitly:</p>
+      <pre><code class="language-typescript">options={{
+        paywalls: { shouldPreload: true },
+        logging: { level: 'warn' },
+      }}
+      </code></pre>
+      <p>With preload on, Superwall warms its own products and builds the paywall's variables at launch, independent of RevenueCat's timing. The cold launch logs now tell the opposite story, before any trigger fires:</p>
+      <pre><code class="language-text">[Superwall] config_attributes should_preload=true
+      [Superwall] [paywallPreload] paywallPreload_start
+      [Superwall] [paywallPreload] paywallPreload_complete
+      [Superwall] [paywallPresentation] productVariables: { weekly, monthly, annual }
+      </code></pre>
+      <p>Prices render every time now, fast cold start or slow.</p>
+      <h2 id="the-red-herring"><a class="anchor" href="#the-red-herring" aria-label="Link to this section"></a>The red herring</h2>
+      <p>For two rounds I chased a webview error: <code>store/document/undefined - Code: 404</code>. It looked like the smoking gun. It was not. That request fires even when prices render correctly. Chasing it cost me real time.</p>
+      <p>When you debug an SDK you do not own, separate the symptoms that correlate with the bug from the noise that is always there. Reproduce the success state and check whether your "smoking gun" is still firing. If it is, it is noise.</p>
+      <h2 id="why-lifetime-rendered-and-subscriptions-did-not"><a class="anchor" href="#why-lifetime-rendered-and-subscriptions-did-not" aria-label="Link to this section"></a>Why lifetime rendered and subscriptions did not</h2>
+      <p>The detail that nagged me the whole time: the lifetime tier always showed its price. Lifetime is a one-time purchase with no base plan or offer, so it follows a simpler resolution path. The subscriptions go through the product-variable substitution that both bugs broke. One blank tier next to one working tier is a strong hint that the problem is in the per-product variable path, not the network or the store account.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>Three things to carry into your own Superwall plus RevenueCat integration:</p>
+      <ol>
+      <li>Turn on <code>logging: { level: 'debug', scopes: ['all'] }</code> first. The SDK is silent by default, and you cannot fix what you cannot see.</li>
+      <li>With a custom purchase controller, seed a concrete subscription status before any paywall presents. An Unknown status short-circuits product loading.</li>
+      <li>Set <code>paywalls: { shouldPreload: true }</code> explicitly. The expo wrapper defaults it to false, against the native default, and that single value decides whether your prices survive a fast cold start.</li>
+      </ol>
+      <p>I am building a mobile app solo and writing up the real bugs as I hit them. If you want more of these field notes, follow along.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, that's where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
