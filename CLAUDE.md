@@ -7,8 +7,16 @@ This is the public surface for Diven Rastdus / Astraedus — projects grid, blog
 ## Stack
 - Plain HTML + CSS + vanilla JS. No framework, no build, no bundler.
 - Custom design system (DM Sans + Instrument Serif + JetBrains Mono, dark theme, amber accent `#f59e0b`).
-- Cloudflare Web Analytics beacon (privacy-friendly).
-- GitHub Pages deploy on push to `main`.
+- GitHub Pages deploy on push to `main` (origin is GitHub Pages/Fastly, proxied through **Cloudflare** — `server: cloudflare`, `cf-ray`).
+
+## Analytics (verified from source 2026-06-28)
+**Only ONE analytics tool is actually installed: Cloudflare Web Analytics** (privacy-friendly RUM beacon), site token `8b578cad5b3646a7b9c81ac6acbb76ab` (`static.cloudflareinsights.com/beacon.min.js` on every page).
+- **No Google Analytics. No PostHog.** (Repo greps hit "PostHog" 40+ times, but those are all *blog content* — there's a tutorial post about PostHog at `blog/posthog-funnel-events/` whose `posthog.init(...)` is an **example snippet in the article**, not a site tag. Don't be fooled.)
+- PostHog project 379606 is the **Origo mobile app**, unrelated to this site — it has zero web pageviews.
+- **Reading the numbers:** Cloudflare Web Analytics data is in the CF dashboard (Web Analytics) or via the GraphQL Analytics API (`rumPageloadEventsAdaptiveGroups`, filter by the site token above). The `cf` CLI exposes zone `cf analytics dashboard get <zoneId>` (HTTP-level, needs a **valid** API token — the one in `~/.cf/config.toml` was `tokenValid:false` as of 2026-06-28, rotate via Bitwarden/CF dashboard). Cloudflare account in Bitwarden.
+
+## Newsletter signup (`#subscribe`, added 2026-06-29)
+The homepage has a `#subscribe` section (between the writing section and the final CTA) — an email input that POSTs `{ email }` to **`https://astraedus.dev/api/subscribe`**, a Cloudflare Worker bound as a same-origin route on this zone. The Worker (repo `~/projects/astraedus-newsletter-worker`) validates server-side and adds the contact to the Resend audience **"Astraedus Newsletter"** (`a32d3681-a39f-42c6-a41e-7bee67402639`). The Resend API key lives ONLY as a Worker secret — never in this static site. Dev.to articles CTA to `astraedus.dev/#subscribe` to compound the audience. To change signup logic, edit/redeploy the Worker repo, not this site. Footer carries the contact email `theagentthatcould@gmail.com`.
 
 ## Key Files
 - `index.html` — homepage (hero, projects grid, articles, contact).

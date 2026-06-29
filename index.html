@@ -797,6 +797,140 @@
     }
     .cta-email a:hover { color: var(--amber); border-color: var(--amber); }
 
+    /* ---- Subscribe ---- */
+    .subscribe {
+      padding: 96px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+    }
+    .subscribe-card {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 44px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .subscribe-card::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .subscribe-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .subscribe-card h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .subscribe-card h2 em { font-style: italic; color: var(--amber); }
+    .subscribe-card > p {
+      font-size: 0.96rem;
+      color: var(--text-2);
+      max-width: 420px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+      position: relative;
+    }
+    .subscribe-form {
+      display: flex;
+      gap: 10px;
+      max-width: 440px;
+      margin: 0 auto;
+      position: relative;
+      flex-wrap: wrap;
+    }
+    .subscribe-form input[type="email"] {
+      flex: 1 1 220px;
+      min-width: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .subscribe-form input[type="email"]::placeholder { color: var(--text-4); }
+    .subscribe-form input[type="email"]:focus {
+      outline: none;
+      border-color: var(--amber-border);
+      box-shadow: 0 0 0 3px var(--amber-dim);
+    }
+    .subscribe-form button {
+      flex: 0 0 auto;
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      padding: 13px 24px;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.2s, background 0.2s;
+    }
+    .subscribe-form button:hover { background: #fbbf24; transform: translateY(-1px); }
+    .subscribe-form button:disabled { opacity: 0.55; cursor: default; transform: none; }
+    .subscribe-note {
+      margin-top: 16px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-4);
+      position: relative;
+      min-height: 1.2em;
+    }
+    .subscribe-note.is-error { color: #f87171; }
+    .subscribe-note.is-success { color: var(--green); }
+    .subscribe-card.is-done .subscribe-form { display: none; }
+    .subscribe-success {
+      display: none;
+      position: relative;
+    }
+    .subscribe-card.is-done .subscribe-success { display: block; }
+    .subscribe-success .checkmark {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      border: 1px solid var(--green-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      font-size: 1.4rem;
+    }
+    .subscribe-success p {
+      font-size: 1rem;
+      color: var(--text);
+      font-family: var(--serif);
+      font-style: italic;
+    }
+    @media (max-width: 480px) {
+      .subscribe-form button { flex: 1 1 100%; }
+    }
+
     /* ---- Footer ---- */
     footer {
       padding: 28px 0;
@@ -1302,6 +1436,25 @@
   </div>
 </section>
 
+<section class="subscribe" id="subscribe">
+  <div class="container">
+    <div class="subscribe-card reveal">
+      <div class="subscribe-eyebrow">The newsletter</div>
+      <h2>Notes from <em>the build.</em></h2>
+      <p>Production AI systems, hard-won lessons, and the occasional teardown — sent when I have something worth saying. No spam, unsubscribe anytime.</p>
+      <form class="subscribe-form" id="subscribe-form" novalidate>
+        <input type="email" id="subscribe-email" name="email" placeholder="you@example.com" autocomplete="email" required aria-label="Email address" />
+        <button type="submit" id="subscribe-btn">Subscribe</button>
+      </form>
+      <div class="subscribe-note" id="subscribe-note" role="status" aria-live="polite"></div>
+      <div class="subscribe-success">
+        <div class="checkmark" aria-hidden="true">&#10003;</div>
+        <p>You're in. Talk soon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="cta">
   <div class="cta-glow"></div>
   <div class="container">
@@ -1322,6 +1475,7 @@
 <footer>
   <div class="container">
     <span>Diven Rastdus / Astraedus, 2026</span>
+    <span><a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></span>
     <span>Sydney, Australia</span>
   </div>
 </footer>
@@ -1398,6 +1552,61 @@
   }, { threshold: 0.5 });
 
   countEls.forEach(function(el) { countObserver.observe(el); });
+
+  // Newsletter subscribe
+  var SUBSCRIBE_ENDPOINT = 'https://astraedus.dev/api/subscribe';
+  var subForm = document.getElementById('subscribe-form');
+  if (subForm) {
+    var subCard = subForm.closest('.subscribe-card');
+    var subEmail = document.getElementById('subscribe-email');
+    var subBtn = document.getElementById('subscribe-btn');
+    var subNote = document.getElementById('subscribe-note');
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setNote(msg, kind) {
+      subNote.textContent = msg || '';
+      subNote.classList.remove('is-error', 'is-success');
+      if (kind) subNote.classList.add('is-' + kind);
+    }
+
+    subForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = (subEmail.value || '').trim();
+      if (!EMAIL_RE.test(email)) {
+        setNote('Please enter a valid email address.', 'error');
+        subEmail.focus();
+        return;
+      }
+      subBtn.disabled = true;
+      var originalLabel = subBtn.textContent;
+      subBtn.textContent = 'Subscribing…';
+      setNote('');
+
+      fetch(SUBSCRIBE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+        .then(function(res) {
+          return res.json().then(function(data) { return { ok: res.ok, data: data }; });
+        })
+        .then(function(result) {
+          if (result.ok && result.data && result.data.ok) {
+            subCard.classList.add('is-done');
+          } else {
+            var msg = (result.data && result.data.error) || 'Something went wrong. Please try again.';
+            setNote(msg, 'error');
+            subBtn.disabled = false;
+            subBtn.textContent = originalLabel;
+          }
+        })
+        .catch(function() {
+          setNote('Network error — check your connection and try again.', 'error');
+          subBtn.disabled = false;
+          subBtn.textContent = originalLabel;
+        });
+    });
+  }
 })();
 </script>
 
