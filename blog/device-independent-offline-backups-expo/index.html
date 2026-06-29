@@ -398,24 +398,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "My Offline App's Backup Lost Every Photo on a New Phone",
-    "description": "I shipped a \"Backup your data\" button for an offline mood tracker. It exported every entry to a JSON...",
-    "url": "https://astraedus.dev/blog/device-independent-offline-backups-expo/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-28",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "My Offline App's Backup Lost Every Photo on a New Phone",
+      "description": "I shipped a \"Backup your data\" button for an offline mood tracker. It exported every entry to a JSON...",
+      "url": "https://astraedus.dev/blog/device-independent-offline-backups-expo/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/device-independent-offline-backups-expo/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-28",
+      "dateModified": "2026-06-28",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

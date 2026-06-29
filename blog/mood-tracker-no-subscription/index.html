@@ -407,24 +407,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Why mental-health tracking behind a subscription is backwards",
-    "description": "Why locking mood tracking behind a subscription is backwards, and how being open-source and local-first lets a free mood tracker stay free with no dark patterns.",
-    "url": "https://astraedus.dev/blog/mood-tracker-no-subscription/",
-    "image": "https://astraedus.dev/soulsync/assets/feature-graphic.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Why mental-health tracking behind a subscription is backwards",
+      "description": "Why locking mood tracking behind a subscription is backwards, and how being open-source and local-first lets a free mood tracker stay free with no dark patterns.",
+      "url": "https://astraedus.dev/blog/mood-tracker-no-subscription/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/mood-tracker-no-subscription/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-20",
+      "dateModified": "2026-06-20",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-06-20"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "You pay for the cure, not the symptom log",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Run the logic out. The free tier lets you record how you feel."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The subscription pulls the design the wrong way",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here's the part that bothers me more than the price. A subscription doesn't just sit there."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How being free actually works",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The usual reply is: nothing's really free, so what's the catch. Fair."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What you get without paying anything",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The point isn't a stripped free tier with the good parts dimmed out. The point is the full thing, free."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Try it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SoulSync is Android-only for now. Download the APK from the latest GitHub release and the full feature set is yours, no card, no trial, no upgrade screen."
+          }
+        }
+      ]
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

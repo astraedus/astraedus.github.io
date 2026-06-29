@@ -398,24 +398,99 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.",
-    "description": "My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...",
-    "url": "https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-22",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "My Superwall Paywall Showed Blank Prices on Cold Start. Two Bugs, One Was a Default.",
+      "description": "My paywall presented perfectly. Right design, right layout, right call-to-action. The only problem:...",
+      "url": "https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/expo-superwall-blank-prices-cold-start/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-22",
+      "dateModified": "2026-06-22",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The setup",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The app is an Expo / React Native app. The paywall stack is expo-superwall for presentation and A/B testing, with RevenueCat as the single source of truth for entitlements."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why I was blind for so long",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The first real unlock was not a fix. It was visibility."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug one: the entitlement status was stuck on Unknown",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "With a custom purchase controller, you are responsible for telling Superwall the subscription status. Superwall defaults that status to SubscriptionStatus.Unknown at configure time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug two: a default that flips between platforms",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After the status fix, prices rendered. Sometimes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The red herring",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For two rounds I chased a webview error: store/document/undefined - Code: 404. It looked like the smoking gun."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why lifetime rendered and subscriptions did not",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The detail that nagged me the whole time: the lifetime tier always showed its price. Lifetime is a one-time purchase with no base plan or offer, so it follows a simpler resolution path."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Three things to carry into your own Superwall plus RevenueCat integration:"
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

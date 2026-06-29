@@ -391,24 +391,99 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash",
-    "description": "Swapped Whisper for Gemini 2.5 Flash multimodal. 7x cheaper, one less third-party account, uses GCP credits already on the billing account.",
-    "url": "https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-20",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash",
+      "description": "Switched my journaling app's voice capture from OpenAI Whisper to Gemini 2.5 Flash multimodal. Same accuracy, 7x cheaper, uses GCP credits already on account. Full edge function + per-user rate limit code.",
+      "url": "https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/voice-transcription-supabase-gemini-flash/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-20",
+      "dateModified": "2026-04-20",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The \"use what you already have\" check",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Before picking a transcription provider, I looked at what was already wired in:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why not Web Speech API (the \"free\" option)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The browser actually ships a SpeechRecognition API. It's free."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The edge function",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here's the meaningful core. Full file is ~200 lines; I've stripped boilerplate."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Per-user rate limit (so one bad-faith account can't burn your credits)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The version of the function above will happily transcribe any audio you throw at it, indefinitely, until your Gemini bill goes vertical. For a public app you need a per-user budget."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Browser side",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The web client is a thin wrapper around MediaRecorder:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I keep on disk vs throw away",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is a journaling app, so privacy matters more than typical voice apps. My defaults:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "TL;DR cost comparison at the scale of one happy user",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "5 voice entries per day, 30 seconds each = 2.5 minutes per day per user."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

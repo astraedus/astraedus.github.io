@@ -398,24 +398,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing",
-    "description": "I ran 10 games between two AI agents. Agent v3 went 5-5 against Agent v1. I reported \"v3 ties v1, no...",
-    "url": "https://astraedus.dev/blog/your-ai-agent-evaluation-is-lying-to-you-why-10-test-runs-prove-nothing/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-08",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing",
+      "description": "I ran 10 games between two AI agents. Agent v3 went 5-5 against Agent v1. I reported \"v3 ties v1, no...",
+      "url": "https://astraedus.dev/blog/your-ai-agent-evaluation-is-lying-to-you-why-10-test-runs-prove-nothing/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/your-ai-agent-evaluation-is-lying-to-you-why-10-test-runs-prove-nothing/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-08",
+      "dateModified": "2026-05-08",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The win-rate trap",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The obvious metric for comparing two agents is win rate. Agent A beats Agent B 50% of the time?"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "TrueSkill makes the same mistake look different",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If you're running a multi-agent ladder (like I am for a Kaggle competition), you're probably using TrueSkill or Elo instead of raw win rate."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The fix: three rules",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After burning a day on a wrong conclusion, I now follow three rules for agent evaluation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What this actually looks like in practice",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I'm building game AI agents for a Kaggle competition. My ladder now persists ratings across sessions and prints a convergence status alongside every ranking:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The deeper problem",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This isn't just a statistics issue. It's a workflow issue."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

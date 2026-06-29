@@ -391,24 +391,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "The diary you actually keep is the one you're not trying to share",
-    "description": "Why honest self-reflection requires privacy first, and what happens when an AI reads your full written history instead of just today's entry.",
-    "url": "https://astraedus.dev/blog/the-diary-you-actually-keep/",
-    "image": "https://astraedus.dev/og-image.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "The diary you actually keep is the one you're not trying to share",
+      "description": "Why honest self-reflection requires privacy first, and what happens when an AI reads your full written history instead of just today's entry.",
+      "url": "https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-22",
+      "dateModified": "2026-04-22",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-04-22"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

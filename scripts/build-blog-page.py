@@ -40,6 +40,20 @@ except ImportError:  # pragma: no cover
 
 SITE = "https://astraedus.dev"
 AUTHOR = "Diven Rastdus"
+PUBLISHER_NAME = "Raedus Labs"
+OG_IMAGE = f"{SITE}/og-image.png"
+
+# Tags that mark a post as a developer/technical how-to -> schema.org/TechArticle
+# (a more specific, Rich-Results-eligible subtype). Anything else -> Article.
+_TECH_TAGS = {
+    "ai", "webdev", "javascript", "typescript", "react", "reactnative", "python",
+    "devops", "security", "postgres", "sql", "database", "rls", "supabase",
+    "expo", "android", "ios", "mobile", "node", "nodejs", "css", "html",
+    "docker", "kubernetes", "linux", "cron", "stripe", "revenuecat", "superwall",
+    "machinelearning", "llm", "api", "backend", "frontend", "testing", "fhir",
+    "healthcare", "programming", "coding", "software", "engineering", "tutorial",
+    "gemini", "openai", "anthropic", "claude", "nextjs", "posthog", "analytics",
+}
 
 # ---------------------------------------------------------------------------
 # Markdown -> body HTML
@@ -152,9 +166,173 @@ def _esc_attr(s: str) -> str:
     return _html.escape(s or "", quote=True)
 
 
-def _json_str(s: str) -> str:
-    """Escape a string for embedding inside a JSON-LD literal."""
-    return json.dumps(s or "")[1:-1]
+# ---------------------------------------------------------------------------
+# JSON-LD structured data (Article/TechArticle + optional FAQPage)
+#
+# Built as Python objects and json.dumps()'d so escaping is correct by
+# construction -- no manual {{ }} doubling, and the FAQ node can be conditional.
+# AI answer engines (ChatGPT, Perplexity, Google AI Overviews) and Google Rich
+# Results read this graph to understand + cite the page.
+# ---------------------------------------------------------------------------
+
+# A heading is "question-shaped" if it ends in '?' or opens with an interrogative.
+_FAQ_QUESTION_RE = re.compile(
+    r"^(?:how|why|what|when|where|which|who|whose|can|should|is|are|does|do|will|"
+    r"could|would|did|was|were)\b",
+    re.IGNORECASE,
+)
+# Listicle/gotcha title signals: "3 ... bugs", "5 mistakes", "gotcha", "blockers".
+_LISTICLE_TITLE_RE = re.compile(
+    r"\b(\d+\s+\w+|mistakes?|gotchas?|bugs?|traps?|blockers?|pitfalls?|"
+    r"lessons?|things?|reasons?|ways?|tips?|rules?)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_md_inline(text: str) -> str:
+    """Reduce a chunk of markdown to plain readable text for a FAQ answer."""
+    # Drop code fences / inline code backticks but keep the code text.
+    text = re.sub(r"```[^\n]*\n?", "", text)
+    text = text.replace("`", "")
+    # Links [label](url) -> label.
+    text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
+    # Images ![alt](url) -> drop entirely.
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    # Emphasis / bold markers.
+    text = re.sub(r"[*_]{1,3}", "", text)
+    # Heading hashes / blockquote markers / list bullets at line start.
+    text = re.sub(r"(?m)^\s{0,3}(#{1,6}\s*|>\s*|[-*+]\s+|\d+\.\s+)", "", text)
+    # Collapse whitespace.
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _first_answer(section_md: str, max_len: int = 320) -> str:
+    """First 1-2 sentences of a section's prose, as a plain-text FAQ answer."""
+    plain = _strip_md_inline(section_md)
+    if not plain:
+        return ""
+    # Take up to two sentences, then cap length.
+    sentences = re.split(r"(?<=[.!?])\s+", plain)
+    answer = sentences[0]
+    if len(answer) < 140 and len(sentences) > 1:
+        answer = (answer + " " + sentences[1]).strip()
+    if len(answer) > max_len:
+        answer = answer[:max_len].rsplit(" ", 1)[0].rstrip(",;:") + "..."
+    return answer
+
+
+def _extract_faq(content_md: str):
+    """Build [(question, answer)] from `##` sections + their first answer sentences.
+
+    Returns the list only when the article has a Q&A / listicle / gotcha shape worth
+    marking up; otherwise returns [] so prose essays don't get spammy FAQ schema.
+    """
+    # Split on level-2 headings (the section grain Google's FAQ expects). Keep the
+    # heading text with its following body.
+    parts = re.split(r"(?m)^##\s+(?!#)(.+?)\s*$", content_md)
+    # re.split with a capturing group yields: [pre, h1, body1, h2, body2, ...]
+    if len(parts) < 3:
+        return []
+    pairs = []
+    it = iter(parts[1:])
+    for heading, body in zip(it, it):
+        q = _strip_md_inline(heading)
+        if not q:
+            continue
+        # A FAQ question shouldn't be longer than a tweet.
+        if len(q) > 120:
+            continue
+        a = _first_answer(body)
+        if not a or len(a) < 25:
+            continue
+        pairs.append((q, a))
+
+    # Whether these pairs are worth marking up as FAQPage is decided by _wants_faq
+    # (question-shaped headings or a listicle/gotcha title); here we just collect.
+    return pairs
+
+
+def _wants_faq(title: str, pairs: list) -> bool:
+    """Gate FAQ emission: question-shaped headings OR a listicle/gotcha title."""
+    if len(pairs) < 2:
+        return False
+    question_shaped = sum(
+        1 for q, _ in pairs if q.endswith("?") or _FAQ_QUESTION_RE.match(q)
+    )
+    if question_shaped >= 2:
+        return True
+    if question_shaped >= 1 and _LISTICLE_TITLE_RE.search(title):
+        return True
+    return bool(_LISTICLE_TITLE_RE.search(title)) and len(pairs) >= 3
+
+
+def _is_tech_article(tags) -> bool:
+    norm = {re.sub(r"[^a-z0-9]", "", t.lower()) for t in _normalize_tags(tags)}
+    return bool(norm & _TECH_TAGS)
+
+
+def build_jsonld_graph(*, title: str, description: str, canonical: str,
+                       date_iso: str, modified_iso: str, is_tech: bool,
+                       faq_pairs=None) -> dict:
+    """Assemble the JSON-LD doc (a @graph of Article[+FAQPage]) as a Python dict.
+
+    Pure data assembly -- no markdown/HTML parsing. FAQ pairs (already extracted +
+    gated by the caller) are appended as a FAQPage when present. This is the single
+    seam reused by both the markdown renderer and the in-place HTML upgrader, so the
+    schema is identical no matter which path produced the page.
+    """
+    article = {
+        "@type": "TechArticle" if is_tech else "Article",
+        "headline": title,
+        "description": description,
+        "url": canonical,
+        "mainEntityOfPage": {"@type": "WebPage", "@id": canonical},
+        "image": OG_IMAGE,
+        "datePublished": date_iso,
+        "dateModified": modified_iso or date_iso,
+        "author": {"@type": "Person", "name": AUTHOR, "url": SITE},
+        "publisher": {
+            "@type": "Organization",
+            "name": PUBLISHER_NAME,
+            "url": SITE,
+            "logo": {"@type": "ImageObject", "url": f"{SITE}/favicon.svg"},
+        },
+        "inLanguage": "en",
+    }
+    graph = [article]
+    if faq_pairs:
+        graph.append({
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": q,
+                    "acceptedAnswer": {"@type": "Answer", "text": a},
+                }
+                for q, a in faq_pairs
+            ],
+        })
+    return {"@context": "https://schema.org", "@graph": graph}
+
+
+def serialize_jsonld(doc: dict) -> str:
+    """Serialize a JSON-LD doc for safe inline embedding inside <script>."""
+    body = json.dumps(doc, indent=2, ensure_ascii=False)
+    # Guard against a stray "</script>" inside any literal breaking the inline script.
+    return body.replace("</", "<\\/")
+
+
+def _build_jsonld(meta: dict, content_md: str, canonical: str, title: str,
+                  description: str, date_iso: str, modified_iso: str) -> str:
+    """Markdown-path JSON-LD: extract+gate FAQ from the markdown, assemble, serialize."""
+    pairs = _extract_faq(content_md)
+    faq = pairs if _wants_faq(title, pairs) else None
+    doc = build_jsonld_graph(
+        title=title, description=description, canonical=canonical,
+        date_iso=date_iso, modified_iso=modified_iso,
+        is_tech=_is_tech_article(meta.get("tags")), faq_pairs=faq,
+    )
+    return serialize_jsonld(doc)
 
 
 PAGE_TEMPLATE = """<!DOCTYPE html>
@@ -555,27 +733,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   </style>
 <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}}'></script><!-- End Cloudflare Web Analytics -->
 
-  <!-- JSON-LD Structured Data -->
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
   <script type="application/ld+json">
-  {{
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "{headline_json}",
-    "description": "{desc_json}",
-    "url": "{canonical}",
-    "image": "{site}/og-image.png",
-    "datePublished": "{date_iso}",
-    "author": {{
-        "@type": "Person",
-        "name": "{author}",
-        "url": "{site}"
-    }},
-    "publisher": {{
-        "@type": "Person",
-        "name": "{author}",
-        "url": "{site}"
-    }}
-}}
+{jsonld_block}
   </script>
 </head>
 <body>
@@ -667,16 +827,27 @@ def render_page(meta: dict, body_markdown: str) -> str:
         words = len(re.findall(r"\w+", body_md))
         reading = max(1, round(words / 200))
 
+    date_iso = _fmt_date_iso(meta.get("published_at", ""))
+    modified_iso = _fmt_date_iso(meta.get("modified_at", "") or meta.get("edited_at", ""))
+    jsonld_block = _build_jsonld(
+        meta=meta,
+        content_md=content_md,
+        canonical=canonical,
+        title=title,
+        description=description,
+        date_iso=date_iso,
+        modified_iso=modified_iso,
+    )
+
     return PAGE_TEMPLATE.format(
         site=SITE,
         author=AUTHOR,
         title_esc=_esc(title),
         title_attr=_esc_attr(title),
         desc_attr=_esc_attr(description),
-        headline_json=_json_str(title),
-        desc_json=_json_str(description),
+        jsonld_block=jsonld_block,
         canonical=canonical,
-        date_iso=_fmt_date_iso(meta.get("published_at", "")),
+        date_iso=date_iso,
         date_human=_fmt_date_human(meta.get("published_at", "")),
         tag_label=_esc(_tag_label(meta.get("tags"))),
         reading=reading,

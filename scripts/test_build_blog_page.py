@@ -10,6 +10,8 @@ fidelity for every feature present across the real backfill corpus
 (code fences, tables, lists, blockquotes, images, inline links, JSX-in-fences).
 """
 import importlib.util
+import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -173,6 +175,166 @@ class SlugSafety(unittest.TestCase):
         ]:
             out = bbp.write_page(dict(META, slug=good), "Lede.\n\n## H\n\nbody", repo)
             self.assertTrue(out.exists())
+
+
+def _extract_jsonld_graphs(html):
+    """Return every parsed JSON-LD doc emitted by the renderer (un-guarding </ -> <\\/)."""
+    graphs = []
+    for block in re.findall(
+        r'<script type="application/ld\+json">\n(.*?)\n  </script>', html, re.S
+    ):
+        graphs.append(json.loads(block.replace("<\\/", "</")))
+    return graphs
+
+
+# A listicle/gotcha-shaped article: question-shaped ## headings + a "3 ... bugs" title.
+LISTICLE_BODY = (
+    "The lede paragraph hooks the reader here.\n\n"
+    "## Why did the app crash only on a real device?\n\n"
+    "The Hermes engine evaluates differently than the JS test runner, so a parse "
+    "the mock accepted threw at runtime.\n\n"
+    "## What is the AsyncStorage race that tests miss?\n\n"
+    "Tests run storage synchronously. On device two writes race and the second "
+    "silently wins, dropping the first draft.\n\n"
+    "## How do you catch this class before shipping?\n\n"
+    "Run the real bundle on a real device with smoke flows. A green Jest suite is "
+    "not device coverage.\n"
+)
+LISTICLE_META = dict(
+    META,
+    title="3 React Native Bugs That Crashed On Device But Passed Every Test",
+    tags=["react", "reactnative", "javascript"],
+)
+
+# A prose essay: declarative headings, narrative title, non-technical tags.
+PROSE_BODY = (
+    "An opening reflection on the void.\n\n"
+    "## The horizon\n\n"
+    "Information at the boundary behaves like memory, a record etched into geometry "
+    "that no fall can erase.\n\n"
+    "## The temperature\n\n"
+    "Hawking showed the void glows faintly, a thermodynamic whisper from what looks "
+    "like nothing at all.\n"
+)
+PROSE_META = dict(
+    META,
+    title="Notes On Black Holes As Entropy Machines",
+    tags=["physics", "writing"],
+)
+
+
+class JsonLdSchema(unittest.TestCase):
+    """Invariants over the GEO/answer-engine JSON-LD. These guard the class of bug
+    where the structured data is malformed, missing a Rich-Results-required field,
+    un-escaped (breaks the parse / breaks out of the <script>), or emits spammy
+    FAQ markup on prose."""
+
+    def graphs(self, meta, body):
+        return _extract_jsonld_graphs(bbp.render_page(meta, body))
+
+    def article_node(self, meta, body):
+        nodes = self.graphs(meta, body)[0]["@graph"]
+        arts = [n for n in nodes if n["@type"] in ("Article", "TechArticle")]
+        self.assertEqual(len(arts), 1, "exactly one Article/TechArticle node")
+        return arts[0]
+
+    def test_jsonld_parses(self):
+        # Every emitted ld+json block must be valid JSON (the whole point).
+        for g in self.graphs(LISTICLE_META, LISTICLE_BODY):
+            self.assertIn("@context", g)
+
+    def test_article_has_required_rich_result_fields(self):
+        art = self.article_node(META, "Lede.\n\n## H\n\nBody text that is here.")
+        for key in ("headline", "description", "url", "image",
+                    "datePublished", "dateModified", "author", "publisher",
+                    "mainEntityOfPage"):
+            self.assertIn(key, art, f"Article JSON-LD missing required field: {key}")
+        self.assertEqual(art["author"]["@type"], "Person")
+        self.assertEqual(art["author"]["name"], "Diven Rastdus")
+
+    def test_publisher_is_raedus_labs_organization(self):
+        art = self.article_node(META, "Lede.\n\n## H\n\nBody text here now.")
+        self.assertEqual(art["publisher"]["@type"], "Organization")
+        self.assertEqual(art["publisher"]["name"], "Raedus Labs")
+        self.assertIn("logo", art["publisher"])
+
+    def test_date_modified_defaults_to_published(self):
+        art = self.article_node(META, "Lede.\n\n## H\n\nBody text here now.")
+        self.assertEqual(art["dateModified"], art["datePublished"])
+        self.assertEqual(art["dateModified"], "2026-06-24")
+
+    def test_tech_tags_yield_techarticle(self):
+        # META carries linux/cron/devops -> TechArticle.
+        art = self.article_node(META, "Lede.\n\n## H\n\nBody text here now.")
+        self.assertEqual(art["@type"], "TechArticle")
+
+    def test_non_tech_tags_yield_plain_article(self):
+        art = self.article_node(PROSE_META, PROSE_BODY)
+        self.assertEqual(art["@type"], "Article")
+
+    def test_faqpage_emitted_for_listicle_gotcha_shape(self):
+        nodes = self.graphs(LISTICLE_META, LISTICLE_BODY)[0]["@graph"]
+        faqs = [n for n in nodes if n["@type"] == "FAQPage"]
+        self.assertEqual(len(faqs), 1, "listicle/Q&A article must emit one FAQPage")
+        qs = faqs[0]["mainEntity"]
+        self.assertGreaterEqual(len(qs), 2)
+        for q in qs:
+            self.assertEqual(q["@type"], "Question")
+            self.assertTrue(q["name"])
+            self.assertEqual(q["acceptedAnswer"]["@type"], "Answer")
+            self.assertTrue(q["acceptedAnswer"]["text"])
+            # Answers are plain text -- no markdown noise that AI engines would lift verbatim.
+            self.assertNotIn("```", q["acceptedAnswer"]["text"])
+            self.assertNotRegex(q["acceptedAnswer"]["text"], r"\[[^\]]+\]\([^)]+\)")
+
+    def test_no_faqpage_on_prose_essay(self):
+        nodes = self.graphs(PROSE_META, PROSE_BODY)[0]["@graph"]
+        faqs = [n for n in nodes if n["@type"] == "FAQPage"]
+        self.assertEqual(faqs, [], "narrative prose must NOT get spammy FAQ markup")
+
+    def test_escaping_quotes_amp_and_script_breakout(self):
+        meta = dict(
+            META,
+            title='Why "RLS OR" Leaks Rows & Breaks <Tenants>',
+            description='Quotes "and" & <html> and </script> here.',
+            tags=["postgres", "security", "sql"],
+        )
+        body = (
+            "Lede.\n\n"
+            "## Why does \"OR\" in an RLS policy leak rows?\n\n"
+            "A policy USING (a OR b) evaluates as a union & matches rows it should "
+            "not, and a </script> in prose must not break the JSON here.\n\n"
+            "## Should you ever use OR in RLS?\n\n"
+            "No. Split into separate PERMISSIVE policies, each with one predicate.\n"
+        )
+        html = bbp.render_page(meta, body)
+        # Parses despite the hostile characters.
+        graphs = _extract_jsonld_graphs(html)
+        art = [n for n in graphs[0]["@graph"] if n["@type"] in ("Article", "TechArticle")][0]
+        self.assertEqual(art["headline"], 'Why "RLS OR" Leaks Rows & Breaks <Tenants>')
+        # A raw </script> inside the ld+json block would terminate the script early.
+        block = re.search(
+            r'<script type="application/ld\+json">\n(.*?)\n  </script>', html, re.S
+        ).group(1)
+        self.assertNotIn("</script>", block, "ld+json must not contain a raw closing script tag")
+
+    def test_faq_answer_handles_section_with_only_code(self):
+        # A section whose body is only a code fence yields no usable prose answer,
+        # so it must be skipped rather than emitting an empty Answer.
+        body = (
+            "Lede.\n\n"
+            "## How do you set the timezone?\n\n"
+            "```bash\nexport TZ=UTC\n```\n\n"
+            "## Why does cron ignore the comment?\n\n"
+            "Cron never reads the comment line; it schedules in the daemon's local "
+            "time regardless of what the comment claims.\n"
+        )
+        nodes = self.graphs(LISTICLE_META, body)[0]["@graph"]
+        faqs = [n for n in nodes if n["@type"] == "FAQPage"]
+        if faqs:
+            for q in faqs[0]["mainEntity"]:
+                self.assertTrue(q["acceptedAnswer"]["text"].strip(),
+                                "no empty FAQ answers")
 
 
 if __name__ == "__main__":

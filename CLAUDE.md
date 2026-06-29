@@ -104,6 +104,39 @@ earns ZERO ranking authority on our domain. Likely a major cause of the ~10 page
 - After backfilling: `node scripts/enhance-blog-seo.js` (SEO layer) -> `update-blog-index.py`
   (listing+sitemap) -> commit+push -> verify canonicals curl 200 -> `astra-indexnow.sh <urls>`.
 
+### 2026-06-29: GEO / answer-engine JSON-LD layer (Article/TechArticle + FAQPage)
+Every `blog/<slug>/index.html` emits rich structured data so AI answer engines
+(ChatGPT, Perplexity, Google AI Overviews) can cite us and Google shows rich results.
+- **Renderer** (`scripts/build-blog-page.py`): the JSON-LD is now built as a Python
+  dict -> `json.dumps(indent=2, ensure_ascii=False)` -> `serialize_jsonld()` (which
+  also `</`->`<\/` guards against a `</script>` breakout). NEVER hand-interpolate
+  JSON-LD into the `.format()` template again — that needs brittle `{{`/`}}` doubling
+  and can't be conditional. The seam is `build_jsonld_graph(...)` (pure data assembly,
+  no parsing) reused by both the markdown renderer and the HTML upgrader.
+- **What it emits**: an `Article` (or `TechArticle` when tags signal a dev how-to)
+  with headline, description, url, image, datePublished, dateModified, author (Person =
+  Diven Rastdus), publisher (**Organization = Raedus Labs**), mainEntityOfPage,
+  inLanguage. PLUS a `FAQPage` (built from `##` headings + the first answer sentence of
+  each section) ONLY for Q&A / listicle / gotcha-shaped posts — gated by `_wants_faq`
+  (question-shaped headings OR a "N bugs/mistakes/gotchas" title). Prose essays get
+  Article-only (no spammy FAQ). The pre-existing `BreadcrumbList` block (from
+  `enhance-blog-seo.js`) is a SEPARATE second `<script>` and is left untouched.
+- **Regenerating EXISTING pages**: `python3 scripts/upgrade-jsonld.py` upgrades the
+  Article JSON-LD on every page IN PLACE, reading the page's own `<head>` meta + its
+  rendered `<h2>` sections. Use this NOT a full re-render, because 11 of the posts are
+  hand-written native HTML with no markdown source — re-rendering would lose their body.
+  Idempotent; `--check` for a dry run. After it: `update-blog-index.py` is unaffected
+  (it reads meta, not schema). 34 pages, 71 ld+json blocks, all parse; 23 carry FAQPage.
+- **New posts are automatic**: `cross-post.py` -> `build-blog-page.write_page` ->
+  `render_page` bakes the schema in at publish time. Nothing manual.
+- **Tests**: `test_build_blog_page.py` `JsonLdSchema` class guards the class of bug
+  (malformed JSON, missing Rich-Results field, wrong publisher, FAQ on prose,
+  `</script>` breakout). Run `python3 scripts/test_build_blog_page.py` (31 tests).
+- **Editorial dovetail**: the article skill STEP 3b ("answer-first") now tells writers
+  to open each `##` section with a complete standalone claim, because that first
+  sentence becomes the cited FAQ Answer. A colon-setup first line ("here is what
+  happened:") makes a weak machine answer.
+
 <!-- Add ## YYYY-MM-DD: Title entries here as lessons accrue. -->
 
 <!-- Auto-generated stub via /project-md bootstrap on 2026-05-05. Sharpen as you learn what's tricky here. -->

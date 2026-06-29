@@ -391,24 +391,91 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "I researched Nous Hermes for a day. Here's what I stole.",
-    "description": "Why I didn't migrate my 24/7 autonomous agent from Claude Code to Nous Hermes -- and the 3 patterns I ported in one afternoon instead.",
-    "url": "https://astraedus.dev/blog/i-researched-nous-hermes-for-a-day/",
-    "image": "https://astraedus.dev/og-image.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "I researched Nous Hermes for a day. Here's what I stole.",
+      "description": "Why I didn't migrate my 24/7 autonomous agent from Claude Code to Nous Hermes -- and the 3 patterns I ported in one afternoon instead.",
+      "url": "https://dev.to/diven_rastdus_c5af27d68f3/i-researched-nous-hermes-for-a-day-heres-what-i-stole-ll5",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://dev.to/diven_rastdus_c5af27d68f3/i-researched-nous-hermes-for-a-day-heres-what-i-stole-ll5"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-24",
+      "dateModified": "2026-04-24",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-04-24"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What Hermes Actually Is",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hermes is a full agentic operating system. Not a library."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Surface-Level Appeal",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Running an autonomous agent 24/7 on Claude Code means I built most of this infrastructure myself. Hooks for enforcement."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Three Dealbreakers for a 24/7 Operator",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Security posture. The default Hermes config ships with what their own security audit calls an ALLOW-ALL execution policy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Migration Cost",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Setting aside the dealbreakers: migrating would mean porting dozens of skills, rewriting the hook system, rebuilding the file-based memory conventions, and re-training the ops workflow around a new mental model."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I Stole Instead",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The interesting move with any framework release isn't \"should I switch.\" It's \"what design decisions did they make that I haven't?\" Read their architecture."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to Read Every Framework Release",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The pattern that Hermes represents, full-featured, opinionated, batteries-included, will keep appearing. A new one drops every few weeks."
+          }
+        }
+      ]
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

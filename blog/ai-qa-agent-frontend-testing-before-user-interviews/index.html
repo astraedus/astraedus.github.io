@@ -406,24 +406,75 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.",
-    "description": "Running a first-time-user QA agent before user interviews found 31 screenshots, 11 ranked issues, 4 blockers. All 4 fixed same day. Second pass came back INTERVIEW-READY.",
-    "url": "https://astraedus.dev/blog/ai-qa-agent-frontend-testing-before-user-interviews/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-23",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.",
+      "description": "Running a first-time-user QA agent before user interviews found 31 screenshots, 11 ranked issues, 4 blockers. All 4 fixed same day. Second pass came back INTERVIEW-READY.",
+      "url": "https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-23",
+      "dateModified": "2026-04-23",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The setup",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not a code review. I didn't want lint."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What it found",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The landing page said Arc was \"An AI that reads your whole story and shows you who you're becoming.\""
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Interview readiness changed in one afternoon",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The first report's verdict: two focused hours of fixes, then go."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The prompt template",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is the exact structure I used, with private details swapped for placeholders. Works against any deployed Next.js app or web product."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

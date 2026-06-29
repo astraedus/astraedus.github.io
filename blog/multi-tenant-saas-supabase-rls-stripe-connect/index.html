@@ -391,24 +391,75 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect",
-    "description": "A real-world pattern for running platform billing and tenant billing side by side with Supabase auth, RLS, Stripe Checkout, and Stripe Connect.",
-    "url": "https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-21",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "How I Built Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect",
+      "description": "A real-world pattern for running platform billing and tenant billing side by side with Supabase auth, RLS, Stripe Checkout, and Stripe Connect.",
+      "url": "https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/multi-tenant-saas-supabase-rls-stripe-connect/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-21",
+      "dateModified": "2026-04-21",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why Existing Solutions Fall Short",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most examples break down in one of three ways."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Working Code",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I wanted every authenticated user to immediately have an accounts row. Supabase makes that easy with a trigger on auth.users."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Pitfalls",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here are the parts that were easy to get wrong."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'd Change",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If I were hardening this version for a production team today, I would change five things."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

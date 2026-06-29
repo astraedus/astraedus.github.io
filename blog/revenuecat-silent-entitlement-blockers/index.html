@@ -398,24 +398,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "4 Ways RevenueCat Silently Denies Paying Users Their Entitlements",
-    "description": "Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...",
-    "url": "https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-16",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "4 Ways RevenueCat Silently Denies Paying Users Their Entitlements",
+      "description": "Your store credentials are valid. RevenueCat accepted the service account. The SDK initialized...",
+      "url": "https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/revenuecat-silent-entitlement-blockers/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-16",
+      "dateModified": "2026-06-16",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "1. Purchases.logIn() was never called",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This was the most expensive one. Three days of confused billing debugging before I found it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "2. No customerInfo listener",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here's what happens when you skip a customerInfoUpdateListener:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "3. The RC session leaked between users on the same device",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This bug is invisible to unit tests. You'd need an integration test that calls configure(), then logOut(), then signs in as a different user and checks their entitlements."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "4. The webhook handles purchases but ignores refunds and cancellations",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The first three bugs are client-side. This one is server-side, and it's the one that keeps denying access after everything else is right."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The checklist",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Before shipping a RevenueCat-gated feature:"
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

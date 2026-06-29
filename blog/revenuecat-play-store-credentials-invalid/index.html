@@ -398,24 +398,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "RevenueCat Said My Play Store Credentials Were Invalid. They Weren't.",
-    "description": "I created a Google service account, uploaded the JSON key to RevenueCat, and watched my Android app...",
-    "url": "https://astraedus.dev/blog/revenuecat-play-store-credentials-invalid/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-14",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "RevenueCat Said My Play Store Credentials Were Invalid. They Weren't.",
+      "description": "I created a Google service account, uploaded the JSON key to RevenueCat, and watched my Android app...",
+      "url": "https://astraedus.dev/blog/revenuecat-play-store-credentials-invalid/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/revenuecat-play-store-credentials-invalid/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-14",
+      "dateModified": "2026-06-14",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

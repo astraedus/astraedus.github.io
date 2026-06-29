@@ -398,24 +398,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "3 React Native Bugs That Crashed on Device but Passed Every Test",
-    "description": "Your test suite is green. TypeScript is happy. The web preview looks perfect.  Then you install the...",
-    "url": "https://astraedus.dev/blog/3-react-native-bugs-that-crashed-on-device-but-passed-every-test/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-06",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "3 React Native Bugs That Crashed on Device but Passed Every Test",
+      "description": "Your test suite is green. TypeScript is happy. The web preview looks perfect.  Then you install the...",
+      "url": "https://astraedus.dev/blog/3-react-native-bugs-that-crashed-on-device-but-passed-every-test/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/3-react-native-bugs-that-crashed-on-device-but-passed-every-test/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-06",
+      "dateModified": "2026-06-06",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Bug 1: The Gold Button That Turned Grey",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "My app uses a theme system. A configureTheme() function mutates a shared Colors object at runtime, and components read from it via StyleSheet.create."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug 2: The Environment Variable That Existed Until It Didn't",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The app crashed on launch with a clear error: EXPOPUBLICSUPABASEURL is required. But the .env file had the value."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug 3: The Missing Crypto API",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The app launched fine. Onboarding worked."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Pattern",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "All three bugs share the same shape:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I Do Now",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After these three burned a full day each, I added a mandatory step before any release build:"
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

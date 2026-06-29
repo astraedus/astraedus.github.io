@@ -398,24 +398,123 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "\"FHIR for Software Engineers (Not Just Healthcare Devs)\"",
-    "description": "FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...",
-    "url": "https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-02",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "\"FHIR for Software Engineers (Not Just Healthcare Devs)\"",
+      "description": "FHIR for Software Engineers (Not Just Healthcare Devs)   FHIR (Fast Healthcare...",
+      "url": "https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/fhir-for-software-engineers-not-just-healthcare-devs/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-02",
+      "dateModified": "2026-04-02",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What FHIR actually is",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "FHIR defines a set of \"resources\" (think: database models) for healthcare data. Each resource has a type, a JSON schema, and a REST endpoint."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Querying a FHIR server",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Any HTTP client works. Here's a real example using curl against a public FHIR server:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The TypeScript client",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Raw HTTP works, but for production code use a typed client. Here's how to set one up:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Understanding medication data",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is where it gets interesting (and messy). A MedicationRequest looks like this:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Search parameters you'll actually use",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "FHIR search has its own syntax, but it maps to query parameters:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Building on top of FHIR",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Once you can read FHIR data, you can build tools. Here's a real-world example: a medication reconciliation system that compares what the hospital prescribed vs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Running your own FHIR server",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For development, use HAPI FHIR -- the reference implementation:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Things that tripped me up",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bundle pagination. Large result sets come back paginated."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When to use FHIR",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "FHIR makes sense when: - You're integrating with healthcare systems (EHRs, pharmacies, labs) - You need a standard data model for health data - Multiple systems need to exchange patient information - You're building tools that operate on medical records"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Resources",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I build production AI systems, including healthcare tools. If you're working with medical data, I'm at astraedus.dev."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

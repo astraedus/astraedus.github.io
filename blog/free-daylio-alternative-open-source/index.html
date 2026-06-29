@@ -407,24 +407,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "I built a free, open-source Daylio alternative instead of paying a subscription",
-    "description": "Why I built a free, open-source mood tracker instead of paying a subscription, an honest comparison with Daylio, and what local-first plus open source actually buys you.",
-    "url": "https://astraedus.dev/blog/free-daylio-alternative-open-source/",
-    "image": "https://astraedus.dev/soulsync/assets/feature-graphic.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "I built a free, open-source Daylio alternative instead of paying a subscription",
+      "description": "Why I built a free, open-source mood tracker instead of paying a subscription, an honest comparison with Daylio, and what local-first plus open source actually buys you.",
+      "url": "https://astraedus.dev/blog/free-daylio-alternative-open-source/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/free-daylio-alternative-open-source/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-20",
+      "dateModified": "2026-06-20",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-06-20"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What Daylio actually costs",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I want to be fair here, so I checked the current numbers rather than going off memory. Daylio has a real free tier, and it works."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "So I built SoulSync",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I'm a developer, and I had a stubborn opinion, which is a dangerous combination. I built SoulSync, a mood tracker and journal with two rules: nothing behind a paywall, and nothing leaves your device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "An honest comparison",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here's the side by side. I've kept it to things I can actually back up."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What open source plus local-first actually buys you",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Two phrases get thrown around a lot. Here's what they mean in practice, not in pitch."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "If you want to try it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SoulSync is Android-only for now. Download the APK from the latest GitHub release and log your first entry."
+          }
+        }
+      ]
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

@@ -407,25 +407,92 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Free Bearable Alternative: Open-Source Mood and Symptom Tracking (Android)",
-    "description": "Bearable's free tier locks your history after 30 days. Here's how SoulSync covers the basics for free, with no account, no cloud, and source code you can actually read.",
-    "url": "https://astraedus.dev/blog/bearable-alternative-free-open-source/",
-    "image": "https://astraedus.dev/soulsync/assets/feature-graphic.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Bearable is locking your history. Here's the free alternative.",
+      "description": "Bearable's free tier locks your history after 30 days. Here's how SoulSync covers the basics for free, with no account, no cloud, and source code you can actually read.",
+      "url": "https://astraedus.dev/blog/bearable-alternative-free-open-source/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/bearable-alternative-free-open-source/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-28",
+      "dateModified": "2026-06-28",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-06-28"
-  }
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What Bearable actually costs",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I'm going off their current pricing, not memory. Bearable Premium runs $34.99 a year or $6.99 a month, with a 7-day free trial."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 30-day wall",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is the one that actually gets people. Mood and symptom tracking is a long-game tool."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "SoulSync: the honest comparison",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I built SoulSync because I wanted a mood and journal app where the full feature set was just the app. No tier to unlock."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What you give up",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I want to be fair about this. Bearable is more fully-featured for people tracking complex chronic illness stuff: medication schedules, pain levels, specific symptom categories, detailed experiments."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "On the privacy question",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Worth being specific here rather than vague."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "If you want to try it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SoulSync is Android only. Download the APK from the latest GitHub release and install it directly."
+          }
+        }
+      ]
+    }
+  ]
+}
   </script>
   <script type="application/ld+json">
   {

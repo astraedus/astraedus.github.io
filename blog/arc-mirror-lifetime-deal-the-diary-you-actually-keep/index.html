@@ -398,24 +398,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Arc Mirror Lifetime Deal: the diary you actually keep",
-    "description": "Most journaling apps do not fail on day one. They fail the first week you miss.  You skip Tuesday....",
-    "url": "https://astraedus.dev/blog/arc-mirror-lifetime-deal-the-diary-you-actually-keep/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-28",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Arc Mirror Lifetime Deal: the diary you actually keep",
+      "description": "Most journaling apps do not fail on day one. They fail the first week you miss.  You skip Tuesday....",
+      "url": "https://astraedus.dev/blog/arc-mirror-lifetime-deal-the-diary-you-actually-keep/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/arc-mirror-lifetime-deal-the-diary-you-actually-keep/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-28",
+      "dateModified": "2026-04-28",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

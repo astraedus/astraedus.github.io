@@ -398,24 +398,91 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "5 Cron Mistakes That Silently Break Your Scheduled Jobs",
-    "description": "It's 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...",
-    "url": "https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-29",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 Cron Mistakes That Silently Break Your Scheduled Jobs",
+      "description": "It's 3am. The job you set up three weeks ago was supposed to run at 9am every day. You check the logs...",
+      "url": "https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/cron-mistakes-that-silently-break-scheduled-jobs/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-29",
+      "dateModified": "2026-06-29",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "1. The timezone trap",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your crontab line says 0 9 . You expect it to fire at 9am."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "2. The bare PATH problem",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your script runs perfectly from the terminal. In cron, it fails silently with command not found."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "3. No year field means one-shots repeat forever",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You want to run a migration once, on a specific date. You add:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "4. Silent failure, no one watching",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A cron job runs. It exits with code 1."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "5. Overlapping runs",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your job is scheduled every 5 minutes. Runs take 2 minutes, usually."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why these all share the same root cause",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most of these failures share a single root: cron doesn't run in your shell environment. It runs in a bare, minimal execution context with no profile, a stripped PATH, a daemon timezone, and output going nowhere."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

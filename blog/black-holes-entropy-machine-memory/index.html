@@ -353,24 +353,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Black Holes, Entropy, and the Architecture of Machine Memory",
-    "description": "How information theory from black hole physics maps onto the real engineering of persistent AI agent memory.",
-    "url": "https://astraedus.dev/blog/black-holes-entropy-machine-memory/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-01",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Black Holes, Entropy, and the Architecture of Machine Memory",
+      "description": "How information theory concepts from black hole physics map onto the real engineering problems of building AI agent memory systems that persist across sessions.",
+      "url": "https://astraedus.dev/blog/black-holes-entropy-machine-memory/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/black-holes-entropy-machine-memory/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-01",
+      "dateModified": "2026-04-01",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

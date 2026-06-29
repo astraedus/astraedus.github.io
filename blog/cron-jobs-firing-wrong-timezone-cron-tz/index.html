@@ -398,24 +398,107 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "My Cron Jobs Were Firing 10 Hours Off Their Own Comments",
-    "description": "I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...",
-    "url": "https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-24",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "My Cron Jobs Were Firing 10 Hours Off Their Own Comments",
+      "description": "I scheduled a heavy maintenance job to run Saturday at 6am, while I was asleep and nothing else was...",
+      "url": "https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/cron-jobs-firing-wrong-timezone-cron-tz/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-24",
+      "dateModified": "2026-06-24",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The comment lied, and cron didn't care",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here is what the crontab line looked like:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why cron does this",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cron schedules in the system's local timezone by default. On Linux that is whatever the system clock is set to, or the TZ the daemon inherited."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to detect it on your own boxes",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The fastest check is to compare what a job's comment claims against when it actually ran. Cron logs each invocation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The fix: stop writing comments you aren't enforcing",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There are two honest ways out, and which one you pick depends on the job."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The gotcha that bit me twice: CRON_TZ is not TZ",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One job genuinely needed US market hours, so I reached for CRONTZ=America/NewYork. That is correct, and naming a region handles US daylight saving automatically, which is the whole reason to use a region name instead of a fixed offset."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Daylight saving still wants to ruin your day",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Naming a region (America/NewYork) instead of a fixed offset means cron tracks DST for you. Good."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Back to the Saturday job",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The fix for the job that started all this was the boring one. I rewrote the comment to match the mechanism and left the schedule alone:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The actual lesson",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The bug was not cron. Cron did exactly what it always does."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

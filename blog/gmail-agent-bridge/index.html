@@ -391,24 +391,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)",
-    "description": "Gmail's users.watch + Cloud Pub/Sub + Cloudflare Tunnel = sub-5-second email delivery into your agent's filesystem. Total monthly cost: $0.",
-    "url": "https://astraedus.dev/blog/gmail-agent-bridge/",
-    "image": "https://astraedus.dev/og-image.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)",
+      "description": "Gmail's users.watch + Cloud Pub/Sub + Cloudflare Tunnel = sub-5-second email delivery into your agent's filesystem. Total monthly cost: $0.",
+      "url": "https://astraedus.dev/blog/gmail-agent-bridge/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/gmail-agent-bridge/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-05",
+      "dateModified": "2026-05-05",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-05-05"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

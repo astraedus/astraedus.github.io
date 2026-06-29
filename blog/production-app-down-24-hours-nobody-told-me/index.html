@@ -398,24 +398,67 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "My Production App Was Down for 24 Hours and Nobody Told Me",
-    "description": "I built an AI assessment app for a consulting firm prospect. Deployed it on Supabase free tier. Sent...",
-    "url": "https://astraedus.dev/blog/production-app-down-24-hours-nobody-told-me/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-23",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "My Production App Was Down for 24 Hours and Nobody Told Me",
+      "description": "I built an AI assessment app for a consulting firm prospect. Deployed it on Supabase free tier. Sent...",
+      "url": "https://astraedus.dev/blog/production-app-down-24-hours-nobody-told-me/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/production-app-down-24-hours-nobody-told-me/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-23",
+      "dateModified": "2026-05-23",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The failure mode nobody warns you about",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most monitoring advice assumes you're running your own servers. \"Set up Prometheus."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 5 signals I actually monitor now",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After losing that prospect, I built a monitoring checklist. Nothing fancy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'd do differently",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If I were starting a new project today, I'd set up monitoring before I deploy, not after the first outage."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

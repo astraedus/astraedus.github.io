@@ -398,24 +398,107 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "R8 Minification Silently Killed My Android App's Core Feature (And Tests Didn't Catch It)",
-    "description": "My CI pipeline was green. Unit tests passed. The APK built and signed without errors. I installed it...",
-    "url": "https://astraedus.dev/blog/r8-minification-silently-killed-my-android-app/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-20",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "R8 Minification Silently Killed My Android App's Core Feature (And Tests Didn't Catch It)",
+      "description": "My CI pipeline was green. Unit tests passed. The APK built and signed without errors. I installed it...",
+      "url": "https://astraedus.dev/blog/r8-minification-silently-killed-my-android-app/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/r8-minification-silently-killed-my-android-app/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-20",
+      "dateModified": "2026-05-20",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What I was building",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nudge is an open-source Android app blocker. You pick the apps you waste time on and set a delay (say, 30 seconds)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 2MB red flag I ignored",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Here's what the release APK looked like:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What R8 actually stripped",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "R8 analyzed my code's call graph and decided several things were \"unused\":"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why tests didn't catch it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is the part that stung. I had tests."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The fix (and why I didn't just add ProGuard rules)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The obvious fix is ProGuard keep rules:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I should have done differently",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Test the release build, not just the debug build."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bonus: the permission disclosure pattern",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Getting Google Play to approve an app with QUERYALLPACKAGES, AccessibilityService, and SYSTEMALERTWINDOW is its own adventure. Google's review team needs to see explicit in-app disclosure of what each permission does and why."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "R8 minification is not compression. It's a code transformation that decides what your app needs at runtime."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

@@ -407,24 +407,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "A mood tracker shouldn't need an account or the cloud",
-    "description": "A private, offline mood tracker with no account and no cloud. How SoulSync keeps 100% of your data on device with SQLite, on-device photos, and JSON export you own.",
-    "url": "https://astraedus.dev/blog/private-offline-mood-tracker/",
-    "image": "https://astraedus.dev/soulsync/assets/feature-graphic.png",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "A mood tracker shouldn't need an account or the cloud",
+      "description": "A private, offline mood tracker with no account and no cloud. How SoulSync keeps 100% of your data on device with SQLite, on-device photos, and JSON export you own.",
+      "url": "https://astraedus.dev/blog/private-offline-mood-tracker/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/private-offline-mood-tracker/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-20",
+      "dateModified": "2026-06-20",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
-    },
-    "datePublished": "2026-06-20"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
 }
   </script>
   <script type="application/ld+json">

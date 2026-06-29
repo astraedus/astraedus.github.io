@@ -398,24 +398,99 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "PostHog + Next.js 16 App Router: the Suspense gotcha that silenced my analytics for 6 days",
-    "description": "I shipped a no-op stub of PostHogProvider.tsx on April 20. I told myself I would come back to it that...",
-    "url": "https://astraedus.dev/blog/posthog-nextjs-16-app-router-the-suspense-gotcha-that-silenced-my-analytics-for-6-days/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-27",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "PostHog + Next.js 16 App Router: the Suspense gotcha that silenced my analytics for 6 days",
+      "description": "I shipped a no-op stub of PostHogProvider.tsx on April 20. I told myself I would come back to it that...",
+      "url": "https://astraedus.dev/blog/posthog-nextjs-16-app-router-the-suspense-gotcha-that-silenced-my-analytics-for-6-days/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/posthog-nextjs-16-app-router-the-suspense-gotcha-that-silenced-my-analytics-for-6-days/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-27",
+      "dateModified": "2026-04-27",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How I broke it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The original component looked roughly like this:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why I did not notice",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I had posthog.capture(\"waitlistsignup\") baked into a form handler. Forms were getting submitted."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Gotcha 1: posthog-js/react ships in the same package, on a subpath",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The official adapter for plugging posthog-js into React's context tree is at posthog-js/react. There is no separate posthog-react package on npm anymore (there used to be)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Gotcha 2: useSearchParams in App Router needs Suspense",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I wanted manual pageview tracking, not the default capturepageview: true, because I want to attribute ?utmsource params and route-level differences explicitly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Gotcha 3: posthog.__loaded is the truth, not React state",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For posthog.capture calls to actually fire, the SDK has to be initialized. In a SPA-style component you might write useEffect(() => posthog.init(...), []) and assume \"it ran.\" But there is an edge case."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How I verified, without trusting the dashboard",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Once the code was right and deploying, the question was: is it actually firing in production?"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I would do differently",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Three habits I am absorbing:"
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

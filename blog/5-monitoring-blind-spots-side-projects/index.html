@@ -398,24 +398,91 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "5 Monitoring Blind Spots That Let My Side Projects Fail Silently",
-    "description": "I run four side projects. A journaling app, an Android app blocker, a healthcare AI tool, and a...",
-    "url": "https://astraedus.dev/blog/5-monitoring-blind-spots-side-projects/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-28",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "5 Monitoring Blind Spots That Let My Side Projects Fail Silently",
+      "description": "I run four side projects. A journaling app, an Android app blocker, a healthcare AI tool, and a...",
+      "url": "https://astraedus.dev/blog/5-monitoring-blind-spots-side-projects/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/5-monitoring-blind-spots-side-projects/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-28",
+      "dateModified": "2026-05-28",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "1. No Uptime Checks (The \"It's Probably Fine\" Gap)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "My journaling app runs on Supabase's free tier. Free-tier projects auto-pause after 7 days of inactivity."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "2. Unstructured Logs Across Services",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "My healthcare AI tool runs three microservices on Cloud Run: an MCP server, an orchestrator agent, and an interaction checker. When a patient reconciliation fails, which service caused it?"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "3. Zero Mobile Crash Visibility",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "My Android app blocker uses Kotlin and Jetpack Compose. R8 (Android's code shrinker) silently removed a class my accessibility service needed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "4. API Quota Exhaustion With No Warning",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This week, my social media automation stopped working. No errors in my code."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "5. CI Tests That Don't Run Against Production",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Last week, my healthcare tool's production API broke. I didn't find out from my CI pipeline."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Pattern",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every one of these gaps follows the same shape: something fails, nothing tells me, I find out too late."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

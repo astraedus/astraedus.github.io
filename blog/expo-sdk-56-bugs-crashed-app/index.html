@@ -398,24 +398,75 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "3 Expo SDK 56 Bugs That Crashed My App Before It Even Launched",
-    "description": "I burned four EAS cloud builds and two hours chasing crashes that had nothing to do with my code. All...",
-    "url": "https://astraedus.dev/blog/expo-sdk-56-bugs-crashed-app/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-27",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "3 Expo SDK 56 Bugs That Crashed My App Before It Even Launched",
+      "description": "I burned four EAS cloud builds and two hours chasing crashes that had nothing to do with my code. All...",
+      "url": "https://astraedus.dev/blog/expo-sdk-56-bugs-crashed-app/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/expo-sdk-56-bugs-crashed-app/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-27",
+      "dateModified": "2026-05-27",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Bug 1: expo-av crashes with NoClassDefFoundError",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I added voice recording to a dream journal app. The Expo docs for Audio still reference expo-av in some examples."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug 2: Gradle 9.x silently breaks React Native",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After fixing the audio crash, the next build failed with a different NoClassDefFoundError:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bug 3: Barrel exports + native modules = cascading crash",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I had a standard barrel export file:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The checklist I wish I had",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Before your next Expo SDK 56 Android build: grep for expo-av (replace with expo-audio/expo-video), check gradle-wrapper.properties isn't 9.x after prebuild, and audit barrel exports for native module imports."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

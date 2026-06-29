@@ -398,24 +398,38 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "My Expo Device Tests Could Break Without CI Noticing. Here Is the Fix.",
-    "description": "My on-device QA used to be an AI tapping my app by pixel coordinates. One regression walk logged 83...",
-    "url": "https://astraedus.dev/blog/deterministic-expo-device-qa-maestro/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-06-18",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "My Expo Device Tests Could Break Without CI Noticing. Here Is the Fix.",
+      "description": "My on-device QA used to be an AI tapping my app by pixel coordinates. One regression walk logged 83...",
+      "url": "https://astraedus.dev/blog/deterministic-expo-device-qa-maestro/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/deterministic-expo-device-qa-maestro/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-06-18",
+      "dateModified": "2026-06-18",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

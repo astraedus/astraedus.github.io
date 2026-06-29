@@ -398,24 +398,83 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "How `OR` in a Postgres RLS policy leaked every flagged row to every user",
-    "description": "A frontend QA pass on a brand-new account opened the library sidebar and saw two notes I had never...",
-    "url": "https://astraedus.dev/blog/how-or-in-a-postgres-rls-policy-leaked-every-flagged-row-to-every-user/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-04-30",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How `OR` in a Postgres RLS policy leaked every flagged row to every user",
+      "description": "A frontend QA pass on a brand-new account opened the library sidebar and saw two notes I had never...",
+      "url": "https://astraedus.dev/blog/how-or-in-a-postgres-rls-policy-leaked-every-flagged-row-to-every-user/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/how-or-in-a-postgres-rls-policy-leaked-every-flagged-row-to-every-user/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-04-30",
+      "dateModified": "2026-04-30",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The setup",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Single table, multi-user app. Each row has a userid and a boolean ispublic."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How RLS combines policies",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "When a table has multiple permissive policies, Postgres ORs their USING expressions. So the effective SELECT predicate on journalentries becomes:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How QA found it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A new test account, just signed up, no entries written. The library sidebar should have been empty."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The fix, in two parts",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I treated this as a defense-in-depth problem. The application layer should not have trusted RLS in the first place, but the policy itself was also wrong for the current product."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The general lesson",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "RLS is a backstop, not a primary access control mechanism. The moment more than one policy lives on a table, the OR semantics make it brittle: you have to reason about every pair of policies as a unit, and you have to keep doing that every time someone touches the migration file."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">

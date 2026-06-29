@@ -391,24 +391,107 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "PostHog Custom Events: How I Tracked a $59 Payment Funnel from Page View to Stripe Checkout",
-    "description": "Pageviews tell you someone showed up. Custom events tell you what happened next. Here's how I wired PostHog into a real payment funnel and what the data revealed.",
-    "url": "https://astraedus.dev/blog/posthog-funnel-events/",
-    "image": "https://astraedus.dev/og-image.png",
-    "datePublished": "2026-05-09",
-    "author": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "PostHog Custom Events: How I Tracked a $59 Payment Funnel from Page View to Stripe Checkout",
+      "description": "Pageviews tell you someone showed up. Custom events tell you what happened next. Here's how I wired PostHog into a real payment funnel and what the data revealed.",
+      "url": "https://dev.to/diven_rastdus_c5af27d68f3/posthog-custom-events-how-i-tracked-a-59-payment-funnel-from-page-view-to-stripe-checkout-3g5p",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://dev.to/diven_rastdus_c5af27d68f3/posthog-custom-events-how-i-tracked-a-59-payment-funnel-from-page-view-to-stripe-checkout-3g5p"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-05-09",
+      "dateModified": "2026-05-09",
+      "author": {
         "@type": "Person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
     },
-    "publisher": {
-        "@type": "Person",
-        "name": "Diven Rastdus",
-        "url": "https://astraedus.dev"
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The events that matter",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Before writing any code, I mapped the funnel on paper. Every SaaS purchase page has the same shape:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The PostHog provider (Next.js App Router)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PostHog's React SDK needs to initialize client-side. In the App Router, that means a client component wrapped in Suspense:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tracking page-mount events",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The simplest custom event: fire when the component mounts. I built a reusable component for this:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tracking clicks with inline capture",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For button clicks, call posthog.capture directly. No wrapper component needed:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tracking scroll depth with IntersectionObserver",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This one catches the \"did they even see the CTA?\" question:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Building the funnel in PostHog",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Once events flow in, go to PostHog > Funnels > New Funnel. Add your events in order:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'd add next",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If I were doing this for a higher-traffic page, I'd add:"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The setup cost",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Total time to wire this up: about 45 minutes. The provider takes 10."
+          }
+        }
+      ]
     }
+  ]
 }
   </script>
   <script type="application/ld+json">
