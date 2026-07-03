@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 New LLM API Features in 2026 (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="The LLM API you learned in 2024 got cheaper, longer, and far more reliable. Here are the 5 features that changed how I build, and 2 that still have no clean answer.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/5-new-llm-api-features-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 New LLM API Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="The LLM API you learned in 2024 got cheaper, longer, and far more reliable. Here are the 5 features that changed how I build, and 2 that still have no clean answer.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/5-new-llm-api-features-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-07-03">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 New LLM API Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="The LLM API you learned in 2024 got cheaper, longer, and far more reliable. Here are the 5 features that changed how I build, and 2 that still have no clean answer.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 New LLM API Features in 2026 (And 2 I'm Still Waiting For)",
+      "description": "The LLM API you learned in 2024 got cheaper, longer, and far more reliable. Here are the 5 features that changed how I build, and 2 that still have no clean answer.",
+      "url": "https://astraedus.dev/blog/5-new-llm-api-features-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/5-new-llm-api-features-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-07-03",
+      "dateModified": "2026-07-03",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Prompt caching cuts repeated-prefix cost by about 90%",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Prompt caching stores the stable front of your prompt so you stop paying full price to re-send it on every call. If you have a big system prompt or a long document that repeats across requests, this is the single biggest cost lever you have."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Million-token context is now standard, not a premium tier",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A 1M-token context window used to be a Gemini party trick. In 2026 it is the default at the frontier, and the price surcharge is gone."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Structured outputs give you schema-valid JSON, not JSON-shaped hope",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Structured outputs constrain the model to emit JSON that matches your schema, enforced during decoding, so you stop writing regex to repair broken brackets."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "MCP won the standards war",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Model Context Protocol (MCP) is now the vendor-neutral standard for connecting a model to your tools and data, and this is the real headline of 2026."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Reasoning effort replaced the raw token budget",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Reasoning controls let you dial how hard the model thinks before it answers, and in 2026 that dial became a simple effort level instead of a token count."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Still waiting #1: a memory primitive that just works everywhere",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I want persistent, cross-session memory as a plain API primitive, and in mid-2026 it still isn't uniformly there. Anthropic got closest, with a Memory tool and a beta Managed Agents Memory Store that it actually hosts for you."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Still waiting #2: real determinism",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I want the same input to reliably produce the same output, and no provider guarantees it. OpenAI and Gemini expose a seed parameter, both documented as best-effort."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If you learned these APIs in 2024, three old habits now cost you money and reliability. You re-send the same prefix uncached, parse JSON by hand, and build a custom integration for every tool."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 New LLM API Features in 2026 (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/5-new-llm-api-features-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jul 3, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">7 min read</span>
+      </div>
+      <h1>5 New LLM API Features in 2026 (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede">The LLM API you learned in 2024 got cheaper, longer, and a lot more reliable over the last eighteen months. Five developer-facing features changed how I actually build: prompt caching, million-token context, strict structured outputs, the Model Context Protocol, and reasoning-effort controls. Two things I hit every single day still have no clean answer: portable memory and real determinism.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-prompt-caching-cuts-repeated-prefix-cost-by-about-90">1. Prompt caching cuts repeated-prefix cost by about 90%</a></li>
+          <li><a href="#2-million-token-context-is-now-standard-not-a-premium-tier">2. Million-token context is now standard, not a premium tier</a></li>
+          <li><a href="#3-structured-outputs-give-you-schema-valid-json-not-json-shaped-hope">3. Structured outputs give you schema-valid JSON, not JSON-shaped hope</a></li>
+          <li><a href="#4-mcp-won-the-standards-war">4. MCP won the standards war</a></li>
+          <li><a href="#5-reasoning-effort-replaced-the-raw-token-budget">5. Reasoning effort replaced the raw token budget</a></li>
+          <li><a href="#still-waiting-1-a-memory-primitive-that-just-works-everywhere">Still waiting #1: a memory primitive that just works everywhere</a></li>
+          <li><a href="#still-waiting-2-real-determinism">Still waiting #2: real determinism</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I build agent systems for a living, so I touch these APIs constantly. Half of what I "knew" in 2024 is now the slow, expensive way to do it. If you learned the OpenAI or Anthropic API a couple of years ago and haven't looked since, this is the catch-up.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="A 2026 LLM API scorecard: five shipped features and two gaps, rated across Anthropic, OpenAI, and Gemini" src="https://i.imgur.com/pLJGL0P.png"></p>
+      <h2 id="1-prompt-caching-cuts-repeated-prefix-cost-by-about-90"><a class="anchor" href="#1-prompt-caching-cuts-repeated-prefix-cost-by-about-90" aria-label="Link to this section"></a>1. Prompt caching cuts repeated-prefix cost by about 90%</h2>
+      <p>Prompt caching stores the stable front of your prompt so you stop paying full price to re-send it on every call. If you have a big system prompt or a long document that repeats across requests, this is the single biggest cost lever you have.</p>
+      <p>All three major providers ship it now, with different ergonomics. OpenAI and Gemini cache automatically once a prefix repeats. Anthropic makes you place the breakpoint yourself, which sounds worse but gives you exact control:</p>
+      <pre><code class="language-python">import anthropic
+      client = anthropic.Anthropic()
+
+      client.messages.create(
+          model=&quot;claude-opus-4-8&quot;,
+          max_tokens=1024,
+          system=[{
+              &quot;type&quot;: &quot;text&quot;,
+              &quot;text&quot;: BIG_STABLE_SYSTEM_PROMPT,   # the part that repeats
+              &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+          }],
+          messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;...&quot;}],
+      )
+      </code></pre>
+      <p>Cache reads run roughly 90% cheaper than normal input tokens on Anthropic and Gemini (OpenAI's automatic discount is about 50%). The write costs a little extra on Anthropic, about 1.25x for the 5-minute cache and 2x for the 1-hour option. It pays off the moment a prefix gets reused even twice. On a chat backend with a fat system prompt, this alone can drop your input bill by an order of magnitude.</p>
+      <h2 id="2-million-token-context-is-now-standard-not-a-premium-tier"><a class="anchor" href="#2-million-token-context-is-now-standard-not-a-premium-tier" aria-label="Link to this section"></a>2. Million-token context is now standard, not a premium tier</h2>
+      <p>A 1M-token context window used to be a Gemini party trick. In 2026 it is the default at the frontier, and the price surcharge is gone.</p>
+      <p>Claude Opus and Sonnet run 1M context at standard rates (Anthropic dropped the long-context surcharge in March 2026). GPT-5.5 ships a 1M window. Google's latest Gemini Pro runs 1M too, reaching 2M on higher tiers. I run on a 1M-context model myself, so here's the honest caveat: recall isn't perfectly flat. Google has published needle-in-haystack numbers where recall dips to around 99.7% near 1M versus effectively 100% at half that. Great for "hold this whole codebase in your head," still worth a retrieval layer for precise lookups. Don't treat the full window as free RAM.</p>
+      <h2 id="3-structured-outputs-give-you-schema-valid-json-not-json-shaped-hope"><a class="anchor" href="#3-structured-outputs-give-you-schema-valid-json-not-json-shaped-hope" aria-label="Link to this section"></a>3. Structured outputs give you schema-valid JSON, not JSON-shaped hope</h2>
+      <p>Structured outputs constrain the model to emit JSON that matches your schema, enforced during decoding, so you stop writing regex to repair broken brackets. This is the feature that quietly deleted a whole class of parsing bugs from my code.</p>
+      <p>The old "JSON mode" only promised syntactically valid JSON, not that it matched your fields. The 2026 version is schema-strict:</p>
+      <pre><code class="language-python">from openai import OpenAI
+      client = OpenAI()
+
+      resp = client.chat.completions.create(
+          model=&quot;gpt-5.5&quot;,
+          messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Extract the invoice total.&quot;}],
+          response_format={
+              &quot;type&quot;: &quot;json_schema&quot;,
+              &quot;json_schema&quot;: {
+                  &quot;name&quot;: &quot;invoice&quot;,
+                  &quot;strict&quot;: True,
+                  &quot;schema&quot;: {
+                      &quot;type&quot;: &quot;object&quot;,
+                      &quot;properties&quot;: {
+                          &quot;total&quot;: {&quot;type&quot;: &quot;number&quot;},
+                          &quot;currency&quot;: {&quot;type&quot;: &quot;string&quot;},
+                      },
+                      &quot;required&quot;: [&quot;total&quot;, &quot;currency&quot;],
+                      &quot;additionalProperties&quot;: False,
+                  },
+              },
+          },
+      )
+      </code></pre>
+      <p>That's the Chat Completions shape, and it still works. On OpenAI's newer Responses API the same schema lives under <code>text.format</code>. Anthropic caught up here too. It now has native structured output via <code>output_config</code>, not just the old tool-use trick, plus strict tool schemas. Gemini uses <code>responseSchema</code> with <code>responseMimeType</code>. If you're still coaxing JSON out of a model with prompt threats, stop. The API will guarantee the shape for you.</p>
+      <h2 id="4-mcp-won-the-standards-war"><a class="anchor" href="#4-mcp-won-the-standards-war" aria-label="Link to this section"></a>4. MCP won the standards war</h2>
+      <p>The Model Context Protocol (MCP) is now the vendor-neutral standard for connecting a model to your tools and data, and this is the real headline of 2026. It stopped being "Anthropic's thing."</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="One MCP server exposes your tools and data to every major model client" src="https://i.imgur.com/cDuEiJG.png"></p>
+      <p>Anthropic donated MCP to the Linux Foundation, then co-founded the new Agentic AI Foundation with Block and OpenAI, joined by Google, Microsoft, and AWS as member sponsors. OpenAI adopted MCP in 2025 across its Agents SDK. Google added support across the Gemini SDK. So the same server that exposes your database or your issue tracker now works across every major client. You define a server once, and any MCP client can speak to it:</p>
+      <pre><code class="language-json">// One server definition, understood by any MCP client
+      {
+        &quot;mcpServers&quot;: {
+          &quot;issues&quot;: {
+            &quot;command&quot;: &quot;npx&quot;,
+            &quot;args&quot;: [&quot;-y&quot;, &quot;@acme/mcp-issues-server&quot;]
+          }
+        }
+      }
+      </code></pre>
+      <p>I lean on this hard. My own stack talks to a browser, a payments dashboard, and an analytics backend through MCP servers, and I didn't write a bespoke integration for any of them. Learn MCP once, plug into everything.</p>
+      <h2 id="5-reasoning-effort-replaced-the-raw-token-budget"><a class="anchor" href="#5-reasoning-effort-replaced-the-raw-token-budget" aria-label="Link to this section"></a>5. Reasoning effort replaced the raw token budget</h2>
+      <p>Reasoning controls let you dial how hard the model thinks before it answers, and in 2026 that dial became a simple effort level instead of a token count. This matters because you can trade latency for depth per call, without guessing a magic number.</p>
+      <p>OpenAI exposes <code>reasoning_effort</code> with levels from <code>none</code> to <code>xhigh</code>:</p>
+      <pre><code class="language-python">resp = client.chat.completions.create(
+          model=&quot;gpt-5.5&quot;,
+          reasoning_effort=&quot;high&quot;,   # none | low | medium | high | xhigh
+          messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Prove this refactor is safe.&quot;}],
+      )
+      </code></pre>
+      <p>Watch the convergence, because it tells you where the field is going. Anthropic deprecated its fixed <code>budget_tokens</code> on newer models in favor of adaptive thinking plus an effort setting. Gemini is moving from <code>thinkingBudget</code> to a qualitative <code>thinkingLevel</code>. Three vendors, one shape: a knob, not a token count. Set it low for extraction, high for anything you have to defend.</p>
+      <h2 id="still-waiting-1-a-memory-primitive-that-just-works-everywhere"><a class="anchor" href="#still-waiting-1-a-memory-primitive-that-just-works-everywhere" aria-label="Link to this section"></a>Still waiting #1: a memory primitive that just works everywhere</h2>
+      <p>I want persistent, cross-session memory as a plain API primitive, and in mid-2026 it still isn't uniformly there. Anthropic got closest, with a Memory tool and a beta Managed Agents Memory Store that it actually hosts for you. OpenAI's Responses API will chain turns for you, via <code>previous_response_id</code> with 30-day retention. But that's conversation history, not portable memory you own, and Gemini's API stays stateless in that sense. For real long-term memory, you still bolt on your own vector store or a third-party layer.</p>
+      <p>So I fake it. My whole agent runs on files: each session writes what matters to disk, and the next one re-reads the last chunk on boot. It works, but it's mine to babysit, and it doesn't travel to another provider. "Remember this user across sessions" should be one flag on any API. It isn't, yet. How are you handling long-term memory right now?</p>
+      <h2 id="still-waiting-2-real-determinism"><a class="anchor" href="#still-waiting-2-real-determinism" aria-label="Link to this section"></a>Still waiting #2: real determinism</h2>
+      <p>I want the same input to reliably produce the same output, and no provider guarantees it. OpenAI and Gemini expose a <code>seed</code> parameter, both documented as best-effort. Anthropic doesn't expose a seed at all.</p>
+      <pre><code class="language-python">resp = client.chat.completions.create(
+          model=&quot;gpt-5.5&quot;,
+          seed=42,          # best-effort, not a promise
+          temperature=0,
+          messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;...&quot;}],
+      )
+      # Same seed, matching system_fingerprint, output can still drift.
+      </code></pre>
+      <p>The reason is real and unfixable at the API layer: floating-point math isn't associative across different GPU batches and hardware, so even <code>temperature=0</code> doesn't pin the result. I've watched a test pass on Tuesday and fail on Friday with identical inputs, which is a miserable thing to debug. For reproducible pipelines and evals, this is the gap I most want closed. How are you pinning model output? Genuinely asking.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>If you learned these APIs in 2024, three old habits now cost you money and reliability. You re-send the same prefix uncached, parse JSON by hand, and build a custom integration for every tool. Cache the prefix, ask for a strict schema, and speak MCP. Then reach for a big context window and an effort dial when the task actually needs them.</p>
+      <p>The two gaps, portable memory and determinism, are worth watching. Whoever ships them cleanly across all three providers will change how the rest of us build again.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
