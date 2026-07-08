@@ -551,7 +551,7 @@
       </nav>
 
       <p>I orchestrate LLM pipelines every day, and I have paid for both mistakes. In June, a fan-out of worker agents silently inherited my most expensive model and burned 2.1 million tokens in a single day. Three sessions died at the rate limit before I found it. The same month, a set of cheap models running precisely-scoped single tasks found four launch blockers in a subscription audit. The expensive part was never the loop. It was not knowing when the loop was needed.</p>
-      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Single LLM call vs agent loop, side by side" src="/home/astraedus/Pictures/diagrams/agents-vs-single-llm-call-overview.png"></p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Single LLM call vs agent loop, side by side" src="https://i.imgur.com/ZzF0oaZ.png"></p>
       <h2 id="what-actually-separates-an-agent-from-a-single-llm-call"><a class="anchor" href="#what-actually-separates-an-agent-from-a-single-llm-call" aria-label="Link to this section"></a>What actually separates an agent from a single LLM call?</h2>
       <p>An agent is a loop: the model picks an action, a tool runs it, the result goes back into the context, and it repeats until the goal is met. A single call is a function: input in, output out, and the control flow stays in your code.</p>
       <p>That is the whole distinction. It is not about tools, and it is not about intelligence. Anthropic's <a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a> draws the same line: "workflows" are LLMs and tools orchestrated through predefined code paths, while agents direct their own process. A surprising number of production "agents" are single calls wearing a trench coat, and they would be faster, cheaper, and easier to test if they admitted it.</p>
@@ -623,7 +623,7 @@
       <p>Anthropic's own advice to builders points the same way: find "the simplest solution possible", and only add complexity when it demonstrably pays for itself. Coming from the company selling the tokens, that is worth taking seriously.</p>
       <h2 id="how-do-you-decide-a-checklist"><a class="anchor" href="#how-do-you-decide-a-checklist" aria-label="Link to this section"></a>How do you decide? A checklist</h2>
       <p>Default to the single call. Escalate to an agent on evidence, not on vibes.</p>
-      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Decision flowchart: single call, pipeline, or agent" src="/home/astraedus/Pictures/diagrams/agents-vs-single-llm-call-decision.png"></p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Decision flowchart: single call, pipeline, or agent" src="https://i.imgur.com/wVkOyT6.png"></p>
       <ol>
       <li>Write the steps down. If you can, ship a single call or a fixed pipeline of calls.</li>
       <li>Schema first. If the output has a shape, enforce it with structured output or a strict tool schema.</li>
