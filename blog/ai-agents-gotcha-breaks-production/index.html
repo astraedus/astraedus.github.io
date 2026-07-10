@@ -542,7 +542,7 @@
       </nav>
 
       <p>I run autonomous agents in production every day. This one gotcha has bitten me from both sides in the same week. One killed worker nearly re-submitted the same listing to a directory that reviews duplicates by hand.</p>
-      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The four states of a finished agent run: the report says success or death, the world changed or did not, and the exit code cannot tell them apart" src="/home/astraedus/Pictures/diagrams/agent-state-quadrant.png"></p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The four states of a finished agent run: the report says success or death, the world changed or did not, and the exit code cannot tell them apart" src="https://i.imgur.com/DSEpT34.png"></p>
       <p>Here is how the near-duplicate happened. A billing limit killed one of my browser automation workers mid-run. It died with 84 bytes of stdout. I read that as total failure and started redoing its jobs from the top. An hour later I found the truth in its leftover browser tabs. The worker had already completed one directory submission (the listing was live), and had a second one half-filled in an open form. My "redo everything" pass was minutes away from submitting the live listing a second time.</p>
       <p>That is the whole trap in one story. Now let's generalize it, because your stack has the same bug.</p>
       <h2 id="why-do-retries-double-fire-side-effects"><a class="anchor" href="#why-do-retries-double-fire-side-effects" aria-label="Link to this section"></a>Why do retries double-fire side effects?</h2>
@@ -592,7 +592,7 @@
       </code></pre>
       <p>Payment APIs like Stripe support idempotency keys exactly so a retried request cannot charge a card twice. Your agent pipeline needs the same discipline for the same reason. The key comes from what the action does, not from which run attempts it. A second run computes the same key, finds it in the ledger, and gets the stored outcome back. The side effect never fires twice.</p>
       <p><strong>Rule 3: when a run dies, reconcile before you retry.</strong></p>
-      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Reconcile-then-retry flow" src="/home/astraedus/Pictures/diagrams/reconcile-then-retry.png"></p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Reconcile-then-retry flow" src="https://i.imgur.com/J5mhcqy.png"></p>
       <p>Before re-dispatching anything, inventory what the dead worker left behind: files it wrote, the git status of any repo it touched, its open browser tabs or sessions, and the live URLs it may have created. Each artifact tells you which actions completed. The recovery loop is small:</p>
       <pre><code class="language-python">def reconcile_then_retry(task):
           evidence = inventory(task)  # files, git status, live URLs, open sessions
