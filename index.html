@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diven Rastdus | Production AI agent systems</title>
-  <meta name="description" content="I ship production AI agent systems and write about what breaks. 24/7 autonomous agent, RAG pipelines, multi-agent coordination, full-stack. TypeScript, Python, Next.js. Available for project work.">
+  <title>Diven Rastdus — Full-stack developer &amp; founder of Raedus Labs</title>
+  <meta name="description" content="Full-stack developer and founder of Raedus Labs. I build production apps in TypeScript, React Native, and Next.js — with automated release pipelines, real device testing, and open-source code. Available for project work.">
   <link rel="canonical" href="https://astraedus.dev/">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://astraedus.dev/">
-  <meta property="og:title" content="Diven Rastdus | Production AI agent systems">
-  <meta property="og:description" content="I ship production AI agent systems and write about what breaks. 24/7 autonomous agent, RAG pipelines, multi-agent coordination, full-stack.">
+  <meta property="og:title" content="Diven Rastdus — Full-stack developer &amp; founder of Raedus Labs">
+  <meta property="og:description" content="I build and ship production apps — Android, React Native, Next.js — with automated release pipelines and real device testing. Founder of Raedus Labs.">
   <meta property="og:image" content="https://astraedus.dev/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -21,9 +21,8 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@astraedus">
-  <meta name="twitter:title" content="Diven Rastdus | Production AI agent systems">
-  <meta name="twitter:description" content="I ship production AI agent systems and write about what breaks. 24/7 autonomous agent, RAG pipelines, multi-agent coordination, full-stack.">
+  <meta name="twitter:title" content="Diven Rastdus — Full-stack developer &amp; founder of Raedus Labs">
+  <meta name="twitter:description" content="I build and ship production apps — Android, React Native, Next.js — with automated release pipelines and real device testing. Founder of Raedus Labs.">
   <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
 
   <!-- JSON-LD Structured Data -->
@@ -35,7 +34,7 @@
         "@type": "WebSite",
         "name": "Astraedus",
         "url": "https://astraedus.dev",
-        "description": "Production AI agent systems and technical writing",
+        "description": "Diven Rastdus — full-stack developer and founder of Raedus Labs",
         "author": { "@id": "https://astraedus.dev/#person" }
       },
       {
@@ -43,953 +42,534 @@
         "@id": "https://astraedus.dev/#person",
         "name": "Diven Rastdus",
         "url": "https://astraedus.dev",
-        "jobTitle": "AI Engineer",
+        "jobTitle": "Full-stack developer",
         "email": "theagentthatcould@gmail.com",
+        "worksFor": { "@id": "https://raeduslabs.com/#org" },
         "sameAs": [
           "https://github.com/astraedus",
-          "https://x.com/astraedus",
           "https://dev.to/diven_rastdus_c5af27d68f3",
-          "https://medium.com/@theagentthatcould",
-          "https://divenrastdus.hashnode.dev",
-          "https://linkedin.com/in/yuvraj-fowdar"
+          "https://divenrastdus.hashnode.dev"
         ],
-        "knowsAbout": ["AI agents", "multi-agent systems", "RAG pipelines", "TypeScript", "Python", "Next.js", "Claude Code"]
+        "knowsAbout": ["TypeScript", "React Native", "Expo", "Next.js", "Supabase", "Python", "Android", "CI/CD", "automated testing"]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://raeduslabs.com/#org",
+        "name": "Raedus Labs",
+        "url": "https://raeduslabs.com",
+        "description": "Independent app studio building open-source apps and AI-native products.",
+        "founder": { "@id": "https://astraedus.dev/#person" }
       }
     ]
   }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #09090b;
-      --surface: #0f0f12;
-      --surface-2: #16161a;
-      --surface-3: #1c1c21;
-      --border: #232328;
-      --border-hover: #38383f;
-      --text: #f4f4f5;
-      --text-2: #a1a1aa;
-      --text-3: #71717a;
-      --text-4: #52525b;
-      --amber: #f59e0b;
-      --amber-dim: rgba(245, 158, 11, 0.10);
-      --amber-border: rgba(245, 158, 11, 0.20);
-      --amber-glow: rgba(245, 158, 11, 0.05);
-      --green: #34d399;
-      --green-dim: rgba(52, 211, 153, 0.10);
-      --green-border: rgba(52, 211, 153, 0.20);
-      --serif: 'Instrument Serif', Georgia, serif;
-      --sans: 'DM Sans', -apple-system, sans-serif;
-      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+      --paper: #FBF7EF;
+      --paper-2: #F4ECDD;
+      --paper-3: #EDE3D1;
+      --ink: #221D18;
+      --ink-2: #5C5347;
+      --ink-3: #8E8371;
+      --line: #E5DAC6;
+      --line-2: #D7C9B1;
+      --ember: #BC531B;
+      --ember-deep: #9E4310;
+      --ember-soft: rgba(188, 83, 27, 0.10);
+      --ember-line: rgba(188, 83, 27, 0.24);
+      --live: #3F7A5A;
+      --live-soft: rgba(63, 122, 90, 0.12);
+      --dark: #1B1611;
+      --dark-2: #241E17;
+      --dark-line: #3A3025;
+      --dark-text: #F3ECDF;
+      --dark-muted: #B7AC98;
+      --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+      --sans: 'Geist', ui-sans-serif, -apple-system, system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+      --hand: 'Caveat', 'Segoe Script', cursive;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html { scroll-behavior: smooth; }
+
     body {
       font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
 
-    ::selection { background: var(--amber); color: var(--bg); }
+    ::selection { background: var(--ember-soft); color: var(--ember-deep); }
     a { color: inherit; }
-    .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+    img { max-width: 100%; }
 
-    /* ---- Dot grid background ---- */
+    /* Paper-grain texture */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 32px 32px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ---- Grain overlay ---- */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0.02;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.045;
+      mix-blend-mode: multiply;
       pointer-events: none;
       z-index: 9999;
     }
 
-    /* ---- Scroll reveal ---- */
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+    section[id] { scroll-margin-top: 84px; }
+
+    /* Accessibility */
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--ember);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    /* Scroll reveal */
     .reveal {
       opacity: 0;
-      transform: translateY(28px);
+      transform: translateY(22px);
       transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* Shared type roles */
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ember-deep);
+    }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ember-deep);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 26px;
+      height: 1px;
+      background: var(--ember);
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: clamp(1.9rem, 4vw, 2.7rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+    }
+    .lede { color: var(--ink-2); font-size: 1.02rem; max-width: 46ch; }
+    p { text-wrap: pretty; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+      padding: 13px 24px;
+      border-radius: 11px;
+      transition: transform 0.18s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .btn svg { width: 17px; height: 17px; }
+    .btn-primary {
+      background: linear-gradient(180deg, #C85D24 0%, #A8460F 100%);
+      color: #FFF7EE;
+      box-shadow: 0 10px 26px -10px rgba(158, 67, 16, 0.6);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -12px rgba(158, 67, 16, 0.7); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      border: 1px solid var(--line-2);
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .btn-ghost:hover { border-color: var(--ember); color: var(--ember-deep); transform: translateY(-2px); }
+    .btn-ghost:active { transform: translateY(0); }
+
+    .arrow::after { content: '\2192'; transition: transform 0.2s ease; }
+    a:hover > .arrow::after, .arrow-host:hover .arrow::after { transform: translateX(3px); }
+
+    /* Live dot */
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 0 0 rgba(63, 122, 90, 0.5);
+      animation: pulse 2.4s ease-out infinite;
+      display: inline-block; flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(63, 122, 90, 0.5); }
+      70% { box-shadow: 0 0 0 7px rgba(63, 122, 90, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(63, 122, 90, 0); }
     }
 
     /* ---- Nav ---- */
     nav {
-      padding: 20px 0;
-      position: relative;
-      z-index: 10;
-      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(10px);
+      background: rgba(251, 247, 239, 0.82);
+      border-bottom: 1px solid var(--line);
     }
-    nav .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
     .logo {
       font-family: var(--mono);
-      font-size: 0.82rem;
+      font-size: 0.86rem;
       font-weight: 500;
-      color: var(--text-3);
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-    .logo strong { color: var(--text); font-weight: 500; }
-    .logo-cursor {
-      display: inline-block;
-      width: 7px;
-      height: 15px;
-      background: var(--amber);
-      margin-left: 3px;
-      animation: blink 1s step-end infinite;
-    }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
-    .nav-links a {
-      font-size: 0.82rem;
-      color: var(--text-2);
+      color: var(--ink);
       text-decoration: none;
-      transition: color 0.2s;
-      position: relative;
+      display: flex; align-items: center;
     }
-    .nav-links a:not(.nav-cta):hover { color: var(--text); }
+    .logo .dim { color: var(--ink-3); }
+    .logo-cursor {
+      display: inline-block; width: 7px; height: 15px;
+      background: var(--ember); margin-left: 4px;
+      animation: blink 1.1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .nav-links { display: flex; align-items: center; gap: 26px; }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.18s;
+    }
+    .nav-links a:not(.nav-cta):hover { color: var(--ink); }
     .nav-links a:not(.nav-cta)::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: var(--amber);
-      transition: width 0.25s ease;
+      content: ''; position: absolute; left: 0; bottom: -5px;
+      width: 0; height: 1px; background: var(--ember); transition: width 0.22s ease;
     }
     .nav-links a:not(.nav-cta):hover::after { width: 100%; }
     .nav-cta {
-      background: var(--text);
-      color: var(--bg) !important;
-      padding: 8px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      text-decoration: none;
-      transition: all 0.2s;
+      color: var(--ember-deep) !important;
+      border: 1px solid var(--ember-line);
+      padding: 7px 16px; border-radius: 8px;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .nav-cta:hover { background: var(--amber); }
+    .nav-cta:hover { background: var(--ember-soft); border-color: var(--ember); }
 
     /* ---- Hero ---- */
-    .hero {
-      padding: 100px 0 80px;
-      position: relative;
-    }
+    .hero { position: relative; overflow: hidden; padding: 92px 0 76px; }
     .hero-glow {
-      position: absolute;
-      top: -150px;
-      right: -100px;
-      width: 700px;
-      height: 700px;
-      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 65%);
-      pointer-events: none;
-      animation: drift 25s ease-in-out infinite;
+      position: absolute; top: -220px; right: -160px;
+      width: 780px; height: 720px; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at center, rgba(188, 83, 27, 0.10) 0%, rgba(188, 83, 27, 0.04) 38%, transparent 68%);
     }
-    .hero-layout {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 60px;
-      align-items: center;
-      position: relative;
-      z-index: 1;
-    }
-    .hero-text { position: relative; }
-    .hero-intro {
+    .hero .wrap { position: relative; z-index: 1; }
+    .hero-name {
       font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--amber);
-      margin-bottom: 24px;
-      letter-spacing: 0.04em;
-      animation: fadeUp 0.6s ease-out both;
+      font-size: 0.78rem; letter-spacing: 0.06em;
+      color: var(--ink-2); margin-bottom: 26px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      animation: rise 0.6s ease-out both;
     }
+    .hero-name .sep { color: var(--line-2); }
     .hero h1 {
       font-family: var(--serif);
-      font-size: clamp(2.8rem, 5.5vw, 4.2rem);
-      font-weight: 400;
-      line-height: 1.08;
-      letter-spacing: -0.025em;
-      margin-bottom: 28px;
-      animation: fadeUp 0.6s ease-out 0.1s both;
+      font-weight: 500;
+      font-size: clamp(2.6rem, 6.2vw, 4.5rem);
+      line-height: 1.04;
+      letter-spacing: -0.02em;
+      max-width: 15ch;
+      margin-bottom: 22px;
+      text-wrap: balance;
+      animation: rise 0.6s ease-out 0.08s both;
     }
-    .hero h1 em {
-      font-style: italic;
-      color: var(--amber);
-    }
+    .hero h1 em { font-style: italic; color: var(--ember); font-weight: 400; }
     .hero-desc {
-      font-size: 1.05rem;
-      color: var(--text-2);
-      max-width: 540px;
-      line-height: 1.7;
-      margin-bottom: 40px;
-      animation: fadeUp 0.6s ease-out 0.2s both;
+      font-size: 1.12rem; color: var(--ink-2);
+      max-width: 52ch; margin-bottom: 12px;
+      animation: rise 0.6s ease-out 0.16s both;
     }
-    .hero-actions {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
-      animation: fadeUp 0.6s ease-out 0.3s both;
+    .hero-sig {
+      font-family: var(--hand); font-size: 1.7rem; color: var(--ember-deep);
+      line-height: 1; margin-bottom: 34px; display: inline-block;
+      transform: rotate(-3deg);
+      animation: rise 0.6s ease-out 0.24s both;
     }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--amber);
-      color: var(--bg);
-      padding: 14px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-      box-shadow: 0 0 40px var(--amber-dim), 0 1px 3px rgba(0,0,0,0.3);
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 60px rgba(245,158,11,0.18), 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid var(--border);
-      color: var(--text-2);
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    .btn-ghost:hover {
-      border-color: var(--border-hover);
-      color: var(--text);
-      background: var(--surface);
-    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; animation: rise 0.6s ease-out 0.3s both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 
-    /* ---- Terminal ---- */
-    .terminal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      animation: fadeUp 0.6s ease-out 0.4s both;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+    /* Live-now strip */
+    .livenow {
+      margin-top: 42px; padding-top: 24px; border-top: 1px solid var(--line);
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3);
+      animation: rise 0.6s ease-out 0.38s both;
     }
-    .terminal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-    }
-    .terminal-dots {
-      display: flex;
-      gap: 6px;
-    }
-    .terminal-dots span {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--border-hover);
-      transition: background 0.3s;
-    }
-    .terminal:hover .terminal-dots span:nth-child(1) { background: #ef4444; }
-    .terminal:hover .terminal-dots span:nth-child(2) { background: #f59e0b; }
-    .terminal:hover .terminal-dots span:nth-child(3) { background: #22c55e; }
-    .terminal-title {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--text-4);
-      letter-spacing: 0.02em;
-    }
-    .terminal-body {
-      padding: 20px;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      line-height: 1.8;
-      min-height: 260px;
-    }
-    .terminal-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-    .terminal-prompt {
-      color: var(--amber);
-      user-select: none;
-    }
-    .terminal-cmd {
-      color: var(--text);
-    }
-    .terminal-cursor-inline {
-      display: inline-block;
-      width: 7px;
-      height: 14px;
-      background: var(--amber);
-      animation: blink 1s step-end infinite;
-      vertical-align: text-bottom;
-      margin-left: 1px;
-    }
-    .terminal-output {
-      margin: 12px 0;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-    .terminal-output.show { opacity: 1; }
-    .terminal-row {
-      display: flex;
-      gap: 16px;
-      padding: 2px 0;
-      opacity: 0;
-      transform: translateX(-8px);
-      transition: all 0.3s ease;
-    }
-    .terminal-row.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    .terminal-key {
-      color: var(--text-3);
-      min-width: 80px;
-      text-transform: uppercase;
-      font-size: 0.72rem;
-      letter-spacing: 0.05em;
-    }
-    .terminal-val { color: var(--text-2); }
-    .terminal-live {
-      color: var(--green);
-      position: relative;
-      padding-left: 14px;
-    }
-    .terminal-live::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .terminal-bottom {
-      margin-top: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .terminal-bottom.show { opacity: 1; }
+    .livenow .label { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); letter-spacing: 0.04em; }
+    .livenow a { color: var(--ink-2); text-decoration: none; transition: color 0.18s; }
+    .livenow a:hover { color: var(--ember-deep); }
+    .livenow .sep { color: var(--line-2); }
 
-    /* ---- Stats ---- */
-    .stats {
-      padding: 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-    }
-    .stat {
-      text-align: center;
-      padding: 36px 20px;
-      position: relative;
-      border-right: 1px solid var(--border);
-    }
-    .stat:last-child { border-right: none; }
-    .stat-value {
-      font-family: var(--mono);
-      font-size: 1.6rem;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .stat-label {
-      font-size: 0.76rem;
-      color: var(--text-3);
-      letter-spacing: 0.01em;
-    }
-    .stat-live {
-      position: relative;
-    }
-    .stat-live::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      margin-left: 8px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
+    /* ---- Section frame ---- */
+    .band { padding: 84px 0; border-top: 1px solid var(--line); }
+    .band-head { max-width: 60ch; margin-bottom: 52px; }
+    .band-head .section-title { margin-bottom: 16px; }
 
-    /* ---- Section headers ---- */
-    .section-eyebrow {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    /* ---- Featured work ---- */
+    .product { padding: 26px 0; }
+    .product + .product { margin-top: 20px; padding-top: 46px; border-top: 1px solid var(--line); }
+    .product-grid {
+      display: grid; grid-template-columns: 1.05fr 0.95fr;
+      gap: 56px; align-items: center;
     }
-    .section-eyebrow::before {
-      content: '';
-      width: 20px;
-      height: 1px;
-      background: var(--amber);
+    .product.rev .product-grid { direction: rtl; }
+    .product.rev .product-copy { direction: ltr; }
+    .product.rev .product-shots { direction: ltr; }
+    .product-badges { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .badge {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 4px 11px; border-radius: 20px;
+      border: 1px solid var(--line-2); color: var(--ink-2); background: rgba(255,255,255,0.4);
     }
-    .section-title {
-      font-family: var(--serif);
-      font-size: clamp(2rem, 4vw, 2.75rem);
-      font-weight: 400;
-      letter-spacing: -0.015em;
-      margin-bottom: 16px;
-      line-height: 1.15;
+    .badge.live { color: var(--live); border-color: var(--live-soft); background: var(--live-soft); display: inline-flex; align-items: center; gap: 7px; }
+    .product h3 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.7rem, 3.2vw, 2.15rem); line-height: 1.1; margin-bottom: 6px; }
+    .product .tag { font-family: var(--serif); font-style: italic; color: var(--ember-deep); font-size: 1.12rem; margin-bottom: 16px; }
+    .product p.body { color: var(--ink-2); font-size: 0.98rem; margin-bottom: 22px; max-width: 44ch; }
+    .product-tech { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+    .product-tech span {
+      font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3);
+      padding: 3px 10px; border: 1px solid var(--line); border-radius: 5px;
     }
-    .section-desc {
-      font-size: 0.98rem;
-      color: var(--text-2);
-      max-width: 520px;
-      line-height: 1.65;
-      margin-bottom: 48px;
+    .product-links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .lnk {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--mono); font-size: 0.76rem; text-decoration: none;
+      padding: 9px 15px; border-radius: 9px; border: 1px solid var(--line-2);
+      color: var(--ink); background: rgba(255,255,255,0.4);
+      transition: border-color 0.18s, color 0.18s, transform 0.18s;
     }
+    .lnk svg { width: 15px; height: 15px; }
+    .lnk:hover { border-color: var(--ember); color: var(--ember-deep); transform: translateY(-1px); }
+    .lnk.primary { background: var(--ember-soft); border-color: var(--ember-line); color: var(--ember-deep); }
 
-    /* ---- Projects ---- */
-    .projects {
-      padding: 88px 0;
-      position: relative;
+    /* Phone cluster */
+    .product-shots { display: flex; justify-content: center; }
+    .cluster { position: relative; display: flex; justify-content: center; align-items: flex-end; }
+    .cluster::before {
+      content: ''; position: absolute; inset: -10% -6%;
+      background: radial-gradient(ellipse at center, rgba(188, 83, 27, 0.09) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
     }
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+    .phone {
+      position: relative; z-index: 1;
+      width: clamp(140px, 40vw, 205px);
+      background: #fff; border-radius: 30px; padding: 7px;
+      border: 1px solid var(--line-2);
+      box-shadow: 0 26px 52px -20px rgba(90, 55, 30, 0.4), 0 4px 14px rgba(90, 55, 30, 0.1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
     }
-    .project-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-    }
-    .project-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
-    }
-    .project-card.featured {
-      grid-column: span 2;
-      border-color: var(--amber-border);
-    }
-    .project-card.featured:hover {
-      border-color: var(--amber);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px var(--amber-border);
-    }
-    .project-chrome {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      color: var(--text-4);
-    }
-    .project-chrome-dots {
-      display: flex;
-      gap: 5px;
-    }
-    .project-chrome-dots span {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: background 0.3s;
-    }
-    .project-card:hover .project-chrome-dots span:nth-child(1) { background: #ef4444; }
-    .project-card:hover .project-chrome-dots span:nth-child(2) { background: #f59e0b; }
-    .project-card:hover .project-chrome-dots span:nth-child(3) { background: #22c55e; }
-    .project-body {
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .featured .project-body { padding: 32px; }
-    .project-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--amber);
-      background: var(--amber-dim);
-      border: 1px solid var(--amber-border);
-      padding: 4px 12px;
-      border-radius: 20px;
-      align-self: flex-start;
-    }
-    .project-badge.live {
-      color: var(--green);
-      background: var(--green-dim);
-      border-color: var(--green-border);
-    }
-    .project-badge.live::before {
-      content: '';
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .project-card h3 {
-      font-family: var(--serif);
-      font-size: 1.4rem;
-      font-weight: 400;
-      line-height: 1.2;
-    }
-    .project-card.featured h3 { font-size: 1.65rem; }
-    .project-desc {
-      font-size: 0.86rem;
-      color: var(--text-2);
-      line-height: 1.65;
-    }
-    .project-tech {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: auto;
-      padding-top: 4px;
-    }
-    .project-tech span {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      padding: 3px 10px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      color: var(--text-3);
-      transition: all 0.2s;
-    }
-    .project-card:hover .project-tech span {
-      border-color: var(--border-hover);
-    }
-    .project-links {
-      display: flex;
-      gap: 14px;
-      margin-top: 4px;
-    }
-    .project-links a {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--amber);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.2s;
-    }
-    .project-links a:hover { color: var(--text); }
-    .project-links a::after { content: '\2197'; font-size: 0.85em; transition: transform 0.2s; }
-    .project-links a:hover::after { transform: translate(2px, -2px); }
+    .phone img { display: block; width: 100%; border-radius: 23px; }
+    .phone.a { transform: rotate(-4deg); }
+    .phone.b { transform: rotate(3deg) translateY(20px); margin-left: -38px; }
+    .cluster:hover .phone.a { transform: rotate(-5deg) translateY(-4px); }
+    .cluster:hover .phone.b { transform: rotate(4deg) translateY(14px); }
 
-    /* ---- Stack ---- */
-    .stack {
-      padding: 88px 0;
-      border-top: 1px solid var(--border);
+    /* ---- How I ship ---- */
+    .ship {
+      background:
+        radial-gradient(circle, rgba(90,70,45,0.05) 1px, transparent 1px) 0 0 / 26px 26px,
+        var(--paper-2);
+      border-top: 1px solid var(--line);
+      padding: 84px 0;
     }
-    .stack-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border-radius: 12px;
-      overflow: hidden;
+    .ship-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+    .pillar { background: var(--paper); padding: 34px 32px; position: relative; transition: background 0.25s; }
+    .pillar:hover { background: var(--paper-3); }
+    .pillar::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 0; background: var(--ember); transition: width 0.25s ease; }
+    .pillar:hover::before { width: 3px; }
+    .pillar .num { font-family: var(--mono); font-size: 0.72rem; color: var(--ember-deep); margin-bottom: 16px; letter-spacing: 0.08em; }
+    .pillar h3 { font-family: var(--serif); font-weight: 500; font-size: 1.3rem; margin-bottom: 10px; line-height: 1.2; }
+    .pillar p { color: var(--ink-2); font-size: 0.92rem; }
+    .pillar code { font-family: var(--mono); font-size: 0.85em; color: var(--ember-deep); background: var(--ember-soft); padding: 1px 5px; border-radius: 4px; }
+
+    /* ---- Raedus Labs centerpiece (dark) ---- */
+    .studio {
+      position: relative; overflow: hidden;
+      background: var(--dark); color: var(--dark-text);
+      padding: 104px 0;
     }
-    .stack-item {
-      background: var(--surface);
-      padding: 28px;
-      position: relative;
-      transition: background 0.3s;
+    .studio::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 60% at 78% 12%, rgba(200, 93, 36, 0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 10% 100%, rgba(188, 83, 27, 0.12) 0%, transparent 62%);
     }
-    .stack-item:hover { background: var(--surface-2); }
-    .stack-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 0;
-      height: 100%;
-      background: var(--amber);
-      transition: width 0.3s ease;
+    .studio::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
     }
-    .stack-item:hover::before { width: 2px; }
-    .stack-item h4 {
-      font-family: var(--mono);
-      font-size: 0.74rem;
-      font-weight: 500;
-      color: var(--amber);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+    .studio .wrap { position: relative; z-index: 1; max-width: 820px; text-align: center; }
+    .studio .eyebrow { color: var(--ember); justify-content: center; }
+    .studio .eyebrow::before { background: var(--ember); }
+    .studio h2 {
+      font-family: var(--serif); font-weight: 500;
+      font-size: clamp(2.2rem, 5.5vw, 3.6rem); line-height: 1.08;
+      letter-spacing: -0.02em; margin-bottom: 22px; text-wrap: balance;
     }
-    .stack-item p {
-      font-size: 0.86rem;
-      color: var(--text-2);
-      line-height: 1.6;
+    .studio h2 em { font-style: italic; color: var(--ember-soft); color: #E9A06A; font-weight: 400; }
+    .studio p { color: var(--dark-muted); font-size: 1.1rem; max-width: 54ch; margin: 0 auto 22px; }
+    .studio-apps {
+      font-family: var(--mono); font-size: 0.76rem; color: #8C8168;
+      letter-spacing: 0.05em; margin-bottom: 36px;
     }
+    .studio-apps span { color: var(--dark-text); }
+    .studio-apps .sep { color: var(--dark-line); margin: 0 8px; }
+    .studio-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--sans); font-weight: 600; font-size: 1rem;
+      text-decoration: none; padding: 16px 32px; border-radius: 13px;
+      background: linear-gradient(180deg, #C85D24 0%, #A8460F 100%); color: #FFF7EE;
+      box-shadow: 0 14px 40px -12px rgba(200, 93, 36, 0.7);
+      transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+    .studio-cta:hover { transform: translateY(-2px); box-shadow: 0 20px 50px -14px rgba(200, 93, 36, 0.85); }
+    .studio-sub {
+      margin-top: 22px; font-family: var(--mono); font-size: 0.76rem; color: #8C8168;
+    }
+    .studio-sub a { color: var(--dark-muted); text-decoration: none; border-bottom: 1px solid var(--dark-line); transition: color 0.18s, border-color 0.18s; }
+    .studio-sub a:hover { color: #E9A06A; border-color: #E9A06A; }
 
     /* ---- Writing ---- */
-    .writing {
-      padding: 88px 0;
-      border-top: 1px solid var(--border);
+    .posts { display: flex; flex-direction: column; }
+    .post {
+      display: grid; grid-template-columns: 1fr auto; gap: 22px; align-items: baseline;
+      padding: 20px 0; border-bottom: 1px solid var(--line);
+      text-decoration: none; position: relative; transition: padding-left 0.22s ease;
     }
-    .writing-list { position: relative; }
-    .writing-link {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 24px;
-      align-items: center;
-      padding: 18px 0;
-      border-bottom: 1px solid var(--border);
-      text-decoration: none;
-      transition: all 0.25s;
-      position: relative;
+    .post:first-child { border-top: 1px solid var(--line); }
+    .post::before {
+      content: ''; position: absolute; left: -14px; top: 14px; bottom: 14px;
+      width: 2px; background: var(--ember); opacity: 0; transition: opacity 0.22s;
     }
-    .writing-link:first-of-type { border-top: 1px solid var(--border); }
-    .writing-link::before {
-      content: '';
-      position: absolute;
-      left: -16px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--amber);
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-    .writing-link:hover::before { opacity: 1; }
-    .writing-link:hover { padding-left: 12px; }
-    .writing-link h4 {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--text);
-      transition: color 0.2s;
-    }
-    .writing-link:hover h4 { color: var(--amber); }
-    .writing-link span {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--text-4);
-      white-space: nowrap;
-    }
-    .writing-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 28px;
-    }
-    .writing-buttons .btn-ghost {
-      font-size: 0.82rem;
-      padding: 10px 22px;
-    }
-
-    /* ---- CTA ---- */
-    .cta {
-      padding: 110px 0;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      position: relative;
-    }
-    .cta-glow {
-      position: absolute;
-      bottom: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .cta h2 {
-      font-family: var(--serif);
-      font-size: clamp(2.25rem, 5vw, 3.5rem);
-      font-weight: 400;
-      margin-bottom: 20px;
-      line-height: 1.1;
-      position: relative;
-    }
-    .cta h2 em { font-style: italic; color: var(--amber); }
-    .cta > .container > p {
-      font-size: 1.02rem;
-      color: var(--text-2);
-      max-width: 480px;
-      margin: 0 auto 40px;
-      line-height: 1.65;
-      position: relative;
-    }
-    .cta-actions {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      position: relative;
-    }
-    .cta-email {
-      margin-top: 28px;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--text-4);
-      position: relative;
-    }
-    .cta-email a {
-      color: var(--text-2);
-      text-decoration: none;
-      border-bottom: 1px solid var(--border);
-      transition: all 0.2s;
-    }
-    .cta-email a:hover { color: var(--amber); border-color: var(--amber); }
+    .post:hover { padding-left: 12px; }
+    .post:hover::before { opacity: 1; }
+    .post .post-title { font-family: var(--serif); font-size: 1.08rem; font-weight: 500; color: var(--ink); line-height: 1.35; transition: color 0.18s; }
+    .post:hover .post-title { color: var(--ember-deep); }
+    .post .post-date { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); white-space: nowrap; }
+    .writing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
 
     /* ---- Subscribe ---- */
-    .subscribe {
-      padding: 96px 0;
-      border-top: 1px solid var(--border);
-      position: relative;
-    }
+    .subscribe { padding: 84px 0; border-top: 1px solid var(--line); }
     .subscribe-card {
-      max-width: 560px;
-      margin: 0 auto;
-      text-align: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 44px 40px;
-      position: relative;
-      overflow: hidden;
+      max-width: 620px; margin: 0 auto; text-align: center;
+      background: linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 100%);
+      border: 1px solid var(--line-2); border-radius: 20px;
+      padding: 48px 42px; position: relative; overflow: hidden;
     }
     .subscribe-card::before {
-      content: '';
-      position: absolute;
-      top: -120px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
-      pointer-events: none;
+      content: ''; position: absolute; top: -140px; left: 50%; transform: translateX(-50%);
+      width: 360px; height: 360px; pointer-events: none;
+      background: radial-gradient(circle, var(--ember-soft) 0%, transparent 68%);
     }
-    .subscribe-eyebrow {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 14px;
-      position: relative;
-    }
-    .subscribe-card h2 {
-      font-family: var(--serif);
-      font-size: clamp(1.7rem, 4vw, 2.4rem);
-      font-weight: 400;
-      line-height: 1.15;
-      margin-bottom: 14px;
-      position: relative;
-    }
-    .subscribe-card h2 em { font-style: italic; color: var(--amber); }
-    .subscribe-card > p {
-      font-size: 0.96rem;
-      color: var(--text-2);
-      max-width: 420px;
-      margin: 0 auto 28px;
-      line-height: 1.6;
-      position: relative;
-    }
-    .subscribe-form {
-      display: flex;
-      gap: 10px;
-      max-width: 440px;
-      margin: 0 auto;
-      position: relative;
-      flex-wrap: wrap;
-    }
+    .subscribe-card > * { position: relative; }
+    .subscribe-card h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.14; margin-bottom: 12px; }
+    .subscribe-card h2 em { font-style: italic; color: var(--ember); }
+    .subscribe-card > p { color: var(--ink-2); font-size: 0.98rem; max-width: 42ch; margin: 0 auto 26px; }
+    .subscribe-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
     .subscribe-form input[type="email"] {
-      flex: 1 1 220px;
-      min-width: 0;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 13px 16px;
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 0.95rem;
+      flex: 1 1 220px; min-width: 0;
+      background: #fff; border: 1px solid var(--line-2); border-radius: 10px;
+      padding: 13px 16px; color: var(--ink); font-family: var(--sans); font-size: 0.95rem;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .subscribe-form input[type="email"]::placeholder { color: var(--text-4); }
-    .subscribe-form input[type="email"]:focus {
-      outline: none;
-      border-color: var(--amber-border);
-      box-shadow: 0 0 0 3px var(--amber-dim);
-    }
+    .subscribe-form input[type="email"]::placeholder { color: var(--ink-3); }
+    .subscribe-form input[type="email"]:focus { outline: none; border-color: var(--ember); box-shadow: 0 0 0 3px var(--ember-soft); }
     .subscribe-form button {
       flex: 0 0 auto;
-      background: var(--amber);
-      color: var(--bg);
-      border: none;
-      padding: 13px 24px;
-      border-radius: 8px;
-      font-family: var(--sans);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s, opacity 0.2s, background 0.2s;
+      background: linear-gradient(180deg, #C85D24 0%, #A8460F 100%); color: #FFF7EE;
+      border: none; padding: 13px 24px; border-radius: 10px;
+      font-family: var(--sans); font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 8px 22px -10px rgba(158, 67, 16, 0.6);
     }
-    .subscribe-form button:hover { background: #fbbf24; transform: translateY(-1px); }
+    .subscribe-form button:hover { transform: translateY(-1px); }
     .subscribe-form button:disabled { opacity: 0.55; cursor: default; transform: none; }
-    .subscribe-note {
-      margin-top: 16px;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--text-4);
-      position: relative;
-      min-height: 1.2em;
-    }
-    .subscribe-note.is-error { color: #f87171; }
-    .subscribe-note.is-success { color: var(--green); }
+    .subscribe-note { margin-top: 15px; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-3); min-height: 1.2em; }
+    .subscribe-note.is-error { color: #B4432E; }
+    .subscribe-note.is-success { color: var(--live); }
     .subscribe-card.is-done .subscribe-form { display: none; }
-    .subscribe-success {
-      display: none;
-      position: relative;
-    }
+    .subscribe-success { display: none; }
     .subscribe-card.is-done .subscribe-success { display: block; }
     .subscribe-success .checkmark {
-      width: 48px;
-      height: 48px;
-      margin: 0 auto 16px;
-      border-radius: 50%;
-      background: var(--green-dim);
-      border: 1px solid var(--green-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--green);
-      font-size: 1.4rem;
+      width: 46px; height: 46px; margin: 0 auto 14px; border-radius: 50%;
+      background: var(--live-soft); border: 1px solid rgba(63,122,90,0.3);
+      display: flex; align-items: center; justify-content: center; color: var(--live); font-size: 1.3rem;
     }
-    .subscribe-success p {
-      font-size: 1rem;
-      color: var(--text);
-      font-family: var(--serif);
-      font-style: italic;
-    }
-    @media (max-width: 480px) {
-      .subscribe-form button { flex: 1 1 100%; }
-    }
+    .subscribe-success p { font-family: var(--serif); font-style: italic; font-size: 1.05rem; color: var(--ink); }
+    @media (max-width: 460px) { .subscribe-form button { flex: 1 1 100%; } }
+
+    /* ---- Contact ---- */
+    .contact { padding: 92px 0; border-top: 1px solid var(--line); text-align: center; position: relative; }
+    .contact h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.08; margin-bottom: 16px; }
+    .contact h2 em { font-style: italic; color: var(--ember); }
+    .contact > .wrap > p { color: var(--ink-2); font-size: 1.05rem; max-width: 44ch; margin: 0 auto 34px; }
+    .contact-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .contact-email { margin-top: 26px; font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); }
+    .contact-email a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); transition: color 0.18s, border-color 0.18s; }
+    .contact-email a:hover { color: var(--ember-deep); border-color: var(--ember); }
 
     /* ---- Footer ---- */
-    footer {
-      padding: 28px 0;
-      border-top: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
-    footer .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      font-family: var(--mono);
-      color: var(--text-4);
-    }
-    footer a { color: var(--text-4); text-decoration: none; }
-    footer a:hover { color: var(--text-2); }
-
-    /* ---- Keyframes ---- */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    @keyframes drift {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(30px, -20px); }
-      50% { transform: translate(-15px, 25px); }
-      75% { transform: translate(20px, 10px); }
-    }
+    footer { background: var(--dark); color: var(--dark-muted); padding: 44px 0; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 40px; justify-content: space-between; align-items: flex-start; }
+    .foot-brand { font-family: var(--mono); font-size: 0.8rem; color: var(--dark-text); }
+    .foot-brand .sub { display: block; color: #8C8168; font-size: 0.72rem; margin-top: 6px; max-width: 30ch; line-height: 1.5; }
+    .foot-cols { display: flex; gap: 52px; flex-wrap: wrap; }
+    .foot-col h4 { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8C8168; margin-bottom: 12px; }
+    .foot-col a { display: block; font-size: 0.82rem; color: var(--dark-muted); text-decoration: none; padding: 3px 0; transition: color 0.18s; }
+    .foot-col a:hover { color: #E9A06A; }
 
     /* ---- Responsive ---- */
-    @media (max-width: 900px) {
-      .hero-layout {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-      .terminal { max-width: 420px; }
+    @media (max-width: 860px) {
+      .product-grid { grid-template-columns: 1fr; gap: 40px; direction: ltr !important; }
+      .product.rev .product-grid { direction: ltr; }
+      .product-shots { order: 2; }
+      .product-copy { order: 1; }
+      .ship-grid { grid-template-columns: 1fr; }
+      .hero { padding: 68px 0 56px; }
     }
-    @media (max-width: 768px) {
-      .container { padding: 0 20px; }
-      .projects-grid { grid-template-columns: 1fr; }
-      .project-card.featured { grid-column: span 1; }
-      .stack-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .stat { border-right: none; }
-      .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
-      .stat:nth-child(odd) { border-right: 1px solid var(--border); }
-      .hero { padding: 60px 0 40px; }
+    @media (max-width: 640px) {
       .nav-links a:not(.nav-cta) { display: none; }
-      .writing-link { grid-template-columns: 1fr; gap: 6px; }
-      .writing-link span { justify-self: start; }
+      .band, .ship, .subscribe, .contact { padding: 62px 0; }
+      .studio { padding: 78px 0; }
+      .post { grid-template-columns: 1fr; gap: 5px; }
+      .post .post-date { order: -1; }
+      .wrap { padding: 0 20px; }
     }
   </style>
   <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
@@ -997,451 +577,221 @@
 <body>
 
 <nav>
-  <div class="container">
-    <div class="logo"><strong>diven</strong>@astraedus<span class="logo-cursor"></span></div>
+  <div class="wrap">
+    <a href="/" class="logo">diven<span class="dim">@astraedus</span><span class="logo-cursor"></span></a>
     <div class="nav-links">
-      <a href="#projects">Projects</a>
-      <a href="/blog">Blog</a>
-      <a href="/writing">Writing</a>
-      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://x.com/astraedus" target="_blank" rel="noopener">X</a>
-      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+      <a href="#work">Work</a>
+      <a href="#how">How I ship</a>
+      <a href="#writing">Writing</a>
+      <a href="https://raeduslabs.com" target="_blank" rel="noopener">Raedus Labs</a>
+      <a href="#contact" class="nav-cta">Contact</a>
     </div>
   </div>
 </nav>
 
+<!-- ===================== HERO ===================== -->
 <section class="hero">
   <div class="hero-glow"></div>
-  <div class="container">
-    <div class="hero-layout">
-      <div class="hero-text">
-        <div class="hero-intro">// available for project work</div>
-        <h1>I ship production<br>agent systems and write<br>about what <em>breaks.</em></h1>
-        <p class="hero-desc">I run a 24/7 autonomous agent on my own laptop, build multi-agent products end-to-end, and publish the failure modes I find along the way. If it needs an LLM, a queue, a webhook, and someone who will actually own the deploy, that's the work.</p>
-        <div class="hero-actions">
-          <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
-          <a href="#projects" class="btn-ghost">View projects</a>
-        </div>
-      </div>
-      <div class="terminal" id="hero-terminal">
-        <div class="terminal-header">
-          <div class="terminal-dots"><span></span><span></span><span></span></div>
-          <span class="terminal-title">astra@system</span>
-        </div>
-        <div class="terminal-body">
-          <div class="terminal-line">
-            <span class="terminal-prompt">$</span>
-            <span class="terminal-cmd" id="typed-cmd"></span><span class="terminal-cursor-inline" id="typing-cursor"></span>
-          </div>
-          <div class="terminal-output" id="terminal-output">
-            <div class="terminal-row"><span class="terminal-key">status</span><span class="terminal-val terminal-live">online</span></div>
-            <div class="terminal-row"><span class="terminal-key">uptime</span><span class="terminal-val">92d 14h</span></div>
-            <div class="terminal-row"><span class="terminal-key">shipped</span><span class="terminal-val">8 products</span></div>
-            <div class="terminal-row"><span class="terminal-key">written</span><span class="terminal-val">30+ articles</span></div>
-            <div class="terminal-row"><span class="terminal-key">mode</span><span class="terminal-val">async</span></div>
-          </div>
-          <div class="terminal-bottom" id="terminal-bottom">
-            <div class="terminal-line">
-              <span class="terminal-prompt">$</span>
-              <span class="terminal-cursor-inline"></span>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="wrap">
+    <div class="hero-name">
+      <span>Diven Rastdus</span>
+      <span class="sep">/</span>
+      <span>Full-stack developer</span>
+      <span class="sep">/</span>
+      <span>Founder, Raedus Labs</span>
+    </div>
+    <h1>I build software, and I ship the <em>last mile.</em></h1>
+    <p class="hero-desc">Production apps in TypeScript, React Native, and Next.js — designed, built, tested on real hardware, and shipped to the store with pipelines that don't need me watching. I run Raedus Labs, a small studio putting open-source apps in people's hands.</p>
+    <div class="hero-sig">— Diven</div>
+    <div class="hero-actions">
+      <a href="https://raeduslabs.com" class="btn btn-primary" target="_blank" rel="noopener">See the studio <span class="arrow"></span></a>
+      <a href="#work" class="btn btn-ghost">View work</a>
+    </div>
+    <div class="livenow">
+      <span class="label"><span class="live-dot"></span>Live on Google Play</span>
+      <a href="#nudge">Nudge</a>
+      <span class="sep">·</span>
+      <a href="#soulsync">SoulSync</a>
+      <span class="sep">·</span>
+      <a href="https://raeduslabs.com" target="_blank" rel="noopener">more at Raedus Labs</a>
     </div>
   </div>
 </section>
 
-<section class="stats">
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat reveal">
-        <div class="stat-value" data-count="8">0</div>
-        <div class="stat-label">Live products shipped</div>
-      </div>
-      <div class="stat reveal">
-        <div class="stat-value">30+</div>
-        <div class="stat-label">Technical articles published</div>
-      </div>
-      <div class="stat reveal">
-        <div class="stat-value"><span class="stat-live">24/7</span></div>
-        <div class="stat-label">Autonomous agent running</div>
-      </div>
-      <div class="stat reveal">
-        <div class="stat-value">async</div>
-        <div class="stat-label">Clear brief in, code out</div>
-      </div>
+<!-- ===================== FEATURED WORK ===================== -->
+<section class="band" id="work">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <div class="eyebrow">Featured work</div>
+      <h2 class="section-title">Two apps, live and in the open.</h2>
+      <p class="lede">Both are open source, on Google Play, and built to stay out of your way. Real products, not demos — read every line if you want to.</p>
     </div>
-  </div>
-</section>
 
-<section class="projects" id="projects">
-  <div class="container">
-    <div class="section-eyebrow reveal">Shipped</div>
-    <h2 class="section-title reveal">Things I built and deployed</h2>
-    <p class="section-desc reveal">Live products, multi-agent hackathons, and the autonomous system I run myself. Every link below goes to a working artifact or a writeup of one.</p>
-
-    <div class="projects-grid">
-
-      <div class="project-card featured reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          astraedus.system
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Running 24/7</div>
-          <h3>Astraedus -- autonomous agent system</h3>
-          <p class="project-desc">A 24/7 autonomous agent running on Claude Code on my own laptop. FTS5-indexed memory across 90+ days of transcripts, a dual-judgment skill drafter that proposes new capabilities and blocks bad ones, a determinism-ladder architecture of 30+ hooks that enforce correct behavior at the shell level, and a Claude/Codex "boardroom" where two agents debate decisions before acting. It writes, commits, and deploys while I sleep.</p>
-          <div class="project-tech">
-            <span>Claude Code</span>
-            <span>Codex</span>
-            <span>Hooks</span>
-            <span>FTS5</span>
-            <span>Python</span>
-            <span>MCP</span>
-            <span>Bash</span>
+    <!-- Nudge -->
+    <article class="product reveal" id="nudge">
+      <div class="product-grid">
+        <div class="product-copy">
+          <div class="product-badges">
+            <span class="badge live"><span class="live-dot"></span>Live on Google Play</span>
+            <span class="badge">Open source · GPL-3.0</span>
           </div>
-          <div class="project-links">
-            <a href="/blog/i-researched-nous-hermes-for-a-day/" target="_blank" rel="noopener">How it's architected</a>
-            <a href="/blog/black-holes-entropy-machine-memory/" target="_blank" rel="noopener">Memory model</a>
+          <h3>Nudge</h3>
+          <p class="tag">The app blocker that adds a pause, not a wall.</p>
+          <p class="body">A privacy-first app blocker for Android. It slips a breathing exercise between you and the apps that eat your day — and asks for zero internet permission, so your data has nowhere to go. Native Kotlin, open source, free forever.</p>
+          <div class="product-tech">
+            <span>Kotlin</span><span>Jetpack Compose</span><span>Room</span><span>Android 8.0+</span>
+          </div>
+          <div class="product-links">
+            <a class="lnk primary" href="https://raeduslabs.com/nudge/" target="_blank" rel="noopener">Product page <span class="arrow"></span></a>
+            <a class="lnk" href="https://play.google.com/store/apps/details?id=dev.astraedus.nudge" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Google Play
+            </a>
+            <a class="lnk" href="https://github.com/astraedus/nudge" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.01 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 24 12C24 5.37 18.63 0 12 0z"/></svg>
+              Source
+            </a>
+          </div>
+        </div>
+        <div class="product-shots">
+          <div class="cluster">
+            <div class="phone a"><img src="/assets/apps/nudge/dashboard.webp" width="480" height="853" alt="Nudge dashboard showing screen time, active rules and walk-aways" loading="lazy"></div>
+            <div class="phone b"><img src="/assets/apps/nudge/breathe.webp" width="480" height="853" alt="Nudge breathing exercise shown before a distracting app opens" loading="lazy"></div>
           </div>
         </div>
       </div>
+    </article>
 
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          medrecon.agent
-        </div>
-        <div class="project-body">
-          <div class="project-badge">Hackathon / due May 11</div>
-          <h3>MedRecon</h3>
-          <p class="project-desc">Multi-agent medication reconciliation. 3 AI agents talk over the A2A protocol to cross-reference prescriptions against real FHIR health records, backed by 8 MCP tools for drug-interaction checks, dose validation, allergy screening, and FHIR output. Healthcare-grade inputs, auditable outputs.</p>
-          <div class="project-tech">
-            <span>Python</span>
-            <span>FastAPI</span>
-            <span>MCP</span>
-            <span>A2A</span>
-            <span>FHIR</span>
-            <span>GCP Cloud Run</span>
-            <span>Next.js</span>
+    <!-- SoulSync -->
+    <article class="product rev reveal" id="soulsync">
+      <div class="product-grid">
+        <div class="product-copy">
+          <div class="product-badges">
+            <span class="badge live"><span class="live-dot"></span>Live on Google Play</span>
+            <span class="badge">Open source · GPL-3.0</span>
           </div>
-          <div class="project-links">
-            <a href="https://frontend-eta-flax-63.vercel.app" target="_blank" rel="noopener">Live demo</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          scout.research
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Live system</div>
-          <h3>Scout</h3>
-          <p class="project-desc">AI research agent. Feed it a company name, it scrapes the web, synthesizes findings through Amazon Nova, and builds a semantically-searchable knowledge base. Two Nova models working together: one for synthesis, one for embeddings.</p>
-          <div class="project-tech">
-            <span>Python</span>
-            <span>FastAPI</span>
-            <span>Amazon Nova</span>
-            <span>RAG</span>
-            <span>Vector Search</span>
-            <span>AWS EC2</span>
-          </div>
-          <div class="project-links">
-            <a href="https://frontend-murex-eta-95.vercel.app" target="_blank" rel="noopener">Live demo</a>
-            <a href="https://github.com/astraedus/scout" target="_blank" rel="noopener">Source</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          arc.journal
-        </div>
-        <div class="project-body">
-          <div class="project-badge">In beta</div>
-          <h3>Arc Journal / The Mirror</h3>
-          <p class="project-desc">An honest diary that gets smarter the more you use it. Two surfaces, one product: a mobile journal for capture (voice + text, wikilinks, optional titles) and a web "Mirror" that reflects longitudinal patterns back at you. Voice transcription runs on Supabase Edge Functions + Gemini 2.5 Flash at ~$0.001/min.</p>
-          <div class="project-tech">
-            <span>Next.js</span>
-            <span>Expo</span>
-            <span>Supabase</span>
-            <span>Edge Functions</span>
-            <span>Gemini</span>
-          </div>
-          <div class="project-links">
-            <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" target="_blank" rel="noopener">Why I built it</a>
-            <a href="/blog/voice-transcription-supabase-gemini-flash/" target="_blank" rel="noopener">Voice pipeline writeup</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          soulsync.app
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Free / open source</div>
           <h3>SoulSync</h3>
-          <p class="project-desc">A free, open-source mood tracker and journal that keeps 100% of your data on device. No account, no cloud, no tracking, no ads. Local SQLite, 10-point mood scale, activity correlation, a plain-language Insights tab, and JSON export you own. React Native + Expo, TypeScript strict, 333 passing tests, GPL-3.0.</p>
-          <div class="project-tech">
-            <span>React Native</span>
-            <span>Expo</span>
-            <span>TypeScript</span>
-            <span>SQLite</span>
-            <span>GPL-3.0</span>
+          <p class="tag">A mood tracker that never sends your data anywhere.</p>
+          <p class="body">A free, open-source mood tracker for Android that keeps 100% of your data on device — no account, no cloud, no ads. A 10-point scale, a calendar heatmap, activity correlation, plain-language insights, and JSON you own. React Native, 1,000+ passing tests.</p>
+          <div class="product-tech">
+            <span>React Native</span><span>Expo</span><span>TypeScript</span><span>SQLite</span>
           </div>
-          <div class="project-links">
-            <a href="/soulsync/">Landing page</a>
-            <a href="https://play.google.com/store/apps/details?id=com.raeduslabs.soulsyncapp" target="_blank" rel="noopener">Google Play</a>
-            <a href="https://github.com/Antimatter543/mood-tracker" target="_blank" rel="noopener">Source</a>
+          <div class="product-links">
+            <a class="lnk primary" href="https://raeduslabs.com/soulsync/" target="_blank" rel="noopener">Product page <span class="arrow"></span></a>
+            <a class="lnk" href="https://play.google.com/store/apps/details?id=com.raeduslabs.soulsyncapp" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Google Play
+            </a>
+            <a class="lnk" href="https://github.com/Antimatter543/mood-tracker" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.01 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 24 12C24 5.37 18.63 0 12 0z"/></svg>
+              Source
+            </a>
+          </div>
+        </div>
+        <div class="product-shots">
+          <div class="cluster">
+            <div class="phone a"><img src="/assets/apps/soulsync/home.webp" width="480" height="960" alt="SoulSync home screen with today's mood entry" loading="lazy"></div>
+            <div class="phone b"><img src="/assets/apps/soulsync/heatmap.webp" width="480" height="960" alt="SoulSync mood heatmap calendar view" loading="lazy"></div>
           </div>
         </div>
       </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          devcontext.app
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Live system</div>
-          <h3>DevContext</h3>
-          <p class="project-desc">AI agent that connects to your GitHub, Calendar, and Slack via Auth0 Token Vault, then gives you contextual briefings. Permission Control Center lets you grant and revoke access per provider.</p>
-          <div class="project-tech">
-            <span>TypeScript</span>
-            <span>Next.js</span>
-            <span>Auth0</span>
-            <span>AI SDK</span>
-          </div>
-          <div class="project-links">
-            <a href="https://devcontext-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
-            <a href="https://github.com/astraedus/devcontext" target="_blank" rel="noopener">Source</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          rebill.saas
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Live product</div>
-          <h3>Rebill</h3>
-          <p class="project-desc">Failed payment recovery for SaaS. Connect Stripe, get smart dunning emails, expiring card alerts, and recovery analytics. Multi-tenant with Stripe Connect.</p>
-          <div class="project-tech">
-            <span>Next.js</span>
-            <span>Stripe Connect</span>
-            <span>Supabase</span>
-            <span>Resend</span>
-          </div>
-          <div class="project-links">
-            <a href="https://rebill.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          echoboard.feedback
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Live product</div>
-          <h3>Echoboard</h3>
-          <p class="project-desc">Customer feedback boards with upvoting, public roadmap kanban, changelog with email notifications, and an embeddable widget. A Canny alternative at a tenth of the price.</p>
-          <div class="project-tech">
-            <span>Next.js</span>
-            <span>Supabase</span>
-            <span>Stripe</span>
-            <span>RLS</span>
-          </div>
-          <div class="project-links">
-            <a href="https://echoboard.astraedus.dev" target="_blank" rel="noopener">Live demo</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          viva.coach
-        </div>
-        <div class="project-body">
-          <div class="project-badge">AI agent</div>
-          <h3>Viva</h3>
-          <p class="project-desc">Real-time AI interview coach. Listens to your interview via Gemini Live API, analyzes body language with Vision, and gives live coaching feedback with scoring.</p>
-          <div class="project-tech">
-            <span>Gemini Live API</span>
-            <span>Vision</span>
-            <span>Cloud Run</span>
-            <span>React</span>
-          </div>
-          <div class="project-links">
-            <a href="https://viva-kappa-two.vercel.app" target="_blank" rel="noopener">Live demo</a>
-            <a href="https://github.com/astraedus/viva" target="_blank" rel="noopener">Source</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          bilateral.tool
-        </div>
-        <div class="project-body">
-          <div class="project-badge live">Free tool</div>
-          <h3>Bilateral</h3>
-          <p class="project-desc">Free, open-source EMDR bilateral stimulation tool. Visual, audio, and haptic modes with sine-wave motion, set timer with breathing rest intervals, and full customization. No account, no tracking, no paywall.</p>
-          <div class="project-tech">
-            <span>Web Audio API</span>
-            <span>Vanilla JS</span>
-            <span>CSS</span>
-            <span>GitHub Pages</span>
-          </div>
-          <div class="project-links">
-            <a href="https://astraedus.github.io/bilateral/" target="_blank" rel="noopener">Try it</a>
-            <a href="https://github.com/astraedus/bilateral" target="_blank" rel="noopener">Source</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card reveal">
-        <div class="project-chrome">
-          <div class="project-chrome-dots"><span></span><span></span><span></span></div>
-          formpilot.ext
-        </div>
-        <div class="project-body">
-          <div class="project-badge">Chrome extension</div>
-          <h3>FormPilot</h3>
-          <p class="project-desc">AI form navigator using Gemini Vision. Analyzes any web form and overlays intelligent guidance on each field. Understands context, suggests values, flags required fields.</p>
-          <div class="project-tech">
-            <span>Gemini Vision</span>
-            <span>Chrome Extension</span>
-            <span>Python</span>
-          </div>
-          <div class="project-links">
-            <a href="https://github.com/astraedus/formpilot" target="_blank" rel="noopener">Source</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    </article>
   </div>
 </section>
 
-<section class="stack">
-  <div class="container">
-    <div class="section-eyebrow reveal">Stack</div>
-    <h2 class="section-title reveal">What I work with</h2>
-    <p class="section-desc reveal">The tools depend on the problem. These are the ones I reach for most.</p>
-    <div class="stack-grid reveal">
-      <div class="stack-item">
-        <h4>Languages</h4>
-        <p>TypeScript, Python, SQL. Production code in all three, daily.</p>
+<!-- ===================== HOW I SHIP ===================== -->
+<section class="ship" id="how">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <div class="eyebrow">How I ship</div>
+      <h2 class="section-title">Not just building — owning the whole path to production.</h2>
+      <p class="lede">The interesting part isn't the code. It's everything between "it works on my machine" and "it's on a stranger's phone." That part is automated.</p>
+    </div>
+    <div class="ship-grid reveal">
+      <div class="pillar">
+        <div class="num">01 — Build</div>
+        <h3>Full-stack, one language</h3>
+        <p>TypeScript across the stack: React Native and Expo on mobile, Next.js on the web, Supabase and Python on the backend. Native Kotlin when Android demands it.</p>
       </div>
-      <div class="stack-item">
-        <h4>Frontend</h4>
-        <p>Next.js, React, Tailwind, shadcn/ui. Server components by default.</p>
+      <div class="pillar">
+        <div class="num">02 — Release</div>
+        <h3>Automated release lanes</h3>
+        <p>GitHub Actions CI/CD: push a version tag, the pipeline builds the signed artifact and ships it straight to the Play Store. No laptop in the loop, no manual upload.</p>
       </div>
-      <div class="stack-item">
-        <h4>Backend</h4>
-        <p>FastAPI, Node.js, PostgreSQL, Supabase. REST and webhooks.</p>
+      <div class="pillar">
+        <div class="num">03 — Verify</div>
+        <h3>Tested before it ships</h3>
+        <p>Invariant test suites gate every release. Maestro end-to-end flows run on physical Android hardware, and an automated visual-QA pass reviews the UI before each deploy.</p>
       </div>
-      <div class="stack-item">
-        <h4>AI / ML</h4>
-        <p>Claude, GPT, Gemini APIs. RAG pipelines, embeddings, tool calling, agents.</p>
-      </div>
-      <div class="stack-item">
-        <h4>Infra</h4>
-        <p>AWS (EC2, Bedrock, Lambda), Vercel, Docker, Cloudflare. CI/CD.</p>
-      </div>
-      <div class="stack-item">
-        <h4>Payments</h4>
-        <p>Stripe, Stripe Connect, webhooks, subscription billing, invoicing.</p>
+      <div class="pillar">
+        <div class="num">04 — Write</div>
+        <h3>I document what breaks</h3>
+        <p>40+ deep-dive articles on production failure modes — the <code>OR</code> in an RLS policy that leaked every row, the analytics gotcha, the agent eval that lies. Lessons, not tutorials.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="writing">
-  <div class="container">
-    <div class="section-eyebrow reveal">Writing</div>
-    <h2 class="section-title reveal">Recent writing</h2>
-    <p class="section-desc reveal">Technical writeups of systems I actually shipped, and post-mortems on what broke.</p>
+<!-- ===================== RAEDUS LABS (centerpiece) ===================== -->
+<section class="studio" id="studio">
+  <div class="wrap">
+    <div class="eyebrow reveal">The studio</div>
+    <h2 class="reveal">The real work lives at <em>Raedus Labs.</em></h2>
+    <p class="reveal">Raedus Labs is where I build products people actually use — open-source apps and AI-native tools, shipped fast and maintained in the open. It's the through-line behind everything on this page.</p>
+    <p class="studio-apps reveal"><span>Nudge</span><span class="sep">·</span><span>SoulSync</span><span class="sep">·</span><span>Piano Trainer</span><span class="sep">·</span><span>Origo</span></p>
+    <a href="https://raeduslabs.com" class="studio-cta reveal" target="_blank" rel="noopener">Visit Raedus Labs <span class="arrow"></span></a>
+    <div class="studio-sub reveal">Every product, one studio — <a href="https://raeduslabs.com" target="_blank" rel="noopener">raeduslabs.com</a></div>
+  </div>
+</section>
 
-    <div class="writing-list">
-      <a href="/blog/bearable-alternative-free-open-source/" class="writing-link reveal">
-        <h4>Bearable is locking your history. Here's the free alternative.</h4>
-        <span>Jun 28, 2026</span>
-      </a>
-      <a href="/blog/free-daylio-alternative-open-source/" class="writing-link reveal">
-        <h4>I built a free, open-source Daylio alternative instead of paying a subscription</h4>
-        <span>Jun 20, 2026</span>
-      </a>
-      <a href="/blog/private-offline-mood-tracker/" class="writing-link reveal">
-        <h4>A mood tracker shouldn't need an account or the cloud</h4>
-        <span>Jun 20, 2026</span>
-      </a>
-      <a href="/blog/mood-tracker-no-subscription/" class="writing-link reveal">
-        <h4>Why mental-health tracking behind a subscription is backwards</h4>
-        <span>Jun 20, 2026</span>
-      </a>
-      <a href="/blog/posthog-funnel-events/" class="writing-link reveal">
-        <h4>PostHog Custom Events: How I Tracked a $59 Payment Funnel from Page View to Stripe Checkout</h4>
-        <span>May 9, 2026</span>
-      </a>
-      <a href="/blog/agent-eval-lying/" class="writing-link reveal">
-        <h4>Your AI Agent Evaluation Is Lying to You: Why 10 Test Runs Prove Nothing</h4>
-        <span>May 8, 2026</span>
-      </a>
-      <a href="/blog/gmail-agent-bridge/" class="writing-link reveal">
-        <h4>How I Built a Push-Based Gmail Bridge for My AI Agent (Zero Polling, Free Tier)</h4>
-        <span>May 5, 2026</span>
-      </a>
-      <a href="/blog/i-researched-nous-hermes-for-a-day/" class="writing-link reveal">
-        <h4>I researched Nous Hermes for a day. Here's what I stole.</h4>
-        <span>Apr 24, 2026</span>
-      </a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3/i-ran-an-ai-qa-agent-on-my-app-before-talking-to-a-single-user-it-found-11-issues-4-were-blockers-596g" class="writing-link reveal" target="_blank" rel="noopener">
-        <h4>I ran an AI QA agent on my app before talking to a single user. It found 11 issues, 4 were blockers.</h4>
-        <span>Apr 23, 2026</span>
-      </a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3/the-diary-you-actually-keep-is-the-one-youre-not-trying-to-share-1k61" class="writing-link reveal" target="_blank" rel="noopener">
-        <h4>The diary you actually keep is the one you're not trying to share</h4>
-        <span>Apr 22, 2026</span>
-      </a>
-      <a href="/blog/multi-tenant-saas-supabase-rls-stripe-connect/" class="writing-link reveal">
-        <h4>Multi-Tenant SaaS Auth + Billing with Supabase RLS and Stripe Connect</h4>
-        <span>Apr 21, 2026</span>
-      </a>
-      <a href="/blog/voice-transcription-supabase-gemini-flash/" class="writing-link reveal">
-        <h4>Voice transcription on Supabase Edge Functions for ~$0.001/min using Gemini 2.5 Flash</h4>
-        <span>Apr 20, 2026</span>
-      </a>
+<!-- ===================== WRITING ===================== -->
+<section class="band" id="writing">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <div class="eyebrow">Writing</div>
+      <h2 class="section-title">Notes from production.</h2>
+      <p class="lede">Technical writeups of systems I actually shipped, and post-mortems on what broke.</p>
     </div>
 
-    <div class="writing-buttons reveal">
-      <a href="/blog" class="btn-ghost">All blog posts</a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener">Dev.to</a>
-      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener">Hashnode</a>
-      <a href="https://medium.com/@theagentthatcould" class="btn-ghost" target="_blank" rel="noopener">Medium</a>
-      <a href="https://astraedus.dev/book" class="btn-ghost">Book</a>
+    <!-- POSTS: newest first. To add a post, copy one <a class="post"> block below the marker
+         (href = /blog/<slug>/, mono date on the right). Keep the newest 4-5; older ones live at /blog. -->
+    <div class="posts reveal">
+      <!-- post-cards:start -->
+      <a class="post" href="/blog/react-native-vs-flutter-2026-when-each-wins/">
+        <span class="post-title">React Native vs Flutter in 2026: When Each One Actually Wins</span>
+        <span class="post-date">Jul 13, 2026</span>
+      </a>
+      <a class="post" href="/blog/ai-agents-gotcha-breaks-production/">
+        <span class="post-title">The AI Agents Gotcha That Breaks Production (And How to Fix It)</span>
+        <span class="post-date">Jul 10, 2026</span>
+      </a>
+      <a class="post" href="/blog/ai-agents-vs-single-llm-call-2026/">
+        <span class="post-title">AI Agents vs a Single LLM Call: Which Should You Use in 2026</span>
+        <span class="post-date">Jul 8, 2026</span>
+      </a>
+      <a class="post" href="/blog/react-native-2026-features/">
+        <span class="post-title">5 New React Native 2026 Features (And 2 I'm Still Waiting For)</span>
+        <span class="post-date">Jul 6, 2026</span>
+      </a>
+      <!-- post-cards:end -->
+    </div>
+
+    <div class="writing-actions reveal">
+      <a href="/blog" class="btn btn-ghost">All blog posts</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn btn-ghost" target="_blank" rel="noopener">Dev.to</a>
+      <a href="https://divenrastdus.hashnode.dev" class="btn btn-ghost" target="_blank" rel="noopener">Hashnode</a>
+      <a href="/book" class="btn btn-ghost">The book</a>
     </div>
   </div>
 </section>
 
+<!-- ===================== NEWSLETTER ===================== -->
 <section class="subscribe" id="subscribe">
-  <div class="container">
+  <div class="wrap">
     <div class="subscribe-card reveal">
-      <div class="subscribe-eyebrow">The newsletter</div>
+      <div class="kicker" style="margin-bottom:14px;">The newsletter</div>
       <h2>Notes from <em>the build.</em></h2>
-      <p>Production AI systems, hard-won lessons, and the occasional teardown — sent when I have something worth saying. No spam, unsubscribe anytime.</p>
+      <p>Production lessons, hard-won debugging stories, and the occasional teardown — sent when I have something worth saying. No spam, unsubscribe anytime.</p>
       <form class="subscribe-form" id="subscribe-form" novalidate>
         <input type="email" id="subscribe-email" name="email" placeholder="you@example.com" autocomplete="email" required aria-label="Email address" />
         <button type="submit" id="subscribe-btn">Subscribe</button>
@@ -1455,105 +805,68 @@
   </div>
 </section>
 
-<section class="cta">
-  <div class="cta-glow"></div>
-  <div class="container">
-    <h2 class="reveal">Let's build <em>something.</em></h2>
-    <p class="reveal">Tell me what you need. I'll reply within 24 hours with a straight answer on whether I can help and what it would take.</p>
-    <div class="cta-actions reveal">
-      <a href="mailto:theagentthatcould@gmail.com" class="btn-primary" target="_blank" rel="noopener">Email me</a>
-      <a href="https://x.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">X / astraedus</a>
-      <a href="https://github.com/astraedus" class="btn-ghost" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn-ghost" target="_blank" rel="noopener">Dev.to</a>
-      <a href="https://divenrastdus.hashnode.dev" class="btn-ghost" target="_blank" rel="noopener">Hashnode</a>
-      <a href="https://medium.com/@theagentthatcould" class="btn-ghost" target="_blank" rel="noopener">Medium</a>
+<!-- ===================== CONTACT ===================== -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <h2 class="reveal">Interested in <em>working together?</em></h2>
+    <p class="reveal">Tell me what you need built. I'll reply within a day with a straight answer on whether I can help and what it would take. Available for project work.</p>
+    <div class="contact-actions reveal">
+      <a href="mailto:theagentthatcould@gmail.com" class="btn btn-primary">Email me</a>
+      <a href="https://github.com/astraedus" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://dev.to/diven_rastdus_c5af27d68f3" class="btn btn-ghost" target="_blank" rel="noopener">Dev.to</a>
+      <a href="https://divenrastdus.hashnode.dev" class="btn btn-ghost" target="_blank" rel="noopener">Hashnode</a>
     </div>
-    <p class="cta-email reveal">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
+    <p class="contact-email reveal">or email <a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></p>
   </div>
 </section>
 
+<!-- ===================== FOOTER ===================== -->
 <footer>
-  <div class="container">
-    <span>Diven Rastdus / Astraedus, 2026</span>
-    <span><a href="mailto:theagentthatcould@gmail.com">theagentthatcould@gmail.com</a></span>
-    <span>Sydney, Australia</span>
+  <div class="wrap">
+    <div class="foot-brand">
+      Diven Rastdus
+      <span class="sub">Full-stack developer &amp; founder of Raedus Labs. Building and shipping software in the open.</span>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col">
+        <h4>Site</h4>
+        <a href="#work">Work</a>
+        <a href="/blog">Blog</a>
+        <a href="/writing">Writing</a>
+        <a href="/book">Book</a>
+      </div>
+      <div class="foot-col">
+        <h4>Studio</h4>
+        <a href="https://raeduslabs.com" target="_blank" rel="noopener">Raedus Labs</a>
+        <a href="https://raeduslabs.com/nudge/" target="_blank" rel="noopener">Nudge</a>
+        <a href="https://raeduslabs.com/soulsync/" target="_blank" rel="noopener">SoulSync</a>
+      </div>
+      <div class="foot-col">
+        <h4>Elsewhere</h4>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://dev.to/diven_rastdus_c5af27d68f3" target="_blank" rel="noopener">Dev.to</a>
+        <a href="https://divenrastdus.hashnode.dev" target="_blank" rel="noopener">Hashnode</a>
+        <a href="mailto:theagentthatcould@gmail.com">Email</a>
+      </div>
+    </div>
   </div>
 </footer>
 
 <script>
 (function() {
   // Scroll reveal
-  const observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-  document.querySelectorAll('.reveal').forEach(function(el) {
-    observer.observe(el);
-  });
-
-  // Terminal typing animation
-  var cmd = 'astra --status';
-  var typed = document.getElementById('typed-cmd');
-  var cursor = document.getElementById('typing-cursor');
-  var output = document.getElementById('terminal-output');
-  var bottom = document.getElementById('terminal-bottom');
-  var i = 0;
-
-  function typeChar() {
-    if (i < cmd.length) {
-      typed.textContent += cmd[i];
-      i++;
-      setTimeout(typeChar, 60 + Math.random() * 40);
-    } else {
-      cursor.style.display = 'none';
-      setTimeout(showOutput, 300);
-    }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
   }
 
-  function showOutput() {
-    output.classList.add('show');
-    var rows = output.querySelectorAll('.terminal-row');
-    rows.forEach(function(row, idx) {
-      setTimeout(function() {
-        row.classList.add('show');
-      }, idx * 120);
-    });
-    setTimeout(function() {
-      bottom.classList.add('show');
-    }, rows.length * 120 + 200);
-  }
-
-  setTimeout(typeChar, 800);
-
-  // Counter animation for stat "8"
-  var countEls = document.querySelectorAll('[data-count]');
-  var countObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        var target = parseInt(entry.target.getAttribute('data-count'));
-        var current = 0;
-        var step = Math.ceil(target / 20);
-        var interval = setInterval(function() {
-          current += step;
-          if (current >= target) {
-            current = target;
-            clearInterval(interval);
-          }
-          entry.target.textContent = current;
-        }, 50);
-        countObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-
-  countEls.forEach(function(el) { countObserver.observe(el); });
-
-  // Newsletter subscribe
+  // Newsletter subscribe — POSTs { email } to the Cloudflare Worker at /api/subscribe
   var SUBSCRIBE_ENDPOINT = 'https://astraedus.dev/api/subscribe';
   var subForm = document.getElementById('subscribe-form');
   if (subForm) {

@@ -26,12 +26,25 @@ We push published URLs to IndexNow (Bing/Yandex/Seznam/etc.) the moment we publi
 The homepage has a `#subscribe` section (between the writing section and the final CTA) — an email input that POSTs `{ email }` to **`https://astraedus.dev/api/subscribe`**, a Cloudflare Worker bound as a same-origin route on this zone. The Worker (repo `~/projects/astraedus-newsletter-worker`) validates server-side and adds the contact to the Resend audience **"Astraedus Newsletter"** (`a32d3681-a39f-42c6-a41e-7bee67402639`). The Resend API key lives ONLY as a Worker secret — never in this static site. Dev.to articles CTA to `astraedus.dev/#subscribe` to compound the audience. To change signup logic, edit/redeploy the Worker repo, not this site. Footer carries the contact email `theagentthatcould@gmail.com`.
 
 ## Key Files
-- `index.html` — homepage (hero, projects grid, articles, contact).
+- `index.html` — homepage. **Rebuilt 2026-07-20** as a warm-paper personal-identity page (was the dark amber "production AI agent systems" page; old version in git history). See `## Homepage` below.
+- `assets/apps/` — optimized WebP product screenshots used by the homepage (`nudge/`, `soulsync/`). Sized ~480w for the phone mockups; regenerate from `nudge/store-listing/screenshots/` (Nudge) and `soulsync/assets/` (SoulSync) with Pillow `im.save(out,'WEBP',quality=80,method=6)`.
 - `CNAME` — `astraedus.dev` (custom domain).
 - `blog/` — one directory per post, each containing `index.html`. Index page at `blog/index.html`.
 - `book/` — work-in-progress book (`cover.jpg` + `index.html`).
 - `arc-journal/privacy.html` — Arc Journal privacy policy (legally required, not really part of the portfolio narrative).
 - `sitemap.xml`, `robots.txt`, `favicon.svg` — standard SEO surface.
+
+## Homepage (`index.html`) — structure & conventions (rebuilt 2026-07-20)
+Warm-paper personal-identity page for Diven Rastdus (full-stack dev + founder of Raedus Labs); its main job is funneling visitors to **raeduslabs.com**. Deliberately a *sibling* of the raeduslabs.com homepage (shared cream paper + JetBrains Mono identity face), not a clone — its own signature ember accent (`--ember #BC531B`), Fraunces display serif, and a single dark full-bleed Raedus Labs centerpiece as the tonal shift. Vanilla HTML/CSS/JS, one inline `<style>`, no framework (no Tailwind here — unlike the raeduslabs repo). Fonts: Fraunces (display) + Geist (body) + JetBrains Mono (identity) + Caveat (one hand-written signature accent), via Google Fonts.
+
+Section order (each is a `<section id=...>`): `hero` → `work` (featured: Nudge + SoulSync) → `how` (How I ship: 4 pillars) → `studio` (dark Raedus Labs centerpiece) → `writing` → `subscribe` → `contact` → footer.
+
+**Load-bearing invariants (don't break):**
+- `#subscribe` anchor id is EXACT — Dev.to articles deep-link `astraedus.dev/#subscribe`. The form still POSTs `{ email }` to the `https://astraedus.dev/api/subscribe` Cloudflare Worker (re-skinned, never rewired).
+- Cloudflare beacon (token `8b578cad5b3646a7b9c81ac6acbb76ab`), self-canonical `https://astraedus.dev/`, og:image `og-image.png` all preserved.
+- No links to suspended/real-identity accounts: NO x.com, medium.com, or linkedin (the old page's `linkedin.com/in/yuvraj-fowdar` was Anti's real name — removed). Socials are GitHub / Dev.to / Hashnode only.
+
+**Adding a new blog post card** (the articles slot lives in the `#writing` section, between the `<!-- post-cards:start -->` and `<!-- post-cards:end -->` markers): copy one `<a class="post" href="/blog/<slug>/">` block to the TOP of that list, set the title + `<span class="post-date">Mon D, YYYY</span>`, and drop the oldest so 4–5 show. Same one-post-per-line pattern as before; keep newest-first. `href` must be the real hosted slug (`/blog/<slug>/`) or it 404s.
 
 ## Architecture
 Flat static. Every page is a self-contained HTML file with inline CSS variables and JS. Shared design tokens are duplicated across files — change the palette, propagate manually. Links between pages are relative.
