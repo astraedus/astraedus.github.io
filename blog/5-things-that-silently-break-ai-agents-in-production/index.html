@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 5 Things That Silently Break AI Agents in Production | Diven Rastdus</title>
+  <meta name="description" content="Your AI agent works in the demo and breaks in production. It&#x27;s almost never the model. It&#x27;s these five plumbing failures, and each one has a small, boring fix.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/5-things-that-silently-break-ai-agents-in-production/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="The 5 Things That Silently Break AI Agents in Production">
+  <meta property="og:description" content="Your AI agent works in the demo and breaks in production. It&#x27;s almost never the model. It&#x27;s these five plumbing failures, and each one has a small, boring fix.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/5-things-that-silently-break-ai-agents-in-production/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-07-27">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="The 5 Things That Silently Break AI Agents in Production">
+  <meta name="twitter:description" content="Your AI agent works in the demo and breaks in production. It&#x27;s almost never the model. It&#x27;s these five plumbing failures, and each one has a small, boring fix.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "The 5 Things That Silently Break AI Agents in Production",
+      "description": "Your AI agent works in the demo and breaks in production. It's almost never the model. It's these five plumbing failures, and each one has a small, boring fix.",
+      "url": "https://astraedus.dev/blog/5-things-that-silently-break-ai-agents-in-production/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/5-things-that-silently-break-ai-agents-in-production/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-07-27",
+      "dateModified": "2026-07-27",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The agent forgets everything between steps",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The agent's plan lives only in the model's context window, and that window gets summarized, truncated, or reset on any long run. When it does, the plan goes with it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "It trusts its own \"done\"",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The agent believes its own report. The model says \"I wrote the file,\" your code marks the task complete, and nobody checked the disk."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "A tool call \"succeeds\" but did nothing",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A tool can return without an error and still do the wrong thing, or nothing at all. An HTTP 200 can mean \"accepted but queued,\" \"partial write,\" or \"no-op.\" An exit code of 0 means the program said it succeeded: curl without -f exits 0 on a 404, and grep exits 1 when it simply found nothing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Small errors compound into a broken chain",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The fourth failure is pure math. Assume steps fail independently, which is optimistic, and a step that works 95% of the time still poisons the chain."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The loop never stops (and neither does the bill)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The fifth failure is the runaway loop. while (!done) { await agent.step() } is one bad plan away from looping forever, and every iteration is a paid API call."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The pattern under all five",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One idea ties these together: the model proposes, deterministic code disposes. Treat every model output as untrusted input to an ordinary program."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "The 5 Things That Silently Break AI Agents in Production", "item": "https://astraedus.dev/blog/5-things-that-silently-break-ai-agents-in-production/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Jul 27, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">7 min read</span>
+      </div>
+      <h1>The 5 Things That Silently Break AI Agents in Production</h1>
+      <p class="article-lede">Your AI agent works in the demo because the demo runs once, on a clean input, while you watch. Production is thousands of runs, on messy inputs, with nobody watching. The gap is almost never the model's reasoning. It's five plumbing failures that stay invisible until they cost you a bad night.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-the-agent-forgets-everything-between-steps">1. The agent forgets everything between steps</a></li>
+          <li><a href="#2-it-trusts-its-own-done">2. It trusts its own "done"</a></li>
+          <li><a href="#3-a-tool-call-succeeds-but-did-nothing">3. A tool call "succeeds" but did nothing</a></li>
+          <li><a href="#4-small-errors-compound-into-a-broken-chain">4. Small errors compound into a broken chain</a></li>
+          <li><a href="#5-the-loop-never-stops-and-neither-does-the-bill">5. The loop never stops (and neither does the bill)</a></li>
+          <li><a href="#the-pattern-under-all-five">The pattern under all five</a></li>
+        </ul>
+      </nav>
+
+      <p>I run a fleet of agents unattended, every day. The first time I left one going overnight, it reported a clean run. Every step logged "success." The actual work was half-finished, and it had burned a small fortune getting there. None of the five failures below throw an error. They quietly produce a wrong result and hand it to the next step, which trusts it completely.</p>
+      <p>Here is the map. The same loop that shines in a demo has five silent failure points once it runs for real.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Where AI agents break: the plan, act, observe, remember loop with five failure points marked" src="https://i.imgur.com/nbWf444.png"></p>
+      <h2 id="1-the-agent-forgets-everything-between-steps"><a class="anchor" href="#1-the-agent-forgets-everything-between-steps" aria-label="Link to this section"></a>1. The agent forgets everything between steps</h2>
+      <p>The agent's plan lives only in the model's context window, and that window gets summarized, truncated, or reset on any long run. When it does, the plan goes with it. Then the agent redoes work it already finished, or flatly contradicts itself. The demo never hits this because the demo is short.</p>
+      <p>Treat the context window as a cache, not your source of truth. The durable state lives in a store, and every step loads it back before it does anything.</p>
+      <pre><code class="language-ts">// BAD: the plan is stuffed into a prompt string. One summarization and it's gone.
+      const prompt = `Goal: ${goal}. Done so far: ${doneList}. Next?`;
+      const next = await model.decide(prompt);
+
+      // GOOD: state lives in a store. Every step LOADS it, then saves.
+      type AgentState = { goal: string; done: string[] };
+
+      async function step(runId: string) {
+        const state = await loadState(runId);        // re-hydrate from the store, every step
+        const decision = await model.decide(state);  // the model sees ALL prior state
+        await saveState(runId, { ...state, done: [...state.done, decision.action] });
+        return decision;
+      }
+      </code></pre>
+      <p>The helpers here (<code>loadState</code>, <code>saveState</code>, and their friends further down) are yours to implement. The pattern is the point. If your agent has to remember something across steps, that memory belongs on disk or in a row, not in the prompt.</p>
+      <h2 id="2-it-trusts-its-own-done"><a class="anchor" href="#2-it-trusts-its-own-done" aria-label="Link to this section"></a>2. It trusts its own "done"</h2>
+      <p>The agent believes its own report. The model says "I wrote the file," your code marks the task complete, and nobody checked the disk. But <code>success</code> usually means the run finished, not that the artifact exists. When the model authored that field itself, it means even less.</p>
+      <p>So check the world, not the claim. And check it well, because a stale artifact from a previous run will pass a lazy check.</p>
+      <pre><code class="language-ts">// BAD: trust the model's word.
+      const result = await agent.run(&quot;write report.pdf&quot;);
+      markComplete(result);            // result.success means &quot;the run ended&quot;, not &quot;the file is there&quot;
+
+      // GOOD: clear any stale copy, then prove the new one exists.
+      await rm(&quot;report.pdf&quot;).catch(() =&gt; {});
+      await agent.run(&quot;write report.pdf&quot;);
+      const stat = await fs.stat(&quot;report.pdf&quot;).catch(() =&gt; null);
+      if (!stat || stat.size === 0) {
+        throw new Error(&quot;agent reported done, but report.pdf isn't there&quot;);
+      }
+      </code></pre>
+      <p>That one rule, "a claim is not a fact," kills a whole class of confabulation bugs. The agent can be wrong without meaning to, so your code shouldn't take it at its word.</p>
+      <h2 id="3-a-tool-call-succeeds-but-did-nothing"><a class="anchor" href="#3-a-tool-call-succeeds-but-did-nothing" aria-label="Link to this section"></a>3. A tool call "succeeds" but did nothing</h2>
+      <p>A tool can return without an error and still do the wrong thing, or nothing at all. An HTTP 200 can mean "accepted but queued," "partial write," or "no-op." An exit code of 0 means the program said it succeeded: <code>curl</code> without <code>-f</code> exits 0 on a 404, and <code>grep</code> exits 1 when it simply found nothing. And <code>fetch</code> doesn't reject on a 500 or a 403 either, only on a network failure, so "no exception" is a weaker signal than it looks.</p>
+      <p>Validate the effect you wanted, not the status you got back. Read the write back out and confirm it landed.</p>
+      <pre><code class="language-ts">// BAD: no exception, so it worked, right? (fetch resolves on 500 and 403 too.)
+      await fetch(url, { method: &quot;POST&quot;, body });
+
+      // GOOD: check the status, then read the record back.
+      const res = await fetch(url, { method: &quot;POST&quot;, body });
+      if (!res.ok) throw new Error(`POST failed: ${res.status}`);
+      const { id } = await res.json();
+      const saved = await fetch(`${url}/${id}`).then(r =&gt; (r.ok ? r.json() : null));
+      if (saved?.status !== &quot;written&quot;) {
+        throw new Error(&quot;write returned 200 but did not persist&quot;);
+      }
+      </code></pre>
+      <p>On an eventually-consistent store, poll with a short backoff instead of reading once, or a write that really landed can still 404 on the immediate read-back. I once watched an agent post the same update fifteen times: each call returned 200, a downstream queue silently dropped it, so the agent re-checked, saw nothing, and posted again.</p>
+      <h2 id="4-small-errors-compound-into-a-broken-chain"><a class="anchor" href="#4-small-errors-compound-into-a-broken-chain" aria-label="Link to this section"></a>4. Small errors compound into a broken chain</h2>
+      <p>The fourth failure is pure math. Assume steps fail independently, which is optimistic, and a step that works 95% of the time still poisons the chain. <code>0.95 ** 10</code> is <code>0.60</code>. Four in ten full runs now fail somewhere, and a three-step demo hid it completely.</p>
+      <p>Retries buy most of it back, so build the chain to absorb flakiness: retry, dedupe, checkpoint.</p>
+      <pre><code class="language-ts">const reliability = 0.95 ** 10; // 0.5987... not &quot;reliable&quot; across ten steps
+
+      async function safeStep(fn: () =&gt; Promise&lt;any&gt;, key: string) {
+        if (await alreadyDone(key)) return getResult(key);  // dedupe: skip work already recorded
+        const out = await withRetry(fn, 3);                 // absorb transient flakiness
+        await recordResult(key, out);                       // checkpoint so a failure resumes here
+        return out;
+      }
+      </code></pre>
+      <p>Three attempts at 95% is 99.99% per step, which is 99.88% across the ten. But that dedupe lives at the orchestrator level only. The downstream operation still has to be idempotent on its own: pass an idempotency key to the payment or API provider, because a crash between the call and the checkpoint will run it twice, and twice means double-charge, double-send, double-write.</p>
+      <h2 id="5-the-loop-never-stops-and-neither-does-the-bill"><a class="anchor" href="#5-the-loop-never-stops-and-neither-does-the-bill" aria-label="Link to this section"></a>5. The loop never stops (and neither does the bill)</h2>
+      <p>The fifth failure is the runaway loop. <code>while (!done) { await agent.step() }</code> is one bad plan away from looping forever, and every iteration is a paid API call. Nobody notices in the demo because the demo finishes. Unattended, it can spin for hours and hand you an invoice instead of a result.</p>
+      <p>Put hard ceilings on it that fail closed. When a limit trips, the agent stops and tells you, rather than grinding on.</p>
+      <pre><code class="language-ts">class BudgetError extends Error {}
+
+      // A step cap AND a token/cost cap. Both fail closed.
+      let steps = 0, tokens = 0, done = false;
+      while (!done) {
+        if (++steps &gt; 25)      throw new BudgetError(&quot;step budget exceeded&quot;);
+        if (tokens &gt; 200_000)  throw new BudgetError(&quot;token budget exceeded&quot;);
+        const out = await agent.step();
+        tokens += out.usage.total_tokens ?? 0;   // field name is provider-specific (see below)
+        done = out.done;
+      }
+      </code></pre>
+      <p>Watch that <code>usage</code> field. OpenAI gives you <code>total_tokens</code>; Anthropic gives you <code>input_tokens</code> and <code>output_tokens</code> and no total. Read the wrong one and <code>tokens</code> becomes <code>NaN</code>, every <code>NaN &gt; 200_000</code> is <code>false</code>, and your cap silently never fires. That is this whole article in one line: no error, wrong result. And notice the throw is a <code>BudgetError</code>, not a plain one. If a budget throw gets swallowed by the retry wrapper from failure #4, you re-burn the whole budget three times. That is the exact bill this guard exists to prevent.</p>
+      <h2 id="the-pattern-under-all-five"><a class="anchor" href="#the-pattern-under-all-five" aria-label="Link to this section"></a>The pattern under all five</h2>
+      <p>One idea ties these together: the model proposes, deterministic code disposes. Treat every model output as untrusted input to an ordinary program. Verify it against the real world. Put hard limits around the loop. Keep the LLM for the fuzzy judgment it's good at, and keep the guarantees in plain code that can't hallucinate.</p>
+      <p>Here is the ship checklist:</p>
+      <ul>
+      <li>[ ] State lives in a store, loaded back every step, not in the context window</li>
+      <li>[ ] Every "done" is verified against the source of truth</li>
+      <li>[ ] Tool calls are checked by effect, not by status code</li>
+      <li>[ ] Steps are deduped and retried; the downstream op is idempotent</li>
+      <li>[ ] The loop has a step cap and a real token/cost cap (mind the field name)</li>
+      </ul>
+      <p>That list is the whole difference between a thing that demos well and a thing you can actually walk away from.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
