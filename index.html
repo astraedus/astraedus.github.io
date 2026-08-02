@@ -398,6 +398,17 @@
     .phone.b { transform: rotate(3deg) translateY(20px); margin-left: -38px; }
     .cluster:hover .phone.a { transform: rotate(-5deg) translateY(-4px); }
     .cluster:hover .phone.b { transform: rotate(4deg) translateY(14px); }
+    /* Wide browser shot (web apps) — same material language as .phone, landscape */
+    .shot {
+      position: relative; z-index: 1;
+      width: min(100%, 560px);
+      background: #fff; border-radius: 16px; padding: 7px;
+      border: 1px solid var(--line-2);
+      box-shadow: 0 26px 52px -20px rgba(90, 55, 30, 0.4), 0 4px 14px rgba(90, 55, 30, 0.1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .shot img { display: block; width: 100%; height: auto; border-radius: 10px; }
+    .cluster:hover .shot { transform: translateY(-6px); }
 
     /* ---- How I ship ---- */
     .ship {
@@ -613,6 +624,8 @@
       <span class="sep">·</span>
       <a href="#soulsync">SoulSync</a>
       <span class="sep">·</span>
+      <a href="#music">Music Practice</a>
+      <span class="sep">·</span>
       <a href="https://raeduslabs.com" target="_blank" rel="noopener">more at Raedus Labs</a>
     </div>
   </div>
@@ -623,8 +636,8 @@
   <div class="wrap">
     <div class="band-head reveal">
       <div class="eyebrow">Featured work</div>
-      <h2 class="section-title">Two apps, live and in the open.</h2>
-      <p class="lede">Both are open source, on Google Play, and built to stay out of your way. Real products, not demos — read every line if you want to.</p>
+      <h2 class="section-title">Three apps, live and in the open.</h2>
+      <p class="lede">All open source — two on Google Play, one right in your browser. Real products, not demos — read every line if you want to.</p>
     </div>
 
     <!-- Nudge -->
@@ -692,6 +705,36 @@
           <div class="cluster">
             <div class="phone a"><img src="/assets/apps/soulsync/home.webp" width="480" height="960" alt="SoulSync home screen with today's mood entry" loading="lazy"></div>
             <div class="phone b"><img src="/assets/apps/soulsync/heatmap.webp" width="480" height="960" alt="SoulSync mood heatmap calendar view" loading="lazy"></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Music Practice -->
+    <article class="product reveal" id="music">
+      <div class="product-grid">
+        <div class="product-copy">
+          <div class="product-badges">
+            <span class="badge live"><span class="live-dot"></span>Live in your browser</span>
+            <span class="badge">Open source · MIT</span>
+          </div>
+          <h3>Music Practice</h3>
+          <p class="tag">The practice app that tells you what to learn next.</p>
+          <p class="body">A free web app for learning piano, electric guitar, and drums. A real prerequisite skill tree decides what you practice tonight and why, drills step up in tempo as you land them, and learned skills come back for spaced review before they fade. No account, no paywall — it runs in the browser and your progress stays on your device.</p>
+          <div class="product-tech">
+            <span>Next.js</span><span>React</span><span>TypeScript</span><span>Tone.js</span><span>VexFlow</span>
+          </div>
+          <div class="product-links">
+            <a class="lnk primary" href="https://music.raeduslabs.com" target="_blank" rel="noopener">Open the app <span class="arrow"></span></a>
+            <a class="lnk" href="https://github.com/astraedus/piano" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.01 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 24 12C24 5.37 18.63 0 12 0z"/></svg>
+              Source
+            </a>
+          </div>
+        </div>
+        <div class="product-shots">
+          <div class="cluster">
+            <div class="shot"><img src="/assets/apps/music/stand.webp" width="1110" height="809" alt="Music Practice home stand: a piano warmup with keyboard fingering, notation and a metronome" loading="lazy"></div>
           </div>
         </div>
       </div>
@@ -840,6 +883,7 @@
         <a href="https://raeduslabs.com" target="_blank" rel="noopener">Raedus Labs</a>
         <a href="https://raeduslabs.com/nudge/" target="_blank" rel="noopener">Nudge</a>
         <a href="https://raeduslabs.com/soulsync/" target="_blank" rel="noopener">SoulSync</a>
+        <a href="https://music.raeduslabs.com" target="_blank" rel="noopener">Music Practice</a>
       </div>
       <div class="foot-col">
         <h4>Elsewhere</h4>
