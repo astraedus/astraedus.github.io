@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Give Your React Native App a Memory That Actually Works | Diven Rastdus</title>
+  <meta name="description" content="A mental model for local persistence in React Native: the three tiers of memory, which data goes where, and how to stop losing user state on restart.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/react-native-app-memory-that-actually-works/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How to Give Your React Native App a Memory That Actually Works">
+  <meta property="og:description" content="A mental model for local persistence in React Native: the three tiers of memory, which data goes where, and how to stop losing user state on restart.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/react-native-app-memory-that-actually-works/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-03">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="How to Give Your React Native App a Memory That Actually Works">
+  <meta name="twitter:description" content="A mental model for local persistence in React Native: the three tiers of memory, which data goes where, and how to stop losing user state on restart.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How to Give Your React Native App a Memory That Actually Works",
+      "description": "A mental model for local persistence in React Native: the three tiers of memory, which data goes where, and how to stop losing user state on restart.",
+      "url": "https://astraedus.dev/blog/react-native-app-memory-that-actually-works/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/react-native-app-memory-that-actually-works/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-03",
+      "dateModified": "2026-08-03",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How to Give Your React Native App a Memory That Actually Works", "item": "https://astraedus.dev/blog/react-native-app-memory-that-actually-works/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 3, 2026</span>
+        <span class="article-tag">Reactnative</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>How to Give Your React Native App a Memory That Actually Works</h1>
+      <p class="article-lede">A React Native app has three separate kinds of memory, and almost every "my data disappeared" bug comes from storing a value in the wrong one. Once you can name the three tiers and match each piece of data to the right one, "remembering" stops being a mystery and becomes a routing decision.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#your-app-has-three-kinds-of-memory">Your app has three kinds of memory</a></li>
+          <li><a href="#match-each-value-to-the-right-tier">Match each value to the right tier</a></li>
+          <li><a href="#why-your-data-disappears-asyncstorage-is-async">Why your data disappears: AsyncStorage is async</a></li>
+          <li><a href="#make-key-value-memory-synchronous-with-mmkv">Make key-value memory synchronous with MMKV</a></li>
+          <li><a href="#gate-the-first-render-on-hydration">Gate the first render on hydration</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>Here's the problem you'll hit. A user fills out onboarding, sets dark mode, adds three entries, then force-quits the app. They reopen it and everything's gone. Or the softer version: the app launches in light mode for half a second, flashes white, then snaps to the dark theme they actually chose. Both are the same bug wearing different clothes. Something lived in the wrong tier of memory.</p>
+      <h2 id="your-app-has-three-kinds-of-memory"><a class="anchor" href="#your-app-has-three-kinds-of-memory" aria-label="Link to this section"></a>Your app has three kinds of memory</h2>
+      <p>A React Native app stores data in three local tiers, and each one survives a different amount of destruction. Above them sits the server, which is the only thing that survives a reinstall.</p>
+      <ul>
+      <li><strong>In-memory state</strong> (<code>useState</code>, <code>useReducer</code>, Zustand held in RAM). Fast, but it survives nothing. A reload, a background-kill, or a crash wipes it.</li>
+      <li><strong>Key-value storage</strong> (MMKV, AsyncStorage, expo-secure-store). Small values that survive a restart. Themes, flags, tokens.</li>
+      <li><strong>Structured storage</strong> (expo-sqlite, WatermelonDB). Rows you can query, sort, and read offline. Notes, entries, a synced list.</li>
+      </ul>
+      <p>The server (Supabase or your own API) is the source of truth. Every local tier is a cache of it.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The three tiers of React Native memory" src="https://i.imgur.com/ZrrmTpy.png"></p>
+      <h2 id="match-each-value-to-the-right-tier"><a class="anchor" href="#match-each-value-to-the-right-tier" aria-label="Link to this section"></a>Match each value to the right tier</h2>
+      <p>The right tier for a value comes down to two questions: how much destruction it must survive, and how you'll read it back. A single flag reads differently than a list you sort.</p>
+      <table>
+      <thead>
+      <tr>
+      <th>What you are storing</th>
+      <th>Tier</th>
+      <th>Store to use</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Auth token, API keys</td>
+      <td>secrets</td>
+      <td><code>expo-secure-store</code></td>
+      </tr>
+      <tr>
+      <td>Theme, onboarding-done, feature flags</td>
+      <td>small key-value</td>
+      <td>MMKV / AsyncStorage</td>
+      </tr>
+      <tr>
+      <td>Notes, entries, a list you query</td>
+      <td>structured records</td>
+      <td><code>expo-sqlite</code></td>
+      </tr>
+      <tr>
+      <td>The canonical copy shared across devices</td>
+      <td>source of truth</td>
+      <td>your server, cached locally</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>One security note that catches people. AsyncStorage and MMKV aren't encrypted by default, so an auth token doesn't belong there. Secrets go in <code>expo-secure-store</code>, which is backed by the iOS Keychain and Android Keystore.</p>
+      <h2 id="why-your-data-disappears-asyncstorage-is-async"><a class="anchor" href="#why-your-data-disappears-asyncstorage-is-async" aria-label="Link to this section"></a>Why your data disappears: AsyncStorage is async</h2>
+      <p>The most common "data loss" bug isn't lost data at all. It's reading storage a beat <em>after</em> your UI has already rendered with a default value.</p>
+      <p>AsyncStorage returns a promise. Your component renders once with its initial state, then the saved value arrives and triggers a second render. The user sees the gap.</p>
+      <pre><code class="language-tsx">function useThemePref() {
+        const [theme, setTheme] = useState(&quot;light&quot;); // default paints first
+        useEffect(() =&gt; {
+          AsyncStorage.getItem(&quot;theme&quot;).then((saved) =&gt; {
+            if (saved) setTheme(saved); // real value lands after first paint
+          });
+        }, []);
+        return theme;
+      }
+      </code></pre>
+      <p>The user picked dark mode last week. On launch they still see a white flash, then it corrects. The data was never lost. You just read it too late.</p>
+      <h2 id="make-key-value-memory-synchronous-with-mmkv"><a class="anchor" href="#make-key-value-memory-synchronous-with-mmkv" aria-label="Link to this section"></a>Make key-value memory synchronous with MMKV</h2>
+      <p>MMKV reads and writes synchronously, so the value is already there on the very first render. No promise, no await, no flash. Pair it with Zustand's persist middleware and your store rehydrates itself.</p>
+      <pre><code class="language-tsx">import { MMKV } from &quot;react-native-mmkv&quot;;
+      import { create } from &quot;zustand&quot;;
+      import { persist, createJSONStorage, StateStorage } from &quot;zustand/middleware&quot;;
+
+      const storage = new MMKV();
+
+      const mmkvStorage: StateStorage = {
+        getItem: (k) =&gt; storage.getString(k) ?? null,
+        setItem: (k, v) =&gt; storage.set(k, v),
+        removeItem: (k) =&gt; storage.delete(k),
+      };
+
+      export const usePrefs = create(
+        persist(
+          (set) =&gt; ({ theme: &quot;light&quot;, setTheme: (theme) =&gt; set({ theme }) }),
+          { name: &quot;prefs&quot;, storage: createJSONStorage(() =&gt; mmkvStorage) }
+        )
+      );
+      </code></pre>
+      <p>Because the read is synchronous, <code>usePrefs.getState().theme</code> is correct on the first paint. The white flash from the AsyncStorage version is gone, and you didn't change a single component.</p>
+      <h2 id="gate-the-first-render-on-hydration"><a class="anchor" href="#gate-the-first-render-on-hydration" aria-label="Link to this section"></a>Gate the first render on hydration</h2>
+      <p>When a tier is genuinely async (SQLite, a network cache), the cleanest fix is to not render the app until its memory has loaded. Hold a spinner until the first read resolves, then mount the tree with real data.</p>
+      <pre><code class="language-tsx">import { useEffect, useState } from &quot;react&quot;;
+      import { ActivityIndicator, View } from &quot;react-native&quot;;
+      import { useSQLiteContext } from &quot;expo-sqlite&quot;;
+
+      function Root() {
+        const db = useSQLiteContext();
+        const [prefs, setPrefs] = useState&lt;Prefs | null&gt;(null);
+
+        useEffect(() =&gt; {
+          db.getAllAsync(&quot;select key, value from settings&quot;)
+            .then((rows) =&gt; setPrefs(rowsToObject(rows))); // memory is now warm
+        }, [db]);
+
+        if (!prefs) {
+          return (
+            &lt;View style={{ flex: 1, justifyContent: &quot;center&quot; }}&gt;
+              &lt;ActivityIndicator /&gt;
+            &lt;/View&gt;
+          );
+        }
+        return &lt;App prefs={prefs} /&gt;;
+      }
+      </code></pre>
+      <p>This is exactly what a settings provider backed by expo-sqlite does in our own apps. It shows a spinner while the first query runs, seeds its context with the saved rows, and only then renders the screens. The user never sees a default value flicker into the real one, because the real one was loaded before anything painted.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>Storing data in React Native is a routing problem, not a library problem. You're not choosing between AsyncStorage and SQLite in the abstract. You're asking, for one specific value, how much it must survive and how you'll read it back. Answer those two questions and the tier picks itself.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Where should this piece of data live?" src="https://i.imgur.com/eVM0uMc.png"></p>
+      <p>Three rules carry most of the weight. Put each value in the lowest tier that meets its durability and access needs. Never let an async read paint a default first, either make the read synchronous or gate the render on it. And keep the server as the source of truth, with every local tier treated as a cache you can rebuild. Do that and your app remembers exactly what the user expects, every time they come back.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
