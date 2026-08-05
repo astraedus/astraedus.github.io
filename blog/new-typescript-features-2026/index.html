@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 TypeScript Features That Define 2026 (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="A native Go compiler, no-build-step .ts, import defer, and more. The TypeScript features shaping how I ship in 2026, with real numbers from real repos.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/new-typescript-features-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 TypeScript Features That Define 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="A native Go compiler, no-build-step .ts, import defer, and more. The TypeScript features shaping how I ship in 2026, with real numbers from real repos.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/new-typescript-features-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-05">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 TypeScript Features That Define 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="A native Go compiler, no-build-step .ts, import defer, and more. The TypeScript features shaping how I ship in 2026, with real numbers from real repos.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 TypeScript Features That Define 2026 (And 2 I'm Still Waiting For)",
+      "description": "A native Go compiler, no-build-step .ts, import defer, and more. The TypeScript features shaping how I ship in 2026, with real numbers from real repos.",
+      "url": "https://astraedus.dev/blog/new-typescript-features-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/new-typescript-features-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-05",
+      "dateModified": "2026-08-05",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The compiler went native, and it's roughly 10x faster",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The headline feature of TypeScript 7 is that the compiler is now a native binary written in Go. Microsoft measured a full type-check of the VS Code codebase dropping from 77.8 seconds to 7.5 seconds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "You can run TypeScript with no build step",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript 5.8 added --erasableSyntaxOnly, which pairs with Node's native type stripping so you can run a .ts file directly. No transpile, no bundler, no dist folder for local scripts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "import defer lets you lazy-load a module",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript 5.9 shipped support for import defer, a Stage 3 ECMAScript proposal that delays evaluating a module until you first touch one of its exports."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "--module node20 gives you a target that stops moving",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript 5.9 added --module node20, a stable option that models Node.js 20 behavior and implies --target es2023. The value here is predictability."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Better defaults and hovers make the editor pull its weight",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TypeScript 5.9 reworked tsc --init to emit a lean config instead of a hundred commented-out lines, and it made editor hovers far more useful."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 2 I'm still waiting for",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A stable compiler API on the native build. Every one of our repos runs typescript-eslint, and template type-checking for Vue, Svelte, and Astro all lean on TypeScript's programmatic API."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The theme for TypeScript in 2026 is speed and less ceremony, not more type gymnastics. The native compiler makes big codebases feel small again, no-build-step .ts kills a whole tooling layer for scripts, and import defer trims your startup cost."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 TypeScript Features That Define 2026 (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/new-typescript-features-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 5, 2026</span>
+        <span class="article-tag">Typescript</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>5 TypeScript Features That Define 2026 (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede">The biggest TypeScript change of 2026 isn't a new type. It's a new engine. The compiler got rewritten in Go and now type-checks about ten times faster, and Node runs your <code>.ts</code> files with no build step at all. A few of these landed across 5.8 and 5.9 during 2025, but together they're the toolchain I'm actually standing on this year. Here are the five I reach for across our projects, and the two I keep waiting on.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-the-compiler-went-native-and-its-roughly-10x-faster">1. The compiler went native, and it's roughly 10x faster</a></li>
+          <li><a href="#2-you-can-run-typescript-with-no-build-step">2. You can run TypeScript with no build step</a></li>
+          <li><a href="#3-import-defer-lets-you-lazy-load-a-module">3. import defer lets you lazy-load a module</a></li>
+          <li><a href="#4-module-node20-gives-you-a-target-that-stops-moving">4. --module node20 gives you a target that stops moving</a></li>
+          <li><a href="#5-better-defaults-and-hovers-make-the-editor-pull-its-weight">5. Better defaults and hovers make the editor pull its weight</a></li>
+          <li><a href="#the-2-im-still-waiting-for">The 2 I'm still waiting for</a></li>
+          <li><a href="#takeaway">Takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Why TypeScript 7 type-checks about 10x faster: porting the compiler from TypeScript-on-Node to a native Go binary drops a full VS Code type-check from 77.8s to 7.5s" src="https://i.imgur.com/lf1fil1.png"></p>
+      <h2 id="1-the-compiler-went-native-and-its-roughly-10x-faster"><a class="anchor" href="#1-the-compiler-went-native-and-its-roughly-10x-faster" aria-label="Link to this section"></a>1. The compiler went native, and it's roughly 10x faster</h2>
+      <p>The headline feature of TypeScript 7 is that the compiler is now a native binary written in Go. Microsoft measured a full type-check of the VS Code codebase dropping from 77.8 seconds to 7.5 seconds. That's a 10.4x cut on real code, not a toy benchmark.</p>
+      <p>The project codename is Corsa, and Anders Hejlsberg (TypeScript's lead architect) is running it. The important part: there's no new type system and no new syntax. The team took the existing checker and ported it, keeping the logic structurally identical. So your types behave the same. The wait just gets shorter.</p>
+      <p>You can try it today from the preview package:</p>
+      <pre><code class="language-bash">npm install -D @typescript/native-preview
+      npx tsgo --noEmit
+      </code></pre>
+      <p>I ran it on one of our Expo apps. A clean <code>tsc --noEmit</code> took 4.2 seconds; the same check on <code>tsgo</code> took 0.8 seconds. That's about 5x on a small codebase, and the gap only widens on big ones, which is where the VS Code 10.4x comes from. Expect one bump on the way in: <code>tsgo</code> immediately rejected our <code>baseUrl</code> option with <code>error TS5102</code>, because TypeScript 7 removed it. Paths resolve relative to the config file now, so I deleted one line and it passed. From the release candidate onward the native compiler folds back into the normal <code>typescript</code> package and the <code>tsc</code> command, so most projects bump a version and change little else. The one caveat before you migrate: TypeScript 7.0 has no stable programmatic API yet, which is why some tools still lag (more on that below).</p>
+      <h2 id="2-you-can-run-typescript-with-no-build-step"><a class="anchor" href="#2-you-can-run-typescript-with-no-build-step" aria-label="Link to this section"></a>2. You can run TypeScript with no build step</h2>
+      <p>TypeScript 5.8 added <code>--erasableSyntaxOnly</code>, which pairs with Node's native type stripping so you can run a <code>.ts</code> file directly. No transpile, no bundler, no <code>dist</code> folder for local scripts.</p>
+      <p>Node strips the type annotations and runs the rest. That works for almost everything, but a few TypeScript features emit real runtime code and can't be stripped: enums, namespaces with runtime bodies, and constructor parameter properties. The flag catches those at author time so you never ship code Node can't run:</p>
+      <pre><code class="language-typescript">// Both of these now error under erasableSyntaxOnly:
+      enum Color { Red, Green }          // enums compile to a runtime object
+
+      class User {
+        constructor(private id: string) {}  // parameter property emits an assignment
+      }
+      </code></pre>
+      <p>Turn it on in your config and run the file straight from Node (22.18 and up, on by default in Node 24):</p>
+      <pre><code class="language-jsonc">// tsconfig.json
+      { &quot;compilerOptions&quot;: { &quot;erasableSyntaxOnly&quot;: true } }
+      </code></pre>
+      <pre><code class="language-bash">node server.ts
+      </code></pre>
+      <p>The trap: type stripping deletes types and runs the code without checking them. A type error won't stop the program. You still need <code>tsc --noEmit</code> in CI to actually catch mistakes.</p>
+      <h2 id="3-import-defer-lets-you-lazy-load-a-module"><a class="anchor" href="#3-import-defer-lets-you-lazy-load-a-module" aria-label="Link to this section"></a>3. <code>import defer</code> lets you lazy-load a module</h2>
+      <p>TypeScript 5.9 shipped support for <code>import defer</code>, a Stage 3 ECMAScript proposal that delays evaluating a module until you first touch one of its exports. It's a clean win for expensive dependencies you don't always use.</p>
+      <pre><code class="language-typescript">import defer * as heavyAnalytics from &quot;./heavy-analytics.js&quot;;
+
+      export function trackFirstOpen() {
+        // heavy-analytics.js runs only when this line executes,
+        // not when the file is imported at startup
+        heavyAnalytics.track(&quot;app_opened&quot;);
+      }
+      </code></pre>
+      <p>One rule to remember: only namespace imports (<code>import defer * as x</code>) are allowed. Named and default imports aren't, because the whole point is to avoid evaluating the module up front. I use this for analytics and PDF generation, the code paths most users never hit on a cold start.</p>
+      <h2 id="4-module-node20-gives-you-a-target-that-stops-moving"><a class="anchor" href="#4-module-node20-gives-you-a-target-that-stops-moving" aria-label="Link to this section"></a>4. <code>--module node20</code> gives you a target that stops moving</h2>
+      <p>TypeScript 5.9 added <code>--module node20</code>, a stable option that models Node.js 20 behavior and implies <code>--target es2023</code>. The value here is predictability.</p>
+      <p>The older <code>nodenext</code> setting tracks whatever the latest Node does, so its behavior shifts under you as Node evolves. <code>node20</code> pins to a known version and stays put, which is exactly what you want in a <code>tsconfig.json</code> you won't touch for a year:</p>
+      <pre><code class="language-jsonc">// tsconfig.json
+      {
+        &quot;compilerOptions&quot;: {
+          &quot;module&quot;: &quot;node20&quot;   // stable, and implies &quot;target&quot;: &quot;es2023&quot;
+        }
+      }
+      </code></pre>
+      <p>Small feature, but it removes a class of "it worked last month" surprises in CI.</p>
+      <h2 id="5-better-defaults-and-hovers-make-the-editor-pull-its-weight"><a class="anchor" href="#5-better-defaults-and-hovers-make-the-editor-pull-its-weight" aria-label="Link to this section"></a>5. Better defaults and hovers make the editor pull its weight</h2>
+      <p>TypeScript 5.9 reworked <code>tsc --init</code> to emit a lean config instead of a hundred commented-out lines, and it made editor hovers far more useful. This is the quality-of-life bucket, and it matters more than it sounds.</p>
+      <p>The new <code>tsc --init</code> writes a short, readable file instead of a wall of comments, close to this:</p>
+      <pre><code class="language-jsonc">{
+        &quot;compilerOptions&quot;: {
+          &quot;target&quot;: &quot;esnext&quot;,
+          &quot;module&quot;: &quot;nodenext&quot;,
+          &quot;strict&quot;: true
+        }
+      }
+      </code></pre>
+      <p>On top of that, DOM type definitions now carry summary descriptions pulled from MDN, so hovering <code>element.scrollIntoView</code> explains what it does without a trip to the browser. Hovers also got expandable <code>+</code> and <code>-</code> buttons to drill into a deep type instead of squinting at a truncated blob.</p>
+      <h2 id="the-2-im-still-waiting-for"><a class="anchor" href="#the-2-im-still-waiting-for" aria-label="Link to this section"></a>The 2 I'm still waiting for</h2>
+      <p><strong>A stable compiler API on the native build.</strong> Every one of our repos runs typescript-eslint, and template type-checking for Vue, Svelte, and Astro all lean on TypeScript's programmatic API. TypeScript 7.0 ships without a stable one, so those tools can't run on the native compiler yet. The API is targeted for 7.1, several months out. Until then you get the fast <code>tsc</code>, but your lint and framework checks still ride the old engine.</p>
+      <p><strong>Nominal (opaque) types.</strong> TypeScript is still structural, so two <code>string</code> aliases are interchangeable no matter what you name them. To fake a real distinct type, we hand-roll brands:</p>
+      <pre><code class="language-typescript">type UserId = string &amp; { readonly __brand: &quot;UserId&quot; };
+      type PostId = string &amp; { readonly __brand: &quot;PostId&quot; };
+
+      function getUser(id: UserId) { /* ... */ }
+      // getUser(somePostId as PostId)  // the brand trick works, but it's a trick
+      </code></pre>
+      <p>It works, and it has saved us from passing a post id where a user id belongs. But a <code>__brand</code> phantom field is a workaround for a language feature that should exist. Give me a real <code>nominal</code> keyword.</p>
+      <h2 id="takeaway"><a class="anchor" href="#takeaway" aria-label="Link to this section"></a>Takeaway</h2>
+      <p>The theme for TypeScript in 2026 is speed and less ceremony, not more type gymnastics. The native compiler makes big codebases feel small again, no-build-step <code>.ts</code> kills a whole tooling layer for scripts, and <code>import defer</code> trims your startup cost. Upgrade when you can, but keep <code>tsc --noEmit</code> in CI as your real safety net, because the fastest features here are the ones that skip type-checking entirely. Fast is only good when it's also correct.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
