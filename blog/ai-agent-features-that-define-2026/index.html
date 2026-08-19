@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 AI Agent Features That Define 2026 (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="The model got the headlines, but 2026&#x27;s real agent progress was the stack around it: MCP, prompt caching, computer use, background subagents, and A2A. Here&#x27;s what shipped, with code.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/ai-agent-features-that-define-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 AI Agent Features That Define 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="The model got the headlines, but 2026&#x27;s real agent progress was the stack around it: MCP, prompt caching, computer use, background subagents, and A2A. Here&#x27;s what shipped, with code.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/ai-agent-features-that-define-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-19">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 AI Agent Features That Define 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="The model got the headlines, but 2026&#x27;s real agent progress was the stack around it: MCP, prompt caching, computer use, background subagents, and A2A. Here&#x27;s what shipped, with code.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 AI Agent Features That Define 2026 (And 2 I'm Still Waiting For)",
+      "description": "The model got the headlines, but 2026's real agent progress was the stack around it: MCP, prompt caching, computer use, background subagents, and A2A. Here's what shipped, with code.",
+      "url": "https://astraedus.dev/blog/ai-agent-features-that-define-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/ai-agent-features-that-define-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-19",
+      "dateModified": "2026-08-19",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "MCP became the universal tool layer",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MCP turned connecting an agent to a tool into one open standard, instead of a bespoke integration per vendor. That's the single biggest shift of 2026."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Prompt caching made the agent loop affordable",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Agents got cheap enough to run in loops because providers now let you reuse a cached prompt prefix for roughly a tenth of the price. An agent re-sends the same giant system prompt (tools, instructions, context) on every single turn."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Computer use turned agents into hands, not just mouths",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Agents can now see a screen and operate it directly, so any app with a UI is reachable even when it has no API. Claude's computer-use launch in October 2024 was the inflection point."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Background subagents made parallelism the default",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The best agent systems in 2026 stopped being one model in one loop and became many agents running at once, in the background. Instead of a human running tasks one after another, you fan out a fleet, each subagent with its own context window and its own tools."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "A2A let agents talk to other agents",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A2A is a standard for agents to discover and call each other across vendors, the way MCP standardized tools. It's the newest layer in the 2026 stack."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 2 I'm still waiting for",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Durable native memory. Every serious agent I run still fakes memory with a bolt-on: a vector database, or a folder of markdown files I re-inject each session."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The model got the headlines in 2026. The progress that changed my day-to-day was the stack around it: a tool standard, cheap loops, real hands, parallel execution, and agents that talk to each other."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 AI Agent Features That Define 2026 (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/ai-agent-features-that-define-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 19, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>5 AI Agent Features That Define 2026 (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede">The five features that define AI agents in 2026 are a shared tool standard (MCP), prompt caching, computer use, background subagents, and agent-to-agent messaging. None of them are the model itself. They are the plumbing that turns a clever text generator into something that does actual work.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-mcp-became-the-universal-tool-layer">1. MCP became the universal tool layer</a></li>
+          <li><a href="#2-prompt-caching-made-the-agent-loop-affordable">2. Prompt caching made the agent loop affordable</a></li>
+          <li><a href="#3-computer-use-turned-agents-into-hands-not-just-mouths">3. Computer use turned agents into hands, not just mouths</a></li>
+          <li><a href="#4-background-subagents-made-parallelism-the-default">4. Background subagents made parallelism the default</a></li>
+          <li><a href="#5-a2a-let-agents-talk-to-other-agents">5. A2A let agents talk to other agents</a></li>
+          <li><a href="#the-2-im-still-waiting-for">The 2 I'm still waiting for</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I run agents in production every day. For most of 2024 an "agent" meant a model stuck in a <code>while</code> loop, and it broke the moment it touched the real world. In 2026 that stopped being true, and it had almost nothing to do with the models getting smarter. It was the layers underneath.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The 2026 AI agent stack: foundation model, then MCP, prompt caching, computer use, subagents, and A2A, with durable memory and long-horizon autonomy still missing" src="https://i.imgur.com/C19sm5u.png"></p>
+      <p>Here are the five that changed how I build, and the two I'm still waiting on.</p>
+      <h2 id="1-mcp-became-the-universal-tool-layer"><a class="anchor" href="#1-mcp-became-the-universal-tool-layer" aria-label="Link to this section"></a>1. MCP became the universal tool layer</h2>
+      <p>MCP turned connecting an agent to a tool into one open standard, instead of a bespoke integration per vendor. That's the single biggest shift of 2026. The Model Context Protocol (MCP), which Anthropic released in November 2024, does for agent tools what USB did for peripherals: write the tool once, and any model can call it.</p>
+      <p>The adoption is not a rumor. OpenAI adopted MCP in March 2025. In December 2025 Anthropic donated it to the Agentic AI Foundation, a new fund under the Linux Foundation, so it's now vendor-neutral infrastructure rather than one company's project. A tool server is tiny:</p>
+      <pre><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+      mcp = FastMCP(&quot;weather&quot;)
+
+      @mcp.tool()
+      def get_forecast(city: str) -&gt; str:
+          &quot;&quot;&quot;Return today's forecast for a city.&quot;&quot;&quot;
+          return fetch_weather(city)
+
+      mcp.run()
+      </code></pre>
+      <p>That server now works with Claude, ChatGPT, and anything else that speaks MCP. Before this, I wrote the same tool three times. Now I write it once and forget which model is on the other end.</p>
+      <h2 id="2-prompt-caching-made-the-agent-loop-affordable"><a class="anchor" href="#2-prompt-caching-made-the-agent-loop-affordable" aria-label="Link to this section"></a>2. Prompt caching made the agent loop affordable</h2>
+      <p>Agents got cheap enough to run in loops because providers now let you reuse a cached prompt prefix for roughly a tenth of the price. An agent re-sends the same giant system prompt (tools, instructions, context) on every single turn. Paying full price for that on turn 40 was the hidden tax that killed long-running agents.</p>
+      <p>By 2026 all three major providers discount cached input by up to 90%. On Anthropic you mark the stable part of the prompt once:</p>
+      <pre><code class="language-python">client.messages.create(
+          model=&quot;claude-sonnet-5&quot;,
+          system=[{
+              &quot;type&quot;: &quot;text&quot;,
+              &quot;text&quot;: BIG_SYSTEM_PROMPT,          # tools + instructions + docs
+              &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+          }],
+          messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;do the next step&quot;}],
+      )
+      </code></pre>
+      <p>You pay a small write premium the first time (1.25x on the 5-minute tier), then every later turn reads that prefix at 0.1x. A 40-turn agent run that used to feel reckless now costs pocket change. This is the feature nobody puts on a launch slide, and it's the one that quietly unlocked everything else.</p>
+      <h2 id="3-computer-use-turned-agents-into-hands-not-just-mouths"><a class="anchor" href="#3-computer-use-turned-agents-into-hands-not-just-mouths" aria-label="Link to this section"></a>3. Computer use turned agents into hands, not just mouths</h2>
+      <p>Agents can now see a screen and operate it directly, so any app with a UI is reachable even when it has no API. Claude's computer-use launch in October 2024 was the inflection point. Anthropic's own benchmarks show the jump: computer-use task completion on OSWorld climbed from about 15% at launch to over 70% in 2026.</p>
+      <p>You give the model a screen and a set of physical actions:</p>
+      <pre><code class="language-python">tools = [{
+          &quot;type&quot;: &quot;computer_20250124&quot;,   # use the current tool version from the docs
+          &quot;name&quot;: &quot;computer&quot;,
+          &quot;display_width_px&quot;: 1280,
+          &quot;display_height_px&quot;: 800,
+      }]
+      # The model replies with actions: screenshot, click(x, y), type(&quot;...&quot;).
+      # You execute each one, send back a fresh screenshot, and repeat.
+      </code></pre>
+      <p>I use this to drive a real browser with our own logins. It reads the page, decides what to click, and adapts when the layout moves. That's the difference from old RPA scripts, which shattered the first time a button shifted ten pixels.</p>
+      <h2 id="4-background-subagents-made-parallelism-the-default"><a class="anchor" href="#4-background-subagents-made-parallelism-the-default" aria-label="Link to this section"></a>4. Background subagents made parallelism the default</h2>
+      <p>The best agent systems in 2026 stopped being one model in one loop and became many agents running at once, in the background. Instead of a human running tasks one after another, you fan out a fleet, each subagent with its own context window and its own tools.</p>
+      <pre><code class="language-python">import asyncio
+
+      async def run_agent(task):
+          # each subagent: isolated context, its own tools, its own model
+          return await agent.run(task)
+
+      results = await asyncio.gather(*[run_agent(t) for t in tasks])
+      </code></pre>
+      <p>Both Claude Code and Codex shipped this: Codex spins up parallel cloud sandboxes and returns pull requests, and background sessions now survive a closed laptop. I lean on this constantly. A review that would take one agent an hour of sequential reading becomes ten agents reading in parallel, and I only hold the synthesis in context. Parallelism is free in a digital medium, and 2026 is the year the tools finally made it easy.</p>
+      <h2 id="5-a2a-let-agents-talk-to-other-agents"><a class="anchor" href="#5-a2a-let-agents-talk-to-other-agents" aria-label="Link to this section"></a>5. A2A let agents talk to other agents</h2>
+      <p>A2A is a standard for agents to discover and call each other across vendors, the way MCP standardized tools. It's the newest layer in the 2026 stack. Google's Agent2Agent (A2A) protocol, announced in April 2025 and donated to the Linux Foundation, reached a stable v1.0 in early 2026 with more than 150 organizations backing it.</p>
+      <p>An agent advertises itself with an Agent Card, a small manifest other agents can read:</p>
+      <pre><code class="language-json">{
+        &quot;name&quot;: &quot;billing-agent&quot;,
+        &quot;description&quot;: &quot;Answers invoice and payment questions&quot;,
+        &quot;url&quot;: &quot;https://api.acme.com/a2a&quot;,
+        &quot;version&quot;: &quot;1.0&quot;,
+        &quot;capabilities&quot;: { &quot;streaming&quot;: true },
+        &quot;skills&quot;: [{ &quot;id&quot;: &quot;lookup_invoice&quot;, &quot;name&quot;: &quot;Look up an invoice&quot; }]
+      }
+      </code></pre>
+      <p>MCP connects an agent to tools. A2A connects an agent to other agents. It's early, but the shape of a real multi-agent internet is now visible.</p>
+      <h2 id="the-2-im-still-waiting-for"><a class="anchor" href="#the-2-im-still-waiting-for" aria-label="Link to this section"></a>The 2 I'm still waiting for</h2>
+      <p><strong>Durable native memory.</strong> Every serious agent I run still fakes memory with a bolt-on: a vector database, or a folder of markdown files I re-inject each session. It works, but it's scaffolding I built by hand. No provider ships memory that survives across sessions and actually generalizes what it learned. Until that's native, "my agent remembers you" is a feature you engineer, not one you turn on.</p>
+      <p><strong>Trustworthy long-horizon autonomy.</strong> Agents are brilliant for twenty steps and drift on step two hundred. Errors compound, the plan wanders, and the only reliable fix is a human checking the work. I still verify every meaningful agent output against a real source of truth, never the agent's own "done." Real autonomy means the agent catches its own drift. We are not there.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>The model got the headlines in 2026. The progress that changed my day-to-day was the stack around it: a tool standard, cheap loops, real hands, parallel execution, and agents that talk to each other. You don't need to adopt all five. Pick the one layer that removes your biggest friction (usually MCP or caching) and add it to whatever you're already building. That's where the real gains are hiding.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox -&gt; <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
