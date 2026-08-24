@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Next.js 16 Features That Actually Shipped (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="Next.js 16 made caching explicit, renamed middleware, and made Turbopack the default. Here&#x27;s what actually landed, with the config to turn each one on.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/five-nextjs-16-features-that-actually-shipped/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 Next.js 16 Features That Actually Shipped (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="Next.js 16 made caching explicit, renamed middleware, and made Turbopack the default. Here&#x27;s what actually landed, with the config to turn each one on.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/five-nextjs-16-features-that-actually-shipped/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-24">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 Next.js 16 Features That Actually Shipped (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="Next.js 16 made caching explicit, renamed middleware, and made Turbopack the default. Here&#x27;s what actually landed, with the config to turn each one on.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 Next.js 16 Features That Actually Shipped (And 2 I'm Still Waiting For)",
+      "description": "Next.js 16 made caching explicit, renamed middleware, and made Turbopack the default. Here's what actually landed, with the config to turn each one on.",
+      "url": "https://astraedus.dev/blog/five-nextjs-16-features-that-actually-shipped/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/five-nextjs-16-features-that-actually-shipped/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-24",
+      "dateModified": "2026-08-24",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Cache Components make caching explicit with \"use cache\"",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Caching in 16 is opt-in. Every page, layout, and API route runs at request time by default, and you cache the parts you choose with the \"use cache\" directive."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Turbopack is the default now, and it's finally stable",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Turbopack ships as the default bundler in Next.js 16, stable for both dev and production. Vercel measures 2 to 5 times faster production builds and up to 10 times faster Fast Refresh, with zero config."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "middleware.ts is now proxy.ts",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "middleware.ts was renamed to proxy.ts, and it runs on the Node.js runtime. The rename is about honesty: the file intercepts requests at your network boundary, so it should say so in its name."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "New cache-invalidation APIs give you read-your-writes",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Next.js 16 adds two new Server Action APIs and changes a third, so you control exactly how fresh your data is. The one I reach for most is updateTag(), which expires a tag and reads fresh data in the same request: 'use server'; import { updateTag } from 'next/cache'; export async function saveProfile(userId: string..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "React Compiler support is stable",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The React Compiler integration is stable in 16, following the compiler's 1.0 release. Flip one flag and it auto-memoizes your components, which removes most hand-written useMemo and useCallback: // next.config.ts const nextConfig = { reactCompiler: true }; Stable, yes, but read the caveat at the end before you flip it..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Now the 2 things I'm still waiting for",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A guided caching story. Cache Components solved the \"why is this stale\" problem, but handed me a new one: deciding what to cache is entirely manual."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Before you upgrade: the gotchas",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The codemod handles most of it, but these bit me or would have. Read this list first: Node.js 20.9+ required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Next.js 16 asks you to say what you mean. You opt into caching, you name your network boundary, you turn the compiler on yourself."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 Next.js 16 Features That Actually Shipped (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/five-nextjs-16-features-that-actually-shipped/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 24, 2026</span>
+        <span class="article-tag">Nextjs</span>
+        <span class="article-reading">7 min read</span>
+      </div>
+      <h1>5 Next.js 16 Features That Actually Shipped (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede">Next.js 16 is the biggest architecture shift since the App Router: caching is now opt-in instead of implicit, <code>middleware.ts</code> became <code>proxy.ts</code>, and Turbopack is the default bundler for every app. If you upgrade for one reason, upgrade because you finally control when your data is cached instead of guessing.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-cache-components-make-caching-explicit-with-use-cache">1. Cache Components make caching explicit with "use cache"</a></li>
+          <li><a href="#2-turbopack-is-the-default-now-and-its-finally-stable">2. Turbopack is the default now, and it's finally stable</a></li>
+          <li><a href="#3-middlewarets-is-now-proxyts">3. middleware.ts is now proxy.ts</a></li>
+          <li><a href="#4-new-cache-invalidation-apis-give-you-read-your-writes">4. New cache-invalidation APIs give you read-your-writes</a></li>
+          <li><a href="#5-react-compiler-support-is-stable">5. React Compiler support is stable</a></li>
+          <li><a href="#now-the-2-things-im-still-waiting-for">Now the 2 things I'm still waiting for</a></li>
+          <li><a href="#before-you-upgrade-the-gotchas">Before you upgrade: the gotchas</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I run Next.js in production, and the caching model in 15 was the part I fought most. Half my <code>no-store</code> and <code>revalidate</code> lines were cargo cult, added to make a stale page go away without really knowing why it was stale. Next.js 16 kills that guessing game. Here are the five features that shipped and are worth your time, plus two things I wanted that aren't here yet.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The Next.js 16 render path" src="https://i.imgur.com/Fwwqnc4.png"></p>
+      <p>The diagram is the whole mental model: a request hits <code>proxy.ts</code>, the route renders dynamically by default, and you opt specific pieces into caching. Everything below is a piece of that path.</p>
+      <h2 id="1-cache-components-make-caching-explicit-with-use-cache"><a class="anchor" href="#1-cache-components-make-caching-explicit-with-use-cache" aria-label="Link to this section"></a>1. Cache Components make caching explicit with "use cache"</h2>
+      <p>Caching in 16 is opt-in. Every page, layout, and API route runs at request time by default, and you cache the parts you choose with the <code>"use cache"</code> directive. That's the opposite of the App Router's old implicit caching, where you often couldn't tell why a page went stale.</p>
+      <p>In 15 you fought the cache by disabling it:</p>
+      <pre><code class="language-ts">// Next 15: opt OUT of caching you didn't ask for
+      export const dynamic = 'force-dynamic';
+      const data = await fetch(url, { cache: 'no-store' });
+      </code></pre>
+      <p>In 16 you turn one config flag on and opt specific things IN:</p>
+      <pre><code class="language-ts">// next.config.ts
+      const nextConfig = { cacheComponents: true };
+      export default nextConfig;
+      </code></pre>
+      <pre><code class="language-ts">async function ProductList() {
+        &quot;use cache&quot;;
+        const products = await db.products.findMany();
+        return &lt;List items={products} /&gt;;
+      }
+      </code></pre>
+      <p>The compiler generates the cache key for you wherever <code>"use cache"</code> appears. Under the hood this completes Partial Prerendering: the cached parts become a static shell that streams instantly, and the uncached parts (a logged-in user's cart, a live price) render per request as dynamic holes. Note the old <code>experimental.ppr</code> and <code>experimental.dynamicIO</code> flags are gone, folded into this one <code>cacheComponents</code> option.</p>
+      <h2 id="2-turbopack-is-the-default-now-and-its-finally-stable"><a class="anchor" href="#2-turbopack-is-the-default-now-and-its-finally-stable" aria-label="Link to this section"></a>2. Turbopack is the default now, and it's finally stable</h2>
+      <p>Turbopack ships as the default bundler in Next.js 16, stable for both dev and production. Vercel measures 2 to 5 times faster production builds and up to 10 times faster Fast Refresh, with zero config. If you have a custom webpack setup, opt out per command:</p>
+      <pre><code class="language-bash">next dev --webpack
+      next build --webpack
+      </code></pre>
+      <p>The 16.3 release pushed this further. Persistent filesystem caching for <code>next build</code> is on by default, and Vercel reports build times dropping 2.3 to 5.5 times on their own sites when the cache is warm. Dev-server memory also drops sharply, up to 90 percent on large apps, because Turbopack now evicts its in-memory cache to disk instead of holding every visited route in RAM.</p>
+      <p>One CI caveat that will bite you: the cache lives in <code>.next/cache</code>, so your builds only get faster if you restore that directory between runs.</p>
+      <h2 id="3-middlewarets-is-now-proxyts"><a class="anchor" href="#3-middlewarets-is-now-proxyts" aria-label="Link to this section"></a>3. middleware.ts is now proxy.ts</h2>
+      <p><code>middleware.ts</code> was renamed to <code>proxy.ts</code>, and it runs on the Node.js runtime. The rename is about honesty: the file intercepts requests at your network boundary, so it should say so in its name.</p>
+      <p>Migration is mechanical. Rename the file, rename the exported function, keep your logic:</p>
+      <pre><code class="language-ts">// proxy.ts
+      export default function proxy(request: NextRequest) {
+        return NextResponse.redirect(new URL('/home', request.url));
+      }
+      </code></pre>
+      <p><code>middleware.ts</code> still works for Edge runtime cases, but it's deprecated and will be removed later. Rename it now while it's a one-line change.</p>
+      <h2 id="4-new-cache-invalidation-apis-give-you-read-your-writes"><a class="anchor" href="#4-new-cache-invalidation-apis-give-you-read-your-writes" aria-label="Link to this section"></a>4. New cache-invalidation APIs give you read-your-writes</h2>
+      <p>Next.js 16 adds two new Server Action APIs and changes a third, so you control exactly how fresh your data is. The one I reach for most is <code>updateTag()</code>, which expires a tag and reads fresh data in the same request:</p>
+      <pre><code class="language-ts">'use server';
+      import { updateTag } from 'next/cache';
+
+      export async function saveProfile(userId: string, profile: Profile) {
+        await db.users.update(userId, profile);
+        updateTag(`user-${userId}`); // user sees their edit immediately
+      }
+      </code></pre>
+      <p><code>refresh()</code> refreshes uncached data only, useful for a live counter after an action. And <code>revalidateTag()</code> now takes a <code>cacheLife</code> profile as a second argument for stale-while-revalidate behavior:</p>
+      <pre><code class="language-ts">revalidateTag('blog-posts', 'max'); // serve stale, revalidate in the background
+      </code></pre>
+      <p>The single-argument <code>revalidateTag('blog-posts')</code> still runs but is deprecated. The rule I use: <code>updateTag</code> when a user must see their own write, <code>revalidateTag</code> when eventual consistency is fine.</p>
+      <h2 id="5-react-compiler-support-is-stable"><a class="anchor" href="#5-react-compiler-support-is-stable" aria-label="Link to this section"></a>5. React Compiler support is stable</h2>
+      <p>The React Compiler integration is stable in 16, following the compiler's 1.0 release. Flip one flag and it auto-memoizes your components, which removes most hand-written <code>useMemo</code> and <code>useCallback</code>:</p>
+      <pre><code class="language-ts">// next.config.ts
+      const nextConfig = { reactCompiler: true };
+      </code></pre>
+      <p>Stable, yes, but read the caveat at the end before you flip it on. It's not on by default, because it relies on Babel and that slows your build. If build time is why you're hesitating, 16.3 added an experimental Rust port of the compiler that ran 20 to 50 percent faster in Vercel's tests, behind <code>experimental.turbopackRustReactCompiler</code>.</p>
+      <h2 id="now-the-2-things-im-still-waiting-for"><a class="anchor" href="#now-the-2-things-im-still-waiting-for" aria-label="Link to this section"></a>Now the 2 things I'm still waiting for</h2>
+      <p><strong>A guided caching story.</strong> Cache Components solved the "why is this stale" problem, but handed me a new one: deciding what to cache is entirely manual. The compiler generates keys, it doesn't tell me which boundaries are safe to cache. I want a lint rule or a codemod that flags cacheable server components, the way the React Compiler flags un-memoizable code. Right now the model is powerful and the guidance is thin.</p>
+      <p><strong>The Rust compiler, stable and on by default.</strong> The whole point of the React Compiler is to delete manual memoization. But the default path is Babel, which taxes every build, so most teams leave it off. The fast native compiler exists and is experimental. Until it's stable and default, the compiler stays a "someday" checkbox for a lot of real apps.</p>
+      <h2 id="before-you-upgrade-the-gotchas"><a class="anchor" href="#before-you-upgrade-the-gotchas" aria-label="Link to this section"></a>Before you upgrade: the gotchas</h2>
+      <p>The codemod handles most of it, but these bit me or would have. Read this list first:</p>
+      <ul>
+      <li><strong>Node.js 20.9+ required.</strong> Node 18 is no longer supported. Check your CI image.</li>
+      <li><strong>Request APIs are async.</strong> <code>params</code>, <code>searchParams</code>, <code>cookies()</code>, <code>headers()</code>, and <code>draftMode()</code> must be awaited. The <code>next-async-request-api</code> codemod covers most call sites.</li>
+      <li><strong>Restore <code>.next/cache</code> in CI.</strong> Miss this and every build is a cold build, so you lose the Turbopack speedup entirely.</li>
+      <li><strong><code>next/image</code> defaults changed.</strong> <code>qualities</code> now defaults to <code>[75]</code> and local IP optimization is blocked. Audit any image that relied on the old defaults.</li>
+      <li><strong><code>next lint</code> is gone.</strong> Run Biome or ESLint directly; <code>next build</code> no longer lints.</li>
+      </ul>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>Next.js 16 asks you to say what you mean. You opt into caching, you name your network boundary, you turn the compiler on yourself. That's more upfront work than 15, and it's the right trade, because the implicit magic was exactly what made the framework hard to reason about.</p>
+      <p>Concrete upgrade path if you're on 15:</p>
+      <ol>
+      <li><code>npx @next/codemod@canary upgrade latest</code></li>
+      <li>Run the <code>next-async-request-api</code> and <code>middleware-to-proxy</code> codemods.</li>
+      <li>Restore <code>.next/cache</code> in CI.</li>
+      <li>Set <code>cacheComponents: true</code> and add <code>"use cache"</code> to the routes you actually want cached.</li>
+      <li>Ship, then watch build times drop on every run after.</li>
+      </ol>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
