@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 New React Native Features in 2026 (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="React Native quietly had a huge year. Here are the 5 changes from 2025 into 2026 that changed how I ship apps, plus 2 I&#x27;m still waiting on.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/5-new-react-native-features-in-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 New React Native Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="React Native quietly had a huge year. Here are the 5 changes from 2025 into 2026 that changed how I ship apps, plus 2 I&#x27;m still waiting on.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/5-new-react-native-features-in-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-26">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 New React Native Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="React Native quietly had a huge year. Here are the 5 changes from 2025 into 2026 that changed how I ship apps, plus 2 I&#x27;m still waiting on.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 New React Native Features in 2026 (And 2 I'm Still Waiting For)",
+      "description": "React Native quietly had a huge year. Here are the 5 changes from 2025 into 2026 that changed how I ship apps, plus 2 I'm still waiting on.",
+      "url": "https://astraedus.dev/blog/5-new-react-native-features-in-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/5-new-react-native-features-in-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-26",
+      "dateModified": "2026-08-26",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The New Architecture is the only architecture now",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For years the New Architecture (Fabric, TurboModules, no bridge) was an opt-in you toggled and prayed over. That era's over."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hermes V1 is the default engine",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hermes was already the recommended JS engine. In 0.84 the rewritten Hermes V1 became the default on both iOS and Android, with no migration step on your side."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "iOS builds got dramatically faster",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is the one my laptop is most grateful for. React Native for iOS now ships as precompiled binaries instead of building the whole core from source on every clean install."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "React 19 and a real React Compiler",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "React 19 landed in React Native in 0.78, and the follow-on releases kept the version current (19.1, 19.2). The bigger deal is the React Compiler, which reached a stable v1.0 in October 2025 and works for React Native, not just the web."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Strict TypeScript API is the default",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "React Native's types used to be hand-maintained .d.ts files that drifted from the actual code. As of 0.87 the public API is generated straight from React Native's own source, and the Strict TypeScript API is the default for every project."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'm still waiting for",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Two things are announced but not done, and both would remove real friction. The React Compiler as a true React-Native-wide default."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "React Native's 2026 story isn't one flashy feature. It's the boring kind of progress that compounds: the New Architecture stopped being a gamble and became the floor, and the toolchain got faster underneath you."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 New React Native Features in 2026 (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/5-new-react-native-features-in-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 26, 2026</span>
+        <span class="article-tag">Reactnative</span>
+        <span class="article-reading">5 min read</span>
+      </div>
+      <h1>5 New React Native Features in 2026 (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede">If you last touched React Native a year ago, the best upgrades waiting for you aren't features you toggle. They're defaults you inherit. The bridge is gone, the New Architecture is the only architecture, and a pile of long-promised performance work now ships turned on.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-the-new-architecture-is-the-only-architecture-now">1. The New Architecture is the only architecture now</a></li>
+          <li><a href="#2-hermes-v1-is-the-default-engine">2. Hermes V1 is the default engine</a></li>
+          <li><a href="#3-ios-builds-got-dramatically-faster">3. iOS builds got dramatically faster</a></li>
+          <li><a href="#4-react-19-and-a-real-react-compiler">4. React 19 and a real React Compiler</a></li>
+          <li><a href="#5-the-strict-typescript-api-is-the-default">5. The Strict TypeScript API is the default</a></li>
+          <li><a href="#what-im-still-waiting-for">What I'm still waiting for</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I build production apps on Expo and React Native, so I've shipped through this whole run of releases. Here are the 5 changes that actually changed how I work, and the 2 I'm still waiting on. First, the shape of the last two years:</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="React Native release timeline from 0.76 to 0.87, showing the New Architecture going from default to the only option" src="https://i.imgur.com/NHwkYt4.png"></p>
+      <h2 id="1-the-new-architecture-is-the-only-architecture-now"><a class="anchor" href="#1-the-new-architecture-is-the-only-architecture-now" aria-label="Link to this section"></a>1. The New Architecture is the only architecture now</h2>
+      <p>For years the New Architecture (Fabric, TurboModules, no bridge) was an opt-in you toggled and prayed over. That era's over. It became the default for new apps in 0.76, and in 0.82 it became the only option. The escape-hatch flags are now ignored:</p>
+      <pre><code class="language-properties"># android/gradle.properties
+      # This meant something in 0.81. As of 0.82 it does nothing.
+      newArchEnabled=false
+      </code></pre>
+      <p>By 0.84 the legacy architecture code is compiled out of the binary by default, not just frozen. An interop layer still exists so older third-party libraries keep working, but the old runtime is on its way to deletion. The practical effect: synchronous native calls, concurrent React, and smaller binaries are just how apps work now, with no config to get wrong.</p>
+      <h2 id="2-hermes-v1-is-the-default-engine"><a class="anchor" href="#2-hermes-v1-is-the-default-engine" aria-label="Link to this section"></a>2. Hermes V1 is the default engine</h2>
+      <p>Hermes was already the recommended JS engine. In 0.84 the rewritten Hermes V1 became the default on both iOS and Android, with no migration step on your side. You get faster startup and better memory behavior for free by upgrading.</p>
+      <p>You don't have to trust me on which engine is running. Check it at runtime:</p>
+      <pre><code class="language-js">const isHermes = () =&gt; !!global.HermesInternal;
+      console.log('Hermes:', isHermes()); // true by default on 0.84+
+      </code></pre>
+      <p>If that logs <code>false</code> after upgrading, something in your build config is overriding it. On a clean 0.84 project it's <code>true</code>.</p>
+      <h2 id="3-ios-builds-got-dramatically-faster"><a class="anchor" href="#3-ios-builds-got-dramatically-faster" aria-label="Link to this section"></a>3. iOS builds got dramatically faster</h2>
+      <p>This is the one my laptop is most grateful for. React Native for iOS now ships as precompiled binaries instead of building the whole core from source on every clean install. It landed experimental in 0.81 (up to 10x faster clean compiles) and became the default in 0.84.</p>
+      <p>On the Expo side, SDK 54 shipped the same precompiled XCFrameworks. Their own RNTester clean build dropped from about 120 seconds to about 10 seconds on an M4 Max. If your CI clean-build times quietly halved this year, this is why. You don't opt in anymore. You just stop waiting.</p>
+      <h2 id="4-react-19-and-a-real-react-compiler"><a class="anchor" href="#4-react-19-and-a-real-react-compiler" aria-label="Link to this section"></a>4. React 19 and a real React Compiler</h2>
+      <p>React 19 landed in React Native in 0.78, and the follow-on releases kept the version current (19.1, 19.2). The bigger deal is the React Compiler, which reached a stable v1.0 in October 2025 and works for React Native, not just the web.</p>
+      <p>The compiler memoizes your components automatically, so a lot of manual <code>useMemo</code> and <code>useCallback</code> becomes noise you can delete:</p>
+      <pre><code class="language-jsx">// The old ritual: memoize by hand or re-sort on every render
+      const sorted = useMemo(() =&gt; sortItems(items), [items]);
+
+      // With the compiler on: write the plain version, it memoizes for you
+      const sorted = sortItems(items);
+      </code></pre>
+      <p>New Expo apps (SDK 54 and later) turn the compiler on by default. Read the caveats before you flip it on an existing app, but the direction's clear: hand-tuned memoization is becoming a thing you do rarely, not a habit.</p>
+      <h2 id="5-the-strict-typescript-api-is-the-default"><a class="anchor" href="#5-the-strict-typescript-api-is-the-default" aria-label="Link to this section"></a>5. The Strict TypeScript API is the default</h2>
+      <p>React Native's types used to be hand-maintained <code>.d.ts</code> files that drifted from the actual code. As of 0.87 the public API is generated straight from React Native's own source, and the Strict TypeScript API is the default for every project.</p>
+      <p>The visible consequence: reaching into internal paths is now a type error instead of a footgun.</p>
+      <pre><code class="language-ts">// This used to &quot;work&quot; by importing from a private path. Now it's a type error:
+      import SomeInternal from 'react-native/Libraries/Components/...';
+
+      // Import from the public surface, which is what the types describe:
+      import { View, Pressable } from 'react-native';
+      </code></pre>
+      <p>If your codebase leans on deep imports, upgrading to 0.87 will surface them all at once. That's annoying for an afternoon and correct forever after.</p>
+      <h2 id="what-im-still-waiting-for"><a class="anchor" href="#what-im-still-waiting-for" aria-label="Link to this section"></a>What I'm still waiting for</h2>
+      <p>Two things are announced but not done, and both would remove real friction.</p>
+      <p><strong>The React Compiler as a true React-Native-wide default.</strong> It's stable, and it's on by default for <strong>new Expo apps</strong>. Everywhere else you opt in by hand, and worse, it's easy to think the compiler is active when the transform never actually ran in your Metro output. Until a bare <code>npx react-native init</code> app ships with it on and verifiable, "stable" still comes with an asterisk for most of the ecosystem.</p>
+      <p><strong>Swift Package Manager on iOS.</strong> SwiftPM support arrived in 0.87, but it's experimental and CocoaPods is still the default. The promise is real (no Ruby, no Bundler, no <code>pod install</code> after every dependency change), and iOS tooling has needed this for years. I want the day CocoaPods is the legacy option, not the required one. We're not there yet.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>React Native's 2026 story isn't one flashy feature. It's the boring kind of progress that compounds: the New Architecture stopped being a gamble and became the floor, and the toolchain got faster underneath you. Most of these wins arrive by doing nothing more exciting than bumping your version and deleting code you used to need.</p>
+      <p>So the biggest win is boring. Get onto a recent release, delete the manual memoization the compiler now handles, and stop opting into things that are already the default. The interesting work is the app you build on top, not the plumbing you no longer have to think about.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
