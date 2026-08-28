@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Chains vs AI Agents: Which Should You Use in 2026 | Diven Rastdus</title>
+  <meta name="description" content="Most tasks people hand to an AI agent should be a prompt chain. Here is the decision ladder, the cost math, and the code for both.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/prompt-chains-vs-ai-agents-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Prompt Chains vs AI Agents: Which Should You Use in 2026">
+  <meta property="og:description" content="Most tasks people hand to an AI agent should be a prompt chain. Here is the decision ladder, the cost math, and the code for both.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/prompt-chains-vs-ai-agents-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-08-28">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="Prompt Chains vs AI Agents: Which Should You Use in 2026">
+  <meta name="twitter:description" content="Most tasks people hand to an AI agent should be a prompt chain. Here is the decision ladder, the cost math, and the code for both.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Prompt Chains vs AI Agents: Which Should You Use in 2026",
+      "description": "Most tasks people hand to an AI agent should be a prompt chain. Here is the decision ladder, the cost math, and the code for both.",
+      "url": "https://astraedus.dev/blog/prompt-chains-vs-ai-agents-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/prompt-chains-vs-ai-agents-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-08-28",
+      "dateModified": "2026-08-28",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What actually separates a chain from an agent?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A chain is a function you wrote; an agent is a loop the model drives. That's the whole distinction, and it's the one people skip."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When does a single call win? (default here)",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A single call wins whenever the task is one transformation and the context fits in the prompt. Classification, extraction, summarization, rewriting, translation, structured-data generation, sentiment, routing: these are single calls, and dressing them up as agents only adds failure modes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When does an agent earn its complexity?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An agent earns its keep when the number of steps is unknown, the path branches on results you cannot predict, and the model needs tools to act on the world."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The prompt chain most people mislabel as an agent",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Between \"one call\" and \"full agent\" sits the option that solves 80% of the hard cases: a prompt chain where your code orchestrates several calls."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The decision, in one pass",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Walk the tree in the diagram top to bottom and stop at the first match: One well-defined transformation, context in hand? Single call."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Agents are not an upgrade to a prompt chain. They are a different tool with a different price tag."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Prompt Chains vs AI Agents: Which Should You Use in 2026", "item": "https://astraedus.dev/blog/prompt-chains-vs-ai-agents-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Aug 28, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">7 min read</span>
+      </div>
+      <h1>Prompt Chains vs AI Agents: Which Should You Use in 2026</h1>
+      <p class="article-lede">Use a prompt chain when you can name the steps before you run them, even if there are several. Reach for an agent only when the model has to look at each result and decide its own next step from something it cannot predict. Most tasks people hand to an "agent" are the first kind. Swapping a chain for an agent there is how you turn a predictable two-second pipeline into a 30-second, many-times-the-cost, hard-to-debug loop.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#what-actually-separates-a-chain-from-an-agent">What actually separates a chain from an agent?</a></li>
+          <li><a href="#when-does-a-single-call-win-default-here">When does a single call win? (default here)</a></li>
+          <li><a href="#when-does-an-agent-earn-its-complexity">When does an agent earn its complexity?</a></li>
+          <li><a href="#the-prompt-chain-most-people-mislabel-as-an-agent">The prompt chain most people mislabel as an agent</a></li>
+          <li><a href="#the-decision-in-one-pass">The decision, in one pass</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I run a production system that is almost entirely automated. It spawns subagents, calls models hundreds of times a day, and ships real work. The surprising part: most of it is not agents. It is plain code calling single LLM calls at the right moments. The agent loops are a small, deliberate minority, and every one of them earns its place. Here is how I decide.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Decision tree: single LLM call vs prompt chain vs fixed workflow vs AI agent" src="https://i.imgur.com/DASEAPj.png"></p>
+      <h2 id="what-actually-separates-a-chain-from-an-agent"><a class="anchor" href="#what-actually-separates-a-chain-from-an-agent" aria-label="Link to this section"></a>What actually separates a chain from an agent?</h2>
+      <p>A chain is a function you wrote; an agent is a loop the model drives. That's the whole distinction, and it's the one people skip.</p>
+      <p>In a prompt chain, your code owns the control flow. You decide the order, the branches, and where each model call goes. An agent hands that control flow to the model. The LLM decides what to do next, does it, looks at the result, and decides again until it thinks it's done. That autonomy is powerful and expensive. You trade determinism for the ability to handle problems whose shape you do not know ahead of time. The simplest chain of all is a single call, so start there and climb only when you must.</p>
+      <pre><code class="language-python">from anthropic import Anthropic
+      client = Anthropic()
+
+      # Single call: you own the control flow.
+      def classify(ticket: str) -&gt; str:
+          msg = client.messages.create(
+              model=&quot;claude-sonnet-5&quot;,
+              max_tokens=20,
+              messages=[{&quot;role&quot;: &quot;user&quot;,
+                         &quot;content&quot;: f&quot;Classify this ticket as bug/billing/other:\n{ticket}&quot;}],
+          )
+          return msg.content[0].text.strip()
+      </code></pre>
+      <p>That function is boring, and boring is the point. It runs in one round trip, costs one set of tokens, and returns the same shape every time. You can unit-test it, cache it, and reason about it.</p>
+      <h2 id="when-does-a-single-call-win-default-here"><a class="anchor" href="#when-does-a-single-call-win-default-here" aria-label="Link to this section"></a>When does a single call win? (default here)</h2>
+      <p>A single call wins whenever the task is one transformation and the context fits in the prompt. Classification, extraction, summarization, rewriting, translation, structured-data generation, sentiment, routing: these are single calls, and dressing them up as agents only adds failure modes.</p>
+      <p>Three reasons the single call is the default:</p>
+      <ul>
+      <li><strong>Cost.</strong> An agent that takes five internal steps sends roughly five times the tokens, and every step re-sends the growing history. A ten-step agent can cost twenty times a single call for the same answer. Prompt caching claws some of that back, since cache reads run about ten times cheaper, but you still pay for every fresh loop.</li>
+      <li><strong>Latency.</strong> Each loop iteration is a full round trip. One call is one round trip. Users feel the difference between 300ms and 15 seconds.</li>
+      <li><strong>Debuggability.</strong> When a single call is wrong, you read one prompt and one response. When an agent is wrong, you replay a branching transcript and guess which of nine decisions went sideways.</li>
+      </ul>
+      <p>If you can name the exact steps in advance, you don't need an agent. You need code.</p>
+      <h2 id="when-does-an-agent-earn-its-complexity"><a class="anchor" href="#when-does-an-agent-earn-its-complexity" aria-label="Link to this section"></a>When does an agent earn its complexity?</h2>
+      <p>An agent earns its keep when the number of steps is unknown, the path branches on results you cannot predict, and the model needs tools to act on the world. Think "investigate this failing test until you find the cause," not "summarize this text."</p>
+      <p>The tell is uncertainty about the path. A coding agent does not know how many files it must read before it finds the bug. A research agent does not know which search will surface the answer. That's real agent territory, because a fixed script cannot encode a path that depends on what the model learns mid-task.</p>
+      <pre><code class="language-python"># Agent: the MODEL owns the control flow. Note the while loop.
+      def agent(goal: str, tools: dict) -&gt; str:
+          messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: goal}]
+          for _ in range(10):  # a hard cap is not optional
+              resp = client.messages.create(
+                  model=&quot;claude-sonnet-5&quot;, max_tokens=1024,
+                  tools=[t[&quot;schema&quot;] for t in tools.values()],
+                  messages=messages,
+              )
+              if resp.stop_reason != &quot;tool_use&quot;:
+                  return resp.content[-1].text  # text is the last block when thinking is off
+              # Claude can return several tool_use blocks at once (parallel tools),
+              # so collect every result and append ONE user turn. Splitting them into
+              # separate messages is the bug everyone ships first.
+              messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: resp.content})
+              results = []
+              for block in resp.content:
+                  if block.type == &quot;tool_use&quot;:
+                      output = tools[block.name][&quot;run&quot;](**block.input)
+                      results.append({&quot;type&quot;: &quot;tool_result&quot;,
+                                      &quot;tool_use_id&quot;: block.id, &quot;content&quot;: str(output)})
+              messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: results})
+          return &quot;hit step limit&quot;
+      </code></pre>
+      <p>Look at what the loop buys you and what it costs. It buys adaptation: the model can read a file, decide it needs another, and keep going. It costs you a hard step cap, a growing context window, tool-error handling, and a transcript you have to trust. You take that trade only when the adaptation is the whole point.</p>
+      <h2 id="the-prompt-chain-most-people-mislabel-as-an-agent"><a class="anchor" href="#the-prompt-chain-most-people-mislabel-as-an-agent" aria-label="Link to this section"></a>The prompt chain most people mislabel as an agent</h2>
+      <p>Between "one call" and "full agent" sits the option that solves 80% of the hard cases: a prompt chain where your code orchestrates several calls. You keep the control flow. The model just fills in the smart parts.</p>
+      <pre><code class="language-python"># Fixed workflow: known steps, deterministic order, no autonomy.
+      def triage(ticket: str) -&gt; dict:
+          category = classify(ticket)                      # call 1
+          if category == &quot;billing&quot;:
+              summary = summarize_for(ticket, team=&quot;finance&quot;)   # call 2a
+          else:
+              summary = summarize_for(ticket, team=&quot;eng&quot;)       # call 2b
+          return {&quot;category&quot;: category, &quot;summary&quot;: summary}
+      </code></pre>
+      <p>This is a prompt chain, and it's not an agent. You know there are exactly two calls. You know the order. The branch is a plain <code>if</code>, not a model decision. You get the intelligence of the model with the reliability of code, and you can test every path. When people say "we built an agent" and it works great in production, this is usually what they actually built.</p>
+      <h2 id="the-decision-in-one-pass"><a class="anchor" href="#the-decision-in-one-pass" aria-label="Link to this section"></a>The decision, in one pass</h2>
+      <p>Walk the tree in the diagram top to bottom and stop at the first match:</p>
+      <ol>
+      <li>One well-defined transformation, context in hand? <strong>Single call.</strong> Do not overthink it.</li>
+      <li>Multiple steps, no tools, order known? <strong>Prompt chain.</strong> Code the steps.</li>
+      <li>Steps known, tools involved, path fixed? <strong>Fixed workflow.</strong> Code owns the flow.</li>
+      <li>Path genuinely unknown until the model runs? <strong>Agent.</strong> Cap the loop and watch it.</li>
+      </ol>
+      <p>The bias should point up the list, not down. Every rung down adds cost, latency, and surface area for bugs. Start at the top and only descend when the task forces you to.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>Agents are not an upgrade to a prompt chain. They are a different tool with a different price tag. In 2026 the fastest way to a slow, expensive, flaky feature is to reach for an agent when a chain would do. Ask one question before you build: do I know the steps in advance? If yes, you want a chain, not autonomy. If no, and only if no, you want an agent, and you want a step limit on it.</p>
+      <p>The best "agentic" systems I have shipped are mostly not agents. They are boring chains with a few smart calls in the right places, and one or two real loops where the path is truly unknown. Boring scales. Autonomy is the exception you spend deliberately.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
