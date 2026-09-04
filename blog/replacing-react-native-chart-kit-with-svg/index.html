@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How I replaced react-native-chart-kit with 1,355 lines of react-native-svg | Diven Rastdus</title>
-  <meta name="description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <meta name="description" content="Four separate complaints about my mood tracker&#x27;s chart had one root cause: the charting library owned...">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="canonical" href="https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/">
 
   <!-- Open Graph -->
   <meta property="og:title" content="How I replaced react-native-chart-kit with 1,355 lines of react-native-svg">
-  <meta property="og:description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <meta property="og:description" content="Four separate complaints about my mood tracker&#x27;s chart had one root cause: the charting library owned...">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/">
   <meta property="og:site_name" content="Diven Rastdus">
@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@astraedus">
   <meta name="twitter:title" content="How I replaced react-native-chart-kit with 1,355 lines of react-native-svg">
-  <meta name="twitter:description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <meta name="twitter:description" content="Four separate complaints about my mood tracker&#x27;s chart had one root cause: the charting library owned...">
   <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -404,7 +404,7 @@
     {
       "@type": "TechArticle",
       "headline": "How I replaced react-native-chart-kit with 1,355 lines of react-native-svg",
-      "description": "Four complaints about my mood tracker's chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here's the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.",
+      "description": "Four separate complaints about my mood tracker's chart had one root cause: the charting library owned...",
       "url": "https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/",
       "mainEntityOfPage": {
         "@type": "WebPage",
@@ -564,7 +564,7 @@
       <div class="article-meta">
         <span class="article-date">Sep 4, 2026</span>
         <span class="article-tag">Reactnative</span>
-        <span class="article-reading">14 min read</span>
+        <span class="article-reading">11 min read</span>
       </div>
       <h1>How I replaced react-native-chart-kit with 1,355 lines of react-native-svg</h1>
       <p class="article-lede">Four separate complaints about my mood tracker's chart had one root cause: the charting library owned the geometry, and the geometry was the thing users were complaining about. So I deleted the dependency and drew the chart myself with <code>react-native-svg</code>. The replacement is 1,355 lines of TypeScript across five files, 750 of them pure functions with no React imports at all.</p>
@@ -593,7 +593,7 @@
       <p><strong>One flat stroke, whatever the value.</strong> A mood of 3 and a mood of 8 were painted in the same colour at the same weight. Users kept saying the line was "not bright enough", which turned out to mean "I can't tell the good days from the bad ones".</p>
       <p><strong>The bezier overshot the data.</strong> A smooth curve between a 4 and a 9 dips below 4 on the way in. On a 0 to 10 mood scale that's a mood the user never had.</p>
       <p><strong>The x axis was slot-indexed, not a time axis.</strong> My query only returns days that were logged. Plot those consecutively and a three-month silence sits the same distance from its neighbour as a one-day silence. Worse, the "14-day moving average" I was labelling was really a 14-<strong>entry</strong> average. It was quietly wrong on exactly the sparse data where a trend line matters most.</p>
-      <p><strong>No way in.</strong> Users wanted to hold the chart and see what a specific day was. In 6.x there's no hook for that. The library also sized itself from <code>Dimensions.get('window')</code> instead of measuring its own container, so it never quite fit its card.</p>
+      <p><strong>No way in.</strong> Users wanted to hold the chart and drag along it, reading each day as they went. 6.x does give you <code>onDataPointClick</code> and a <code>decorator</code> prop for painting extra SVG on top, which covers tapping a dot. What it doesn't hand you is the touch stream or the x-to-index mapping, so a continuous scrub with nearest-point hit-testing isn't something you can build on top of it. The library also sized itself from <code>Dimensions.get('window')</code> instead of measuring its own container, so it never quite fit its card.</p>
       <h2 id="the-part-where-i-was-wrong-about-the-library"><a class="anchor" href="#the-part-where-i-was-wrong-about-the-library" aria-label="Link to this section"></a>The part where I was wrong about the library</h2>
       <p>I removed chart-kit believing it was unmaintained. That belief was two months stale, and I should say so plainly.</p>
       <p>Here's the real release history from npm. Version 6.12.0 shipped in February 2022 and then nothing moved for four years. That's the version my <code>^6.12.0</code> range was resolving to, and that four-year silence is what "unmaintained" meant to me. Then it woke up: 6.12.1 in April 2026, a <code>next</code> train through May and June, and <strong>v7.0.0 on 27 June 2026</strong>. It's on 7.0.2 now with 133k weekly downloads.</p>
