@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I replaced react-native-chart-kit with 1,355 lines of react-native-svg | Diven Rastdus</title>
+  <meta name="description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How I replaced react-native-chart-kit with 1,355 lines of react-native-svg">
+  <meta property="og:description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-04">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="How I replaced react-native-chart-kit with 1,355 lines of react-native-svg">
+  <meta name="twitter:description" content="Four complaints about my mood tracker&#x27;s chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here&#x27;s the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How I replaced react-native-chart-kit with 1,355 lines of react-native-svg",
+      "description": "Four complaints about my mood tracker's chart traced back to the same thing: a chart library owns the geometry, and the geometry was the product. Here's the rewrite, the gesture arbitration, and the Fabric bug that made me un-modernise an animation.",
+      "url": "https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-04",
+      "dateModified": "2026-09-04",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What was actually wrong with the library chart",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Four defects: one flat stroke whatever the value, a bezier that overshot the data, a slot-indexed x axis, and no way to touch the thing. Only the first is cosmetic."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The part where I was wrong about the library",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "I removed chart-kit believing it was unmaintained. That belief was two months stale, and I should say so plainly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Split the geometry out before you draw anything",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No coordinate math lives in the component. Every domain, gridline, gradient stop and hit-test is a pure function in a transforms/ folder with zero React or React Native imports."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Colour that carries information",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The line is painted with a vertical gradient built from the app's single mood ramp, so height reads as colour and not just position. High is green, low is amber and red."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hold to scrub, tap to expand",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A long-press-then-drag Pan from react-native-gesture-handler gives you the whole scrub interaction in six lines, and a ref keeps it from re-rendering the chart on every pointer sample."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Two Pan gestures, one finger",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Two Pan handlers and a vertical ScrollView can share one finger without either gesture knowing the other exists. Three numbers and one RNGH rule do all the work."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The Fabric trap that sent me back to the old Animated API",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The page transition uses React Native's built-in Animated with useNativeDriver: true, not Reanimated. That looks like a regression."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Testing a chart without taking a screenshot",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Pure geometry means the chart's tests are ordinary unit tests asserting invariants, not pixel snapshots. There are 131 of them across the chart transforms and renderers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'd do differently",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Check the registry, not your memory of the registry. I called a library unmaintained in a code comment, a changelog and a test docstring."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How I replaced react-native-chart-kit with 1,355 lines of react-native-svg", "item": "https://astraedus.dev/blog/replacing-react-native-chart-kit-with-svg/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 4, 2026</span>
+        <span class="article-tag">Reactnative</span>
+        <span class="article-reading">14 min read</span>
+      </div>
+      <h1>How I replaced react-native-chart-kit with 1,355 lines of react-native-svg</h1>
+      <p class="article-lede">Four separate complaints about my mood tracker's chart had one root cause: the charting library owned the geometry, and the geometry was the thing users were complaining about. So I deleted the dependency and drew the chart myself with <code>react-native-svg</code>. The replacement is 1,355 lines of TypeScript across five files, 750 of them pure functions with no React imports at all.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#what-was-actually-wrong-with-the-library-chart">What was actually wrong with the library chart</a></li>
+          <li><a href="#the-part-where-i-was-wrong-about-the-library">The part where I was wrong about the library</a></li>
+          <li><a href="#split-the-geometry-out-before-you-draw-anything">Split the geometry out before you draw anything</a></li>
+          <li><a href="#colour-that-carries-information">Colour that carries information</a></li>
+          <li><a href="#hold-to-scrub-tap-to-expand">Hold to scrub, tap to expand</a></li>
+          <li><a href="#two-pan-gestures-one-finger">Two Pan gestures, one finger</a></li>
+          <li><a href="#the-fabric-trap-that-sent-me-back-to-the-old-animated-api">The Fabric trap that sent me back to the old Animated API</a></li>
+          <li><a href="#testing-a-chart-without-taking-a-screenshot">Testing a chart without taking a screenshot</a></li>
+          <li><a href="#what-id-do-differently">What I'd do differently</a></li>
+        </ul>
+      </nav>
+
+      <p>SoulSync is an open-source mood tracker on Android. Its Statistics tab started life on <code>react-native-chart-kit</code>, the default answer to "how do I draw a line chart in React Native". It's a fine default right up until you want the chart to do something.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The Statistics tab: monthly mood trend with a drawn 0 to 10 axis, mood-coloured line and a dashed 7-day trend overlay" src="https://i.imgur.com/ooy7jeq.png"></p>
+      <h2 id="what-was-actually-wrong-with-the-library-chart"><a class="anchor" href="#what-was-actually-wrong-with-the-library-chart" aria-label="Link to this section"></a>What was actually wrong with the library chart</h2>
+      <p>Four defects: one flat stroke whatever the value, a bezier that overshot the data, a slot-indexed x axis, and no way to touch the thing. Only the first is cosmetic.</p>
+      <p><strong>One flat stroke, whatever the value.</strong> A mood of 3 and a mood of 8 were painted in the same colour at the same weight. Users kept saying the line was "not bright enough", which turned out to mean "I can't tell the good days from the bad ones".</p>
+      <p><strong>The bezier overshot the data.</strong> A smooth curve between a 4 and a 9 dips below 4 on the way in. On a 0 to 10 mood scale that's a mood the user never had.</p>
+      <p><strong>The x axis was slot-indexed, not a time axis.</strong> My query only returns days that were logged. Plot those consecutively and a three-month silence sits the same distance from its neighbour as a one-day silence. Worse, the "14-day moving average" I was labelling was really a 14-<strong>entry</strong> average. It was quietly wrong on exactly the sparse data where a trend line matters most.</p>
+      <p><strong>No way in.</strong> Users wanted to hold the chart and see what a specific day was. In 6.x there's no hook for that. The library also sized itself from <code>Dimensions.get('window')</code> instead of measuring its own container, so it never quite fit its card.</p>
+      <h2 id="the-part-where-i-was-wrong-about-the-library"><a class="anchor" href="#the-part-where-i-was-wrong-about-the-library" aria-label="Link to this section"></a>The part where I was wrong about the library</h2>
+      <p>I removed chart-kit believing it was unmaintained. That belief was two months stale, and I should say so plainly.</p>
+      <p>Here's the real release history from npm. Version 6.12.0 shipped in February 2022 and then nothing moved for four years. That's the version my <code>^6.12.0</code> range was resolving to, and that four-year silence is what "unmaintained" meant to me. Then it woke up: 6.12.1 in April 2026, a <code>next</code> train through May and June, and <strong>v7.0.0 on 27 June 2026</strong>. It's on 7.0.2 now with 133k weekly downloads.</p>
+      <p>v7 is a substantial rewrite behind a <code>react-native-chart-kit/v2</code> subpath. Its release notes list "multi-series data, null gaps, smart labels, tooltips, crosshair, scrollable viewports, pan/zoom", plus renderer-agnostic core packages for scales, layout, geometry and interaction. Read that against my list above. Null gaps and a crosshair address defects three and four directly. If I'd checked npm instead of my memory of npm, "upgrade" was a real option I never priced.</p>
+      <p>I'd still make the same call, and the reasons that survive are better than the one I used:</p>
+      <ol>
+      <li><strong>The colour ramp is shared app state, not chart config.</strong> The line is painted from the same mood ramp as the timeline dots and the heatmap cells. A theming API gives me a second palette that drifts from the first one on the next redesign.</li>
+      <li><strong>Half the geometry already existed.</strong> The Home tab's week chart left chart-kit three months earlier, and its pure <code>chartGeometry.ts</code> was sitting right there. The marginal cost of the second chart was 750 lines, not 1,355.</li>
+      <li><strong>A library that owns pan and zoom is a third competitor for the same finger.</strong> More on that below. It's the reason I'd have had to fight v7's interaction layer rather than use it.</li>
+      </ol>
+      <p>That's a narrower claim than "the library is dead", and it's the one I can defend.</p>
+      <p>The other obvious move was a different library. <code>victory-native</code> does 508k weekly downloads and <code>react-native-gifted-charts</code> does 248k, and both handle gestures properly. Same three reasons apply to both, plus one more: swapping libraries is the same migration cost as writing it, without the part where I get to keep the geometry.</p>
+      <h2 id="split-the-geometry-out-before-you-draw-anything"><a class="anchor" href="#split-the-geometry-out-before-you-draw-anything" aria-label="Link to this section"></a>Split the geometry out before you draw anything</h2>
+      <p>No coordinate math lives in the component. Every domain, gridline, gradient stop and hit-test is a pure function in a <code>transforms/</code> folder with zero React or React Native imports. The renderer is thin enough to be boring.</p>
+      <p>That's not architecture for its own sake. A chart's bugs are almost all arithmetic, and arithmetic is the part you can test without a screen. Here's the vertical domain resolver, which answers "what range does this axis cover":</p>
+      <pre><code class="language-ts">export const resolveDomain = (
+          values: readonly (number | null | undefined)[],
+          mode: DomainMode
+      ): ValueDomain =&gt; {
+          if (mode === 'fixed') return MOOD_DOMAIN;   // always 0..10
+
+          let min = Infinity, max = -Infinity;
+          for (const v of values) {
+              if (typeof v !== 'number' || !Number.isFinite(v)) continue;
+              if (v &lt; min) min = v;
+              if (v &gt; max) max = v;
+          }
+          if (min === Infinity) return MOOD_DOMAIN;   // empty DB is a real code path
+
+          const pad = Math.max(FIT_PAD_MIN, (max - min) * FIT_PAD_RATIO);
+          let lo = clamp(Math.floor(min - pad), MOOD_MIN, MOOD_MAX);
+          let hi = clamp(Math.ceil(max + pad), MOOD_MIN, MOOD_MAX);
+
+          // Widen to a minimum span. A two-point series spanning 0.2 of a mood
+          // would otherwise render as a dramatic mountain range.
+          while (hi - lo &lt; FIT_MIN_SPAN) {
+              if (hi &lt; MOOD_MAX) hi += 1;
+              else if (lo &gt; MOOD_MIN) lo -= 1;
+              else break;
+          }
+          return { min: lo, max: hi };
+      };
+      </code></pre>
+      <p>Two modes, because they answer different questions. <code>fixed</code> is always 0 to 10, so this week and last week stay comparable at a glance. <code>fit</code> zooms to the data's own range, which is what you want when every day was a 6 or a 7. <code>FIT_MIN_SPAN</code> is 3, because a fitted domain of 6.1 to 6.3 turns statistical noise into a mountain range.</p>
+      <p>The bounds snap to integers, so axis labels are whole moods and never "6.37".</p>
+      <h2 id="colour-that-carries-information"><a class="anchor" href="#colour-that-carries-information" aria-label="Link to this section"></a>Colour that carries information</h2>
+      <p>The line is painted with a vertical gradient built from the app's single mood ramp, so height reads as colour and not just position. High is green, low is amber and red. There's deliberately no second palette.</p>
+      <p>The interesting part is a constant:</p>
+      <pre><code class="language-ts">/**
+       * The canonical mood ramp bottoms out at 0.2 alpha. A fill can live there;
+       * a 3px stroke cannot, and that faintness IS the &quot;not bright enough&quot;
+       * complaint. The ramp's shape is preserved, its floor is raised.
+       *
+       * 0.85 (was 0.55): at 0.55 the stroke visibly DIMMED as it descended, so a
+       * bad week looked like a rendering fault rather than a low mood.
+       */
+      const LINE_MIN_OPACITY = 0.85;
+      </code></pre>
+      <p>I shipped 0.55 first and it was wrong. A ramp tuned for filled shapes doesn't transfer to a 3px stroke, because a stroke has almost no area to carry the alpha. The fix keeps the ramp's shape and rescales it into a legible opacity window, instead of inventing a second ramp that would drift from the rest of the app.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The chart expanded full-screen with the Fit domain switch on, zoomed to a 3 to 9 range" src="https://i.imgur.com/HmqFItt.png"></p>
+      <h2 id="hold-to-scrub-tap-to-expand"><a class="anchor" href="#hold-to-scrub-tap-to-expand" aria-label="Link to this section"></a>Hold to scrub, tap to expand</h2>
+      <p>A long-press-then-drag <code>Pan</code> from <code>react-native-gesture-handler</code> gives you the whole scrub interaction in six lines, and a ref keeps it from re-rendering the chart on every pointer sample.</p>
+      <pre><code class="language-ts">const scrub = Gesture.Pan()
+          .activateAfterLongPress(SCRUB_ACTIVATE_MS)   // 220
+          .runOnJS(true)
+          .onStart((e) =&gt; handleScrub(e.x))
+          .onUpdate((e) =&gt; handleScrub(e.x))
+          .onFinalize(endScrub);
+
+      // Race, not Simultaneous: a quick tap expands, a hold scrubs, never both.
+      return onPress ? Gesture.Race(scrub, tap) : scrub;
+      </code></pre>
+      <p><code>runOnJS(true)</code> is deliberate, not laziness. The readout is React state and the haptic is a JS call, so there's nothing here worth a worklet.</p>
+      <p>The ref is what stops a re-render storm. Gesture callbacks write the current index to <code>scrubIndexRef</code> and only call <code>setState</code> when the index actually <strong>changes</strong>. On a slow drag across a month that's about 30 updates instead of thousands.</p>
+      <p>Hit-testing is a separate pure function, and its comments are mostly about edges:</p>
+      <pre><code class="language-ts">export const nearestIndex = (x: number, xs: readonly number[]): number | null =&gt; {
+          if (xs.length === 0) return null;
+          let best = 0, bestDist = Math.abs(xs[0] - x);
+          for (let i = 1; i &lt; xs.length; i++) {
+              const d = Math.abs(xs[i] - x);
+              // Strictly-less keeps the EARLIER point on an exact tie, so a scrub
+              // across a midpoint switches once, at the midpoint, in both directions.
+              if (d &lt; bestDist) { best = i; bestDist = d; }
+          }
+          return best;
+      };
+      </code></pre>
+      <p><code>xs</code> holds only the <strong>real</strong> data points, so a hold can never report a mood for a day that was never logged. Dragging past either end clamps to that end rather than dropping the cursor, because a cursor that vanishes mid-drag reads as a bug.</p>
+      <p>One product decision is buried in there. The tooltip shows the day's average <strong>and</strong> the last entry the user actually wrote that day, with its time and the first line of its note. An average isn't what anyone remembers about a Tuesday. The entry is.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Holding the chart: a cursor line snapped to 25 Aug with a tooltip showing the average and that day's entry" src="https://i.imgur.com/1DkhywO.png"></p>
+      <h2 id="two-pan-gestures-one-finger"><a class="anchor" href="#two-pan-gestures-one-finger" aria-label="Link to this section"></a>Two Pan gestures, one finger</h2>
+      <p>Two <code>Pan</code> handlers and a vertical <code>ScrollView</code> can share one finger without either gesture knowing the other exists. Three numbers and one RNGH rule do all the work.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="How RNGH arbitrates between the page-swipe pan, the hold-to-scrub pan and the ScrollView" src="https://i.imgur.com/OvcVqub.png"></p>
+      <p>I added a second gesture to this screen after the chart: swipe sideways to step through periods. So now the scrub pan, the page pan and the scroller all want the same touch.</p>
+      <p>The rule: when a non-simultaneous handler <strong>activates</strong>, every other handler still in <code>BEGAN</code> gets cancelled. The only question is which one activates first.</p>
+      <p>The numbers: the scrub needs a 220 ms hold, the page pan needs 24 px of horizontal travel (<code>activeOffsetX</code>), and 12 px of vertical travel fails it outright (<code>failOffsetY</code>). Hold still and the scrub arrives long before your finger drifts 24 px. Flick sideways and the page pan wins in well under 220 ms. Drag downward and the pan fails, so the ScrollView keeps the touch and scrolls as it always did.</p>
+      <p>The page pan is attached to a plain <code>View</code> that's an <strong>ancestor</strong> of the ScrollView, not to the ScrollView itself. Two handlers on one native view tag makes arbitration depend on registration order. On an ancestor it's unambiguous. The ScrollView is RNGH's rather than React Native's, so vertical scrolling joins the same arbitration instead of running its own.</p>
+      <p>These thresholds are load-bearing in a way that's invisible in review. The comment above <code>ACTIVE_OFFSET_X</code> says it out loud: don't lower it, and don't mark either gesture simultaneous with anything.</p>
+      <h2 id="the-fabric-trap-that-sent-me-back-to-the-old-animated-api"><a class="anchor" href="#the-fabric-trap-that-sent-me-back-to-the-old-animated-api" aria-label="Link to this section"></a>The Fabric trap that sent me back to the old Animated API</h2>
+      <p>The page transition uses React Native's built-in <code>Animated</code> with <code>useNativeDriver: true</code>, not Reanimated. That looks like a regression. It isn't.</p>
+      <p>A live Reanimated <code>useAnimatedStyle</code> on a <code>flex: 1</code> container blanks this screen. The Statistics tab has about eight charts, each resolving its own async query and re-laying-out over roughly three seconds after mount. On one of those re-layouts, Reanimated applies its animated props against a stale measured frame and shoves the whole subtree about 1,600 px off-screen. The tab goes blank with no JS re-render at all, so nothing in the React tree looks wrong.</p>
+      <p>I root-caused it on device after shipping it. The property being animated is irrelevant: an opacity-only animated style reproduces it. Only removing the animated style from the <code>flex: 1</code> view fixes it. Lighter screens share the same code path and never reproduce, because their content doesn't repeatedly re-lay-out after mount.</p>
+      <p>Native-driven <code>Animated</code> doesn't have the bug. The transform is applied by the platform animation module to the view's own node, and is never recomputed from a JS-side measured layout. So the swipe uses it, with a long comment explaining why nobody should modernise it.</p>
+      <h2 id="testing-a-chart-without-taking-a-screenshot"><a class="anchor" href="#testing-a-chart-without-taking-a-screenshot" aria-label="Link to this section"></a>Testing a chart without taking a screenshot</h2>
+      <p>Pure geometry means the chart's tests are ordinary unit tests asserting invariants, not pixel snapshots. There are 131 of them across the chart transforms and renderers. A sample of the names:</p>
+      <ul>
+      <li>gradient stop opacity decreases monotonically from top to bottom</li>
+      <li>a fitted domain contains every data point it was fitted to</li>
+      <li>an exact midpoint resolves to the earlier point, in both directions</li>
+      <li><code>nearestIndex</code> is monotonic: sweeping right never moves the index left</li>
+      <li>the tooltip never leaves the container, for any anchor</li>
+      <li><code>buildGridLines</code> returns nothing for a degenerate domain instead of looping forever</li>
+      </ul>
+      <p>The one I'd recommend to anyone doing a migration like this isn't a geometry test. It's a source-level guard:</p>
+      <pre><code class="language-ts">const IMPORTS_CHART_KIT =
+          /(?:from\s+['&quot;]react-native-chart-kit['&quot;]|require\(\s*['&quot;]react-native-chart-kit['&quot;]\s*\))/;
+
+      it('scans a non-trivial number of files (guards against a vacuous pass)', () =&gt; {
+          expect(allFiles.length).toBeGreaterThan(50);
+      });
+
+      it('no app source imports it', () =&gt; {
+          const offenders = allFiles.filter((f) =&gt;
+              IMPORTS_CHART_KIT.test(readFileSync(f, 'utf8'))
+          );
+          expect(offenders.map((f) =&gt; f.replace(`${ROOT}/`, ''))).toEqual([]);
+      });
+
+      it('the regex really does catch an import (proves the check has teeth)', () =&gt; {
+          expect(IMPORTS_CHART_KIT.test(`import { LineChart } from '${CHART_KIT}';`)).toBe(true);
+          // A comment naming it is fine. This file and several others do.
+          expect(IMPORTS_CHART_KIT.test(`// replaces ${CHART_KIT}'s LineChart`)).toBe(false);
+      });
+      </code></pre>
+      <p>The dependency is gone from <code>package.json</code>, so a stray import fails at bundle time anyway. But that failure is a confusing "module not found" in Metro. This test states the actual rule, so the next new chart in this repo hears about it in review.</p>
+      <p>Note the two supporting tests. One proves the file walker found something, so the check can't pass vacuously. One proves the regex has teeth. A guard test that silently stops guarding is worse than no guard, because you stop checking by hand.</p>
+      <h2 id="what-id-do-differently"><a class="anchor" href="#what-id-do-differently" aria-label="Link to this section"></a>What I'd do differently</h2>
+      <p>Check the registry, not your memory of the registry. I called a library unmaintained in a code comment, a changelog and a test docstring. It had shipped a major version two months before I wrote any of them.</p>
+      <p>The second thing: I spent a while theming around the library before replacing it. Colour props, custom dot renderers, wrappers to fight the sizing. All of it was thrown away.</p>
+      <p>The heuristic I'd use now has two parts. If two consecutive feature requests need the library to change its geometry or its gesture handling, stop theming and measure how much of the library you actually use. And before you write the word "unmaintained" anywhere, open npm.</p>
+      <p>Open question, and I'd genuinely like other opinions. I kept the scrub on the JS thread because the readout is React state. If you've moved this kind of scrub fully into a worklet with a shared value driving the SVG cursor, was the complexity worth it on a mid-range Android device? Or is 60 Hz on the JS thread plenty for a gesture this coarse?</p>
+      <p>The app is open source if you want to read the whole thing: <a href="https://github.com/Antimatter543/mood-tracker">github.com/Antimatter543/mood-tracker</a>. It's on <a href="https://play.google.com/store/apps/details?id=com.raeduslabs.soulsyncapp">Google Play</a> too.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
