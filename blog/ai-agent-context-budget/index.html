@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Give Your AI Agent a Context Budget That Actually Works | Diven Rastdus</title>
+  <meta name="description" content="Your agent isn&#x27;t running out of context. It&#x27;s drowning in it. Here is the three-tier budget that keeps a long session sharp, with runnable code.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/ai-agent-context-budget/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How to Give Your AI Agent a Context Budget That Actually Works">
+  <meta property="og:description" content="Your agent isn&#x27;t running out of context. It&#x27;s drowning in it. Here is the three-tier budget that keeps a long session sharp, with runnable code.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/ai-agent-context-budget/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-04">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="How to Give Your AI Agent a Context Budget That Actually Works">
+  <meta name="twitter:description" content="Your agent isn&#x27;t running out of context. It&#x27;s drowning in it. Here is the three-tier budget that keeps a long session sharp, with runnable code.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How to Give Your AI Agent a Context Budget That Actually Works",
+      "description": "Your agent isn't running out of context. It's drowning in it. Here is the three-tier budget that keeps a long session sharp, with runnable code.",
+      "url": "https://astraedus.dev/blog/ai-agent-context-budget/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/ai-agent-context-budget/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-04",
+      "dateModified": "2026-09-04",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why does an AI agent get worse the longer it runs?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Because a conversation is append-only by default, and every token you added on turn 3 is still being re-sent on turn 40. The model doesn't forget the early context."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is a context budget?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A context budget splits everything the agent could know into three tiers, ranked by how often each one gets re-sent. !The context budget: hot loaded every turn, warm loaded per task, cold on disk until queried The tiers aren't about importance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Rule 1: Cap the hot layer, and let a script enforce it",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Anything loaded on every turn needs a hard token ceiling checked by code, because going over budget usually truncates quietly instead of raising an error."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Rule 2: Retrieve instead of re-reading",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Never load a whole file into context to recover one fact. Index it once, then query for the handful of lines that answer the question."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Rule 3: Make the warm layer someone else's problem",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "When a task reads a lot but answers little, run it in a subagent. The reading lands in that agent's window, and only the conclusion lands in yours."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can the API clear old context for me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Context editing strips stale tool results out of the history in place."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Rule 4: Keep durable state on disk, not in the conversation",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Anything that has to outlive the session belongs in a file, because the conversation is the one storage layer guaranteed to disappear. Here's the test I use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does prompt caching solve this instead?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Caching makes re-sending a long prefix much cheaper, but it does nothing about relevance, so it fixes your bill and not your quality. It's still worth setting up properly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "!The context budget checklist: cap the hot layer, index it, isolate heavy reading, keep state on disk Pick the rule your agent breaks worst and fix only that one this week."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How to Give Your AI Agent a Context Budget That Actually Works", "item": "https://astraedus.dev/blog/ai-agent-context-budget/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 4, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">9 min read</span>
+      </div>
+      <h1>How to Give Your AI Agent a Context Budget That Actually Works</h1>
+      <p class="article-lede">Your agent isn't running out of context. It's drowning in it, because the share of the window that still matters keeps shrinking while the window itself keeps growing.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#why-does-an-ai-agent-get-worse-the-longer-it-runs">Why does an AI agent get worse the longer it runs?</a></li>
+          <li><a href="#what-is-a-context-budget">What is a context budget?</a></li>
+          <li><a href="#rule-1-cap-the-hot-layer-and-let-a-script-enforce-it">Rule 1: Cap the hot layer, and let a script enforce it</a></li>
+          <li><a href="#rule-2-retrieve-instead-of-re-reading">Rule 2: Retrieve instead of re-reading</a></li>
+          <li><a href="#rule-3-make-the-warm-layer-someone-elses-problem">Rule 3: Make the warm layer someone else's problem</a></li>
+          <li><a href="#can-the-api-clear-old-context-for-me">Can the API clear old context for me?</a></li>
+          <li><a href="#rule-4-keep-durable-state-on-disk-not-in-the-conversation">Rule 4: Keep durable state on disk, not in the conversation</a></li>
+          <li><a href="#does-prompt-caching-solve-this-instead">Does prompt caching solve this instead?</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I've been running an agent continuously for months, and it fails in a very specific way. Give it a fresh session and one task, and it's sharp. Let the same session run for forty turns, and the quality falls off a cliff on work it handled fine an hour earlier. Nothing crashed. No limit was hit. It just got worse.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Two agents over 40 turns: one with no budget falls to 15% relevant tokens, one on a budget holds 72%" src="https://i.imgur.com/COj1ovY.png"></p>
+      <p><em>(Shape is illustrative. The ratio is the point, not the exact percentages.)</em></p>
+      <p>The fix is to stop treating the window as one container and start treating it as a budget with three tiers. A small hot layer you re-send every turn. A warm layer scoped to the task in front of you. A cold layer that sits on disk and costs nothing until you query it.</p>
+      <h2 id="why-does-an-ai-agent-get-worse-the-longer-it-runs"><a class="anchor" href="#why-does-an-ai-agent-get-worse-the-longer-it-runs" aria-label="Link to this section"></a>Why does an AI agent get worse the longer it runs?</h2>
+      <p>Because a conversation is append-only by default, and every token you added on turn 3 is still being re-sent on turn 40.</p>
+      <p>The model doesn't forget the early context. It drowns in it. On turn 3, those three files you read were the entire point of the turn. By turn 40 you're on a different problem, and those files are still sitting there, competing for attention with the thing you actually need right now. Nothing removed them, because nothing was ever made responsible for removing them.</p>
+      <p>That costs you twice. Quality drops, because attention is finite and you spent it on stale tool output. Cost climbs, because every turn re-sends the whole history. A conversation sitting at 200K tokens that runs 40 more turns bills those 200K tokens 40 more times. (Caching softens that bill. It doesn't fix the underlying problem, and I'll come back to why.)</p>
+      <p>Notice what isn't happening in that chart. Neither window filled up. Both had room to spare. Fullness was never the problem.</p>
+      <h2 id="what-is-a-context-budget"><a class="anchor" href="#what-is-a-context-budget" aria-label="Link to this section"></a>What is a context budget?</h2>
+      <p>A context budget splits everything the agent could know into three tiers, ranked by how often each one gets re-sent.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The context budget: hot loaded every turn, warm loaded per task, cold on disk until queried" src="https://i.imgur.com/iTT45vN.png"></p>
+      <p>The tiers aren't about importance. They're about frequency. Your decision log might be the most valuable text you own, and it still belongs in cold storage, because you need two lines of it once a week. The system prompt might be dull boilerplate, and it belongs in hot, because it shapes every single turn.</p>
+      <p>One rule per tier follows from that split.</p>
+      <h2 id="rule-1-cap-the-hot-layer-and-let-a-script-enforce-it"><a class="anchor" href="#rule-1-cap-the-hot-layer-and-let-a-script-enforce-it" aria-label="Link to this section"></a>Rule 1: Cap the hot layer, and let a script enforce it</h2>
+      <p>Anything loaded on every turn needs a hard token ceiling checked by code, because going over budget usually truncates quietly instead of raising an error.</p>
+      <p>Measure it with the real tokenizer:</p>
+      <pre><code class="language-python">from anthropic import Anthropic
+
+      client = Anthropic()
+      HOT_BUDGET = 4000  # tokens re-sent on every single turn
+
+      def count(text: str) -&gt; int:
+          return client.messages.count_tokens(
+              model=&quot;claude-opus-5&quot;,
+              messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text}],
+          ).input_tokens
+
+      used = count(open(&quot;AGENT.md&quot;).read())
+      print(f&quot;hot layer: {used}/{HOT_BUDGET} tokens&quot;)
+      if used &gt; HOT_BUDGET:
+          raise SystemExit(f&quot;over budget by {used - HOT_BUDGET} tokens&quot;)
+      </code></pre>
+      <p>Run that in CI. The endpoint is free and sits on its own rate limit pool, so the check costs you nothing. A hot layer with no enforced ceiling grows every week, because adding one more rule always feels free in the moment.</p>
+      <p>Don't reach for <code>tiktoken</code> here. It's OpenAI's tokenizer, not Claude's, and there's no offline Claude tokenizer to swap in. It undercounts, and it undercounts worse on code than on prose. The count isn't even stable across Claude models. Anthropic's own migration guidance says the tokenizer introduced with Claude 4.7 can produce up to roughly a third more tokens on identical text. A budget you measured six months ago is a budget that's wrong today. Count against the model ID you actually ship.</p>
+      <p>Silent truncation is the part that bites. My own always-loaded startup context runs under a hard character cap, and the harness that injects it drops anything past that cap without complaining. Go over, and you lose the tail. Nothing tells you. The rule that came out of that: adding to the hot layer is a spending decision. A new line earns its place only if it prevents more trouble than it costs.</p>
+      <h2 id="rule-2-retrieve-instead-of-re-reading"><a class="anchor" href="#rule-2-retrieve-instead-of-re-reading" aria-label="Link to this section"></a>Rule 2: Retrieve instead of re-reading</h2>
+      <p>Never load a whole file into context to recover one fact. Index it once, then query for the handful of lines that answer the question.</p>
+      <p>SQLite bundles a full-text search engine, FTS5, compiled in by default on virtually every standard Python build. No new infrastructure:</p>
+      <pre><code class="language-python">import sqlite3, pathlib
+
+      db = sqlite3.connect(&quot;notes.db&quot;)
+      db.execute(&quot;CREATE VIRTUAL TABLE IF NOT EXISTS notes USING fts5(path, body)&quot;)
+      db.execute(&quot;DELETE FROM notes&quot;)  # rebuild, so a second run doesn't duplicate every row
+
+      for p in pathlib.Path(&quot;docs&quot;).rglob(&quot;*.md&quot;):
+          db.execute(&quot;INSERT INTO notes VALUES (?, ?)&quot;, (str(p), p.read_text(errors=&quot;ignore&quot;)))
+      db.commit()
+
+      rows = db.execute(
+          &quot;SELECT path, snippet(notes, 1, '&gt;&gt;', '&lt;&lt;', ' ... ', 20) &quot;
+          &quot;FROM notes WHERE notes MATCH ? ORDER BY rank LIMIT 5&quot;,
+          (&quot;retry AND webhook&quot;,),
+      ).fetchall()
+
+      for path, snippet in rows:
+          print(path, snippet)
+      </code></pre>
+      <p>That's standard library only. No vector database, no embedding bill, no service to keep alive. An FTS5 index over a few thousand markdown files answers in tens of milliseconds, fast enough to query mid-turn instead of guessing.</p>
+      <p>Five snippets instead of five files. Reach for embeddings when you genuinely need semantic recall, but keyword search already answers most questions shaped like "what did I decide about X".</p>
+      <h2 id="rule-3-make-the-warm-layer-someone-elses-problem"><a class="anchor" href="#rule-3-make-the-warm-layer-someone-elses-problem" aria-label="Link to this section"></a>Rule 3: Make the warm layer someone else's problem</h2>
+      <p>When a task reads a lot but answers little, run it in a subagent. The reading lands in that agent's window, and only the conclusion lands in yours.</p>
+      <p>The asymmetry is the whole trick. Reading forty files to answer one architectural question can run into six figures of tokens. The answer is 200 words. If your main loop does that reading, it carries every one of those tokens for the rest of the session. If a subagent does it, the main loop pays for 200 words.</p>
+      <p>The dispatch needs an explicit return contract:</p>
+      <pre><code class="language-python">CONTRACT = &quot;&quot;&quot;
+      Search the repo and answer the question below.
+
+      Return at most 200 words: the answer, the file:line references that support it,
+      and nothing else. Do not paste file contents back into your reply.
+      If the repo does not answer it, reply exactly: blocked: &lt;what you need&gt;.
+      &quot;&quot;&quot;
+      </code></pre>
+      <p>That last line matters more than it looks. A vague subagent prompt comes back as a confident guess, and a confident wrong answer costs far more than the tokens you saved, because everything downstream gets built on it. Give the subagent the access to look things up itself, and give it explicit permission to come back empty.</p>
+      <h2 id="can-the-api-clear-old-context-for-me"><a class="anchor" href="#can-the-api-clear-old-context-for-me" aria-label="Link to this section"></a>Can the API clear old context for me?</h2>
+      <p>Yes. Context editing strips stale tool results out of the history in place. It's the server-side cousin of the subagent trick:</p>
+      <pre><code class="language-python">client.beta.messages.create(
+          model=&quot;claude-opus-5&quot;,
+          max_tokens=16000,
+          betas=[&quot;context-management-2025-06-27&quot;],
+          context_management={&quot;edits&quot;: [{&quot;type&quot;: &quot;clear_tool_uses_20250919&quot;}]},
+          tools=[...],
+          messages=[...],
+      )
+      </code></pre>
+      <p>That clears old tool output rather than summarizing it, which is what you want when most of your history is tool results nobody will read again. There's a <code>clear_thinking_20251015</code> strategy too. The bare form above runs on defaults, so set an explicit trigger threshold once you know what your loop actually looks like.</p>
+      <h2 id="rule-4-keep-durable-state-on-disk-not-in-the-conversation"><a class="anchor" href="#rule-4-keep-durable-state-on-disk-not-in-the-conversation" aria-label="Link to this section"></a>Rule 4: Keep durable state on disk, not in the conversation</h2>
+      <p>Anything that has to outlive the session belongs in a file, because the conversation is the one storage layer guaranteed to disappear.</p>
+      <p>Here's the test I use. If this session died mid-task right now, could a fresh one pick the work up from what's on disk? If the answer is no, your state is sitting in the wrong tier.</p>
+      <pre><code>state/
+        ACTIVE.md      # what I am doing now, and the next concrete step
+        DECISIONS.md   # what I chose, and why (the why is the expensive part)
+        LESSONS.md     # what broke, and the rule that stops a repeat
+        notes.db       # the FTS5 index over all of it
+      </code></pre>
+      <p>Only <code>ACTIVE.md</code> is hot. Everything else is cold and gets queried. Write the reasoning, not just the outcome, because the outcome is usually recoverable from the code and the reasoning never is. That's also where the compounding shows up: a lesson written down once becomes a rule that costs almost nothing to carry forever.</p>
+      <h2 id="does-prompt-caching-solve-this-instead"><a class="anchor" href="#does-prompt-caching-solve-this-instead" aria-label="Link to this section"></a>Does prompt caching solve this instead?</h2>
+      <p>Caching makes re-sending a long prefix much cheaper, but it does nothing about relevance, so it fixes your bill and not your quality.</p>
+      <p>It's still worth setting up properly. Caching is prefix matched, so any byte that changes invalidates everything after it. Keep stable content first (a frozen system prompt, a deterministically ordered tool list) and put volatile content (timestamps, request IDs, the varying question) after your last breakpoint. Then check <code>usage.cache_read_input_tokens</code> on real traffic. If it reads zero across repeated requests, a <code>datetime.now()</code> in the system prompt is the usual culprit. The other one is subtler: the minimum cacheable prefix depends on the model, so a prompt that's simply too short silently never caches at all.</p>
+      <p>Real money, genuinely. But a cached irrelevant token is still an irrelevant token sitting in the window. Budget first, then cache what survives.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The context budget checklist: cap the hot layer, index it, isolate heavy reading, keep state on disk" src="https://i.imgur.com/GhURpsX.png"></p>
+      <p>Pick the rule your agent breaks worst and fix only that one this week. For most people it's the first one, because almost nobody has measured the layer they re-send a thousand times a day.</p>
+      <p>Measure it once. You'll either find nothing, or you'll find the reason your agent goes stupid after lunch.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
