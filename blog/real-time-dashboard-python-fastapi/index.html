@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building a Real-Time Dashboard with Python and FastAPI (No WebSockets) | Diven Rastdus</title>
+  <meta name="description" content="A live metrics dashboard in about 120 lines, using Server-Sent Events instead of WebSockets. Includes the four things that silently break in production.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/real-time-dashboard-python-fastapi/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Building a Real-Time Dashboard with Python and FastAPI (No WebSockets)">
+  <meta property="og:description" content="A live metrics dashboard in about 120 lines, using Server-Sent Events instead of WebSockets. Includes the four things that silently break in production.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/real-time-dashboard-python-fastapi/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-07">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="Building a Real-Time Dashboard with Python and FastAPI (No WebSockets)">
+  <meta name="twitter:description" content="A live metrics dashboard in about 120 lines, using Server-Sent Events instead of WebSockets. Includes the four things that silently break in production.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Building a Real-Time Dashboard with Python and FastAPI (No WebSockets)",
+      "description": "A live metrics dashboard in about 120 lines, using Server-Sent Events instead of WebSockets. Includes the four things that silently break in production.",
+      "url": "https://astraedus.dev/blog/real-time-dashboard-python-fastapi/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/real-time-dashboard-python-fastapi/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-07",
+      "dateModified": "2026-09-07",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "Building a Real-Time Dashboard with Python and FastAPI (No WebSockets)", "item": "https://astraedus.dev/blog/real-time-dashboard-python-fastapi/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 7, 2026</span>
+        <span class="article-tag">Python</span>
+        <span class="article-reading">8 min read</span>
+      </div>
+      <h1>Building a Real-Time Dashboard with Python and FastAPI (No WebSockets)</h1>
+      <p class="article-lede">A real-time dashboard in Python doesn't need WebSockets. Dashboard data flows one way, from server to browser, and Server-Sent Events do exactly that over ordinary HTTP. One endpoint, no protocol upgrade, no extra dependency, and the browser handles reconnection itself. FastAPI already ships everything required.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#why-not-websockets">Why not WebSockets?</a></li>
+          <li><a href="#fan-out-with-one-bounded-queue-per-client">Fan out with one bounded queue per client</a></li>
+          <li><a href="#start-the-producer-with-lifespan-not-onevent">Start the producer with lifespan, not on_event</a></li>
+          <li><a href="#the-endpoint-and-what-a-frame-actually-looks-like">The endpoint, and what a frame actually looks like</a></li>
+          <li><a href="#the-browser-needs-nine-lines">The browser needs nine lines</a></li>
+          <li><a href="#the-four-things-that-silently-break-hanging-tests-dead-producers-nginx-and-the-six-connection-cap">The four things that silently break (hanging tests, dead producers, nginx, and the six-connection cap)</a></li>
+          <li><a href="#bound-the-queue-drop-the-oldest">Bound the queue, drop the oldest</a></li>
+        </ul>
+      </nav>
+
+      <p>Most metrics start life as a file. You have counters in a database, or a JSONL file some job appends to, and to see what changed you re-run a script and read the tail. That works until you want to <em>watch</em> it. Then you start refreshing, and refreshing is just polling done by a human.</p>
+      <p>Here's the shape of the whole thing. One producer, many browsers, and one bounded queue per browser.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Architecture of a FastAPI Server-Sent Events dashboard: a producer task publishes into a broker that fans out to one bounded asyncio queue per connected client, each feeding a StreamingResponse to a browser EventSource" src="https://i.imgur.com/Xyk2TpY.png"></p>
+      <p>The complete runnable code, including the test suite, is <a href="https://gist.github.com/astraedus/448d3c37c351017dd5156fc0c89809ab">in this gist</a>.</p>
+      <h2 id="why-not-websockets"><a class="anchor" href="#why-not-websockets" aria-label="Link to this section"></a>Why not WebSockets?</h2>
+      <p>A dashboard never talks back, so a WebSocket buys you a bidirectional channel you never use. You pay for it with a protocol upgrade, a separate deployment story, and reconnection logic you write yourself. SSE is plain HTTP. It passes through proxies, it works with the auth middleware you already have, and reconnection is a browser feature rather than your code.</p>
+      <p>Reach for WebSockets when the client genuinely sends messages: chat, collaborative editing, multiplayer. For numbers on a screen, SSE is less machinery for the same result.</p>
+      <h2 id="fan-out-with-one-bounded-queue-per-client"><a class="anchor" href="#fan-out-with-one-bounded-queue-per-client" aria-label="Link to this section"></a>Fan out with one bounded queue per client</h2>
+      <p>Give every connected browser its own bounded <code>asyncio.Queue</code> and drop the oldest message when it fills, so one slow client can never stall the producer. The load-bearing word is <em>bounded</em>.</p>
+      <pre><code class="language-python">import asyncio, json, random
+      from contextlib import asynccontextmanager, suppress
+      from typing import AsyncIterator
+
+      from fastapi import FastAPI, Request
+      from fastapi.responses import HTMLResponse, StreamingResponse
+
+
+      class Broker:
+          &quot;&quot;&quot;Pub/sub fan-out. Every subscriber owns a BOUNDED queue, so a slow
+          browser tab can never apply backpressure to the producer.&quot;&quot;&quot;
+
+          def __init__(self, maxsize: int = 10) -&gt; None:
+              self._maxsize = maxsize
+              self._subscribers: set[asyncio.Queue[str]] = set()
+              self.dropped = 0
+
+          @property
+          def subscriber_count(self) -&gt; int:
+              return len(self._subscribers)
+
+          def publish(self, message: str) -&gt; None:
+              &quot;&quot;&quot;Never awaits. If a subscriber is full, evict its oldest message
+              (stale metrics are worthless) and count the drop.&quot;&quot;&quot;
+              for queue in self._subscribers:
+                  try:
+                      queue.put_nowait(message)
+                  except asyncio.QueueFull:
+                      queue.get_nowait()
+                      queue.put_nowait(message)
+                      self.dropped += 1
+
+          @asynccontextmanager
+          async def subscribe(self) -&gt; AsyncIterator[asyncio.Queue[str]]:
+              queue: asyncio.Queue[str] = asyncio.Queue(maxsize=self._maxsize)
+              self._subscribers.add(queue)
+              try:
+                  yield queue
+              finally:
+                  self._subscribers.discard(queue)  # a disconnect always cleans up
+
+
+      broker = Broker()
+      </code></pre>
+      <p><code>publish()</code> never awaits, and that's the whole design. If you await a slow client, one laptop on hotel wifi backs up the producer and stalls every other viewer. Bounding the queue and dropping the oldest entry turns that outage into a counter. For metrics, that trade is obviously right, because nobody wants a stale number delivered late.</p>
+      <p>Staying synchronous buys a second property for free. Because <code>publish()</code> never yields control, no client can disconnect mid-broadcast and mutate the set underneath the loop.</p>
+      <p><code>subscribe()</code> is an async context manager, so a dropped connection always removes its queue. That matters more than it sounds. A leak here stays invisible until you've run for a week and every disconnected tab is still holding memory.</p>
+      <h2 id="start-the-producer-with-lifespan-not-onevent"><a class="anchor" href="#start-the-producer-with-lifespan-not-onevent" aria-label="Link to this section"></a>Start the producer with lifespan, not on_event</h2>
+      <p>Start background producers in FastAPI's <code>lifespan</code> context manager rather than <code>@app.on_event("startup")</code>. If you pass <code>lifespan</code>, the old startup and shutdown handlers never run at all. FastAPI's own docs are blunt here. "If you provide a <code>lifespan</code> parameter," they warn, "<code>startup</code> and <code>shutdown</code> event handlers will no longer be called."</p>
+      <pre><code class="language-python">async def metrics_producer(target: Broker) -&gt; None:
+          tick = 0
+          while True:
+              tick += 1
+              target.publish(json.dumps({
+                  &quot;tick&quot;: tick,
+                  &quot;rps&quot;: round(random.uniform(80, 240), 1),
+                  &quot;latency_ms&quot;: round(random.uniform(12, 90), 1),
+                  &quot;clients&quot;: target.subscriber_count,
+              }))
+              await asyncio.sleep(1.0)
+
+
+      @asynccontextmanager
+      async def lifespan(app: FastAPI) -&gt; AsyncIterator[None]:
+          task = asyncio.create_task(metrics_producer(broker))
+          try:
+              yield
+          finally:
+              task.cancel()
+              with suppress(asyncio.CancelledError):
+                  await task
+
+
+      app = FastAPI(lifespan=lifespan)
+      </code></pre>
+      <p>Swap the random numbers for your real stats source. The cancel-and-suppress in the <code>finally</code> block is what makes shutdown quiet instead of dumping a cancellation traceback.</p>
+      <h2 id="the-endpoint-and-what-a-frame-actually-looks-like"><a class="anchor" href="#the-endpoint-and-what-a-frame-actually-looks-like" aria-label="Link to this section"></a>The endpoint, and what a frame actually looks like</h2>
+      <p>An SSE frame is just text with a blank line at the end.</p>
+      <pre><code class="language-python">async def event_stream(request: Request) -&gt; AsyncIterator[str]:
+          async with broker.subscribe() as queue:
+              event_id = 0
+              while True:
+                  try:
+                      payload = await asyncio.wait_for(queue.get(), 15.0)
+                  except TimeoutError:
+                      yield &quot;: ping\n\n&quot;  # comment frame: keeps idle proxies from reaping us
+                      continue
+                  if await request.is_disconnected():
+                      break  # drops this one message; fine for metrics, not for orders
+                  event_id += 1
+                  yield f&quot;id: {event_id}\nevent: metrics\ndata: {payload}\n\n&quot;
+
+
+      @app.get(&quot;/events&quot;)
+      async def events(request: Request) -&gt; StreamingResponse:
+          return StreamingResponse(
+              event_stream(request),
+              media_type=&quot;text/event-stream&quot;,
+              headers={
+                  &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+                  &quot;Connection&quot;: &quot;keep-alive&quot;,
+                  &quot;X-Accel-Buffering&quot;: &quot;no&quot;,  # nginx would otherwise buffer the stream
+              },
+          )
+      </code></pre>
+      <p>Three details carry the weight. A blank line terminates a frame. A line starting with <code>:</code> is a comment, which is why the heartbeat is spelled <code>: ping</code>. And <code>data:</code> has to be a single line, which <code>json.dumps()</code> guarantees for free.</p>
+      <p>The timeout doubles as the heartbeat. A plain <code>await queue.get()</code> gives you nowhere to emit a keepalive on an idle stream, so an idle connection sits silent until some proxy decides it's dead. Wrapping the get in <code>wait_for</code> lets one loop handle both data and liveness.</p>
+      <p>Here's what curl sees, at roughly one frame per second:</p>
+      <pre><code>id: 1
+      event: metrics
+      data: {&quot;tick&quot;: 18, &quot;rps&quot;: 121.9, &quot;latency_ms&quot;: 40.3, &quot;clients&quot;: 1}
+
+      id: 2
+      event: metrics
+      data: {&quot;tick&quot;: 19, &quot;rps&quot;: 205.5, &quot;latency_ms&quot;: 62.6, &quot;clients&quot;: 1}
+      </code></pre>
+      <h2 id="the-browser-needs-nine-lines"><a class="anchor" href="#the-browser-needs-nine-lines" aria-label="Link to this section"></a>The browser needs nine lines</h2>
+      <p>The browser side is nine lines: <code>new EventSource("/events")</code>, one event listener, and no reconnect logic at all.</p>
+      <pre><code class="language-javascript">// EventSource reconnects on its own and sends the last `id:` back as a
+      // Last-Event-ID header, so the server *can* resume you, if it keeps a replay
+      // buffer. This one doesn't. It just picks up live.
+      const es = new EventSource(&quot;/events&quot;);
+      es.addEventListener(&quot;metrics&quot;, (e) =&gt; {
+        document.getElementById(&quot;state&quot;).textContent = &quot;live&quot;;
+        for (const [k, v] of Object.entries(JSON.parse(e.data))) {
+          const el = document.getElementById(k);
+          if (el) el.textContent = v;
+        }
+      });
+      es.onerror = () =&gt; { document.getElementById(&quot;state&quot;).textContent = &quot;reconnecting...&quot;; };
+      </code></pre>
+      <p>No reconnect loop, no exponential backoff, no library. Kill the server and the numbers freeze while the label flips to <code>reconnecting...</code>. Start it again and they resume.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The running dashboard in a browser, showing live requests/sec, p50 latency, connected clients and an incrementing tick counter" src="https://i.imgur.com/I8lAkO8.png"></p>
+      <h2 id="the-four-things-that-silently-break-hanging-tests-dead-producers-nginx-and-the-six-connection-cap"><a class="anchor" href="#the-four-things-that-silently-break-hanging-tests-dead-producers-nginx-and-the-six-connection-cap" aria-label="Link to this section"></a>The four things that silently break (hanging tests, dead producers, nginx, and the six-connection cap)</h2>
+      <p>Each of these looks like a bug in your own code. None of them are.</p>
+      <p><strong>Your tests hang forever.</strong> <code>httpx.ASGITransport</code> buffers the entire response body before returning, so <code>client.stream("GET", "/events")</code> against an endless stream never returns at all. Even <code>response.status_code</code> is unreachable. It looks exactly like a deadlock in your own broker. Drive the ASGI app directly and cancel after N frames, or run a real server in a fixture.</p>
+      <p><strong>Your producer never starts under test.</strong> <code>ASGITransport</code> doesn't run lifespan, so nothing publishes and every test reads zero frames. <code>TestClient</code> does run it, but only as a context manager. A bare <code>TestClient(app)</code> without <code>with</code> skips lifespan too, and just as silently. If you export your <code>lifespan</code> function you can enter it in a fixture with <code>async with lifespan(app):</code> and skip the extra dependency. Migrating from <code>on_event</code> to <code>lifespan</code> changes test behaviour without a warning, which is the real trap.</p>
+      <p><strong>nginx buffers your stream.</strong> Every local curl looks perfect without <code>X-Accel-Buffering: no</code>, and then production delivers your "real-time" events in batches every few KB. This one stays invisible until you deploy behind a proxy.</p>
+      <p><strong>You get six connections per domain.</strong> Over HTTP/1.1 most browsers cap simultaneous connections to one domain at six, and that budget is shared across tabs. A few open dashboards can starve the rest of your app. Over HTTP/2 the negotiated stream limit defaults to around 100, so serving the thing over HTTP/2 makes the problem disappear.</p>
+      <h2 id="bound-the-queue-drop-the-oldest"><a class="anchor" href="#bound-the-queue-drop-the-oldest" aria-label="Link to this section"></a>Bound the queue, drop the oldest</h2>
+      <p>The streaming is never the hard part. Roughly 120 lines gets you a live dashboard, and most of it is ordinary FastAPI. The hard part is deciding what happens when one client can't keep up. Bound the queue, drop the oldest frame, count the drops. A number that arrives late is worse than a number that never arrives, because you'll trust it.</p>
+      <p>Clone <a href="https://gist.github.com/astraedus/448d3c37c351017dd5156fc0c89809ab">the gist</a>, run <code>uvicorn app:app</code>, and open two tabs to watch the client counter move. Then shorten the heartbeat interval and watch the bytes, rather than reading the code and assuming.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me there or at theagentthatcould@gmail.com.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
