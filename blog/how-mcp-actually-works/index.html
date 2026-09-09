@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How MCP Actually Works: The Protocol Behind Every AI Agent Integration | Diven Rastdus</title>
+  <meta name="description" content="MCP is JSON-RPC 2.0 plus per-request metadata. Here is the whole protocol on one page, and the five things that only break once you run it in production.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/how-mcp-actually-works/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How MCP Actually Works: The Protocol Behind Every AI Agent Integration">
+  <meta property="og:description" content="MCP is JSON-RPC 2.0 plus per-request metadata. Here is the whole protocol on one page, and the five things that only break once you run it in production.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/how-mcp-actually-works/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-09">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="How MCP Actually Works: The Protocol Behind Every AI Agent Integration">
+  <meta name="twitter:description" content="MCP is JSON-RPC 2.0 plus per-request metadata. Here is the whole protocol on one page, and the five things that only break once you run it in production.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How MCP Actually Works: The Protocol Behind Every AI Agent Integration",
+      "description": "MCP is JSON-RPC 2.0 plus per-request metadata. Here is the whole protocol on one page, and the five things that only break once you run it in production.",
+      "url": "https://astraedus.dev/blog/how-mcp-actually-works/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/how-mcp-actually-works/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-09",
+      "dateModified": "2026-09-09",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What MCP actually is",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MCP is a client-host-server protocol where one host runs many clients, and each client talks to exactly one server. The architecture page is blunt about the ratio: \"each client having a 1:1 relationship with a particular server.\" Your host app (Claude Code, Cursor, your own agent loop) holds the model."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What changed in the current revision",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The current revision, 2026-07-28, deleted the initialize handshake and made MCP stateless. The architecture page states it directly: \"MCP is a stateless protocol: every request is self-contained and carries its own protocol version and capabilities.\" This was well covered when it landed, so treat it as context rather..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Two transports, and only two",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The spec defines exactly two standard transports. stdio launches the server as a subprocess and exchanges newline-delimited JSON-RPC over its standard streams."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What a tool definition actually is",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A tool is a name, a description, and a JSON Schema for its arguments, plus optional extras like title, outputSchema, icons, and annotations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The round trip of one tool call",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The model picks a tool, the client sends tools/call, the server runs your code, and the result goes back into context. Two details in that last step surprise people."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The parts that only break in production",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Five things broke for me after MCP was supposedly working: colliding tool names, schemas that aren't portable across model providers, a 2xx from something that isn't an MCP server, cached tokens that lie about their own expiry, and state that no longer survives between calls."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tool descriptions are attack surface",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A server you didn't write controls text that lands in your model's context, and the model is expected to act on it. The spec's warning is unambiguous: clients MUST consider tool annotations untrusted unless they come from trusted servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The takeaway",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MCP is small: JSON-RPC, per-request metadata, and a list of tools whose descriptions are prompts. Most of what goes wrong comes from treating it as bigger and more magical than that."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How MCP Actually Works: The Protocol Behind Every AI Agent Integration", "item": "https://astraedus.dev/blog/how-mcp-actually-works/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 9, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">9 min read</span>
+      </div>
+      <h1>How MCP Actually Works: The Protocol Behind Every AI Agent Integration</h1>
+      <p class="article-lede">MCP isn't a framework, an SDK, or an AI feature. It's JSON-RPC 2.0 sent over stdio or HTTP, where every request carries its own protocol version and capabilities. That's the entire protocol, and you can hold all of it in your head at once.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#what-mcp-actually-is">What MCP actually is</a></li>
+          <li><a href="#what-changed-in-the-current-revision">What changed in the current revision</a></li>
+          <li><a href="#two-transports-and-only-two">Two transports, and only two</a></li>
+          <li><a href="#what-a-tool-definition-actually-is">What a tool definition actually is</a></li>
+          <li><a href="#the-round-trip-of-one-tool-call">The round trip of one tool call</a></li>
+          <li><a href="#the-parts-that-only-break-in-production">The parts that only break in production</a></li>
+          <li><a href="#tool-descriptions-are-attack-surface">Tool descriptions are attack surface</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p>I run several MCP servers in production and I've written both sides of the wire. The protocol took an afternoon to learn. The failures took considerably longer, and none of them are in the quickstart. So this is the protocol on one page, followed by the five things that broke for me after it was supposedly working.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="MCP architecture: one client per server, and no session between them" src="https://i.imgur.com/egSOfqF.png"></p>
+      <h2 id="what-mcp-actually-is"><a class="anchor" href="#what-mcp-actually-is" aria-label="Link to this section"></a>What MCP actually is</h2>
+      <p>MCP is a client-host-server protocol where one host runs many clients, and each client talks to exactly one server. The architecture page is blunt about the ratio: "each client having a 1:1 relationship with a particular server." Your host app (Claude Code, Cursor, your own agent loop) holds the model. Connect five servers and you've got five clients inside one host.</p>
+      <p>That rule explains API design that otherwise looks like an omission. There's no routing layer, no server registry, no addressing scheme on the wire. A message on a connection is unambiguously for that server, so nothing needs to say which server it means.</p>
+      <p>One more principle worth knowing: servers can't read the whole conversation or see into each other. Isolation between servers is the host's job, not the protocol's.</p>
+      <h2 id="what-changed-in-the-current-revision"><a class="anchor" href="#what-changed-in-the-current-revision" aria-label="Link to this section"></a>What changed in the current revision</h2>
+      <p>The current revision, <code>2026-07-28</code>, deleted the <code>initialize</code> handshake and made MCP stateless. The architecture page states it directly: "MCP is a stateless protocol: every request is self-contained and carries its own protocol version and capabilities." This was well covered when it landed, so treat it as context rather than news. It also silently invalidates a lot of older tutorials.</p>
+      <p>There's no session to open. Every request carries <code>io.modelcontextprotocol/protocolVersion</code> and <code>io.modelcontextprotocol/clientCapabilities</code> in its <code>_meta</code> field, and the server accepts or rejects that request on its own. Send an unsupported version and you get back error <code>-32022</code> listing the versions the server does support, so you retry with one of those. If you'd rather ask up front, servers <strong>MUST</strong> implement <code>server/discover</code>; calling it is optional.</p>
+      <p>The spec calls the old world "legacy" (<code>2025-11-25</code> and earlier) and the new one "modern". Mixed eras fail unless one side implements both, so if you're staring at a dead connection, check that first.</p>
+      <p>The second breaking change got much less attention: <strong>servers can no longer initiate JSON-RPC requests at all.</strong> The spec is flat about it, "servers do not initiate JSON-RPC requests and clients do not send JSON-RPC responses." Anything a server used to ask the client for, sampling, elicitation, roots, now comes back inside a reply as an <code>InputRequiredResult</code> with <code>resultType: "input_required"</code>. The client answers by retrying the original call with <code>inputResponses</code> and the server's opaque <code>requestState</code>, using a different JSON-RPC <code>id</code>. If you wrote a server that calls back into the model, it's broken, and it probably fails quietly.</p>
+      <h2 id="two-transports-and-only-two"><a class="anchor" href="#two-transports-and-only-two" aria-label="Link to this section"></a>Two transports, and only two</h2>
+      <p>The spec defines exactly two standard transports. <strong>stdio</strong> launches the server as a subprocess and exchanges newline-delimited JSON-RPC over its standard streams. <strong>Streamable HTTP</strong> POSTs each message to a single endpoint, and replies arrive either as a JSON object or a request-scoped SSE stream.</p>
+      <p>The older two-endpoint HTTP+SSE transport has been deprecated since <code>2025-03-26</code>. If a tutorial has you opening a long-lived <code>GET</code> for events, that tutorial is old.</p>
+      <p>Which transport you get comes down to which key you wrote. This shape is host-tooling convention, not protocol spec:</p>
+      <pre><code class="language-json">{
+        &quot;mcpServers&quot;: {
+          &quot;filesystem&quot;: { &quot;command&quot;: &quot;npx&quot;, &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;, &quot;/data&quot;] },
+          &quot;analytics&quot;:  { &quot;type&quot;: &quot;http&quot;, &quot;url&quot;: &quot;https://mcp.example.com/mcp&quot; }
+        }
+      }
+      </code></pre>
+      <p>A <code>command</code> key means a subprocess on your machine. A <code>url</code> key means an HTTP request to someone else's. That difference matters more than it looks, because only one of them can read your environment variables.</p>
+      <h2 id="what-a-tool-definition-actually-is"><a class="anchor" href="#what-a-tool-definition-actually-is" aria-label="Link to this section"></a>What a tool definition actually is</h2>
+      <p>A tool is a name, a description, and a JSON Schema for its arguments, plus optional extras like <code>title</code>, <code>outputSchema</code>, <code>icons</code>, and <code>annotations</code>. In Python it's a decorator, and the docstring becomes the description:</p>
+      <pre><code class="language-python">@mcp.tool()
+      def conversations_list(platform: Optional[str] = None, limit: int = 50) -&gt; str:
+          &quot;&quot;&quot;List active messaging conversations across connected platforms.
+
+          Args:
+              platform: Filter by platform name (telegram, discord, slack, etc.)
+              limit: Maximum number of conversations to return (default 50)
+          &quot;&quot;&quot;
+      </code></pre>
+      <p>Here's what took me too long to internalize: <strong>that description is prompt text.</strong> It isn't documentation for a human reading your repo. It's serialized into the model's context and it's the only basis the model has for picking your tool over another. A vague description is a tool the model never calls. A description carrying <code>Example: "amoxicillin, ibuprofen"</code> is a tool it calls correctly the first time.</p>
+      <h2 id="the-round-trip-of-one-tool-call"><a class="anchor" href="#the-round-trip-of-one-tool-call" aria-label="Link to this section"></a>The round trip of one tool call</h2>
+      <p>The model picks a tool, the client sends <code>tools/call</code>, the server runs your code, and the result goes back into context. Two details in that last step surprise people.</p>
+      <p>A tool result carries both <code>content</code> and <code>structuredContent</code>. The first is what the model reads. The second is server-produced JSON for your code, validated against <code>outputSchema</code> if you defined one. The spec says a tool returning structured content <strong>SHOULD</strong> also serialize it into a text block. For a human-facing agent I usually don't, because paying context tokens for JSON syntax the model doesn't need adds up.</p>
+      <p>Errors come in two flavours that behave nothing alike. A malformed request or unknown tool is a <strong>protocol error</strong>, a normal JSON-RPC error. A failure inside your tool is a <strong>tool execution error</strong>, returned as a successful result with <code>isError: true</code>. The spec is explicit that clients <strong>SHOULD</strong> hand those to the model so it can self-correct, which means your error strings are prompt text too. "Invalid input" teaches the model nothing. "drug_names must be comma-separated, you sent an array" gets a correct retry.</p>
+      <h2 id="the-parts-that-only-break-in-production"><a class="anchor" href="#the-parts-that-only-break-in-production" aria-label="Link to this section"></a>The parts that only break in production</h2>
+      <p>Five things broke for me after MCP was supposedly working: colliding tool names, schemas that aren't portable across model providers, a 2xx from something that isn't an MCP server, cached tokens that lie about their own expiry, and state that no longer survives between calls. Everything above works on the first try in a demo. These cost me real days.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="One tool call, end to end, and where it actually breaks" src="https://i.imgur.com/N99XhEF.png"></p>
+      <p><strong>Tool names aren't namespaced.</strong> Uniqueness is scoped to a single server, so two servers can both export <code>search</code>. The spec tells aggregating clients to "implement a disambiguation strategy such as prefixing tool names with a server identifier", and warns the server's own <code>name</code> isn't guaranteed unique either. Mine registers everything as <code>mcp_{server}_{tool}</code>.</p>
+      <p><strong>JSON Schema isn't portable across model providers.</strong> One schema from one server doesn't just work everywhere. Some providers reject <code>#/definitions/...</code> and need <code>#/$defs/...</code>. Some return a 400 when <code>required</code> names a property missing from <code>properties</code>. Some reject nullable <code>anyOf</code> unions in tool inputs. My client runs a normalization pass over every incoming schema, and that pass exists entirely because of provider-specific rejections.</p>
+      <p><strong>A 2xx doesn't mean you reached an MCP server.</strong> Point a <code>url</code> at a normal web app and it answers HTML with a 200. The SDK then waits out the whole connect timeout before surfacing an opaque cancellation. A content-type preflight turns a 60 second mystery into a one second error, so check for <code>application/json</code> or <code>text/event-stream</code> first.</p>
+      <p><strong>Cached tokens lie after a restart.</strong> Load a token from disk and its expiry can come back unset, which reads as valid no matter how old it is. You ship a stale token, and the failure isn't always a clean 401. One provider of mine returned 200 with an application-level auth error in the body, invisible to the transport layer and indistinguishable from an empty result set.</p>
+      <p><strong>Statelessness is now your problem.</strong> Since there's no session, a server can't relate one call to the next. Anything spanning calls, a cart, a browser context, a transaction, needs an explicit handle returned by one tool and passed as an argument to the next. The spec's design guidance is non-normative here but worth obeying: "a handle is a name, not a capability." Validate authorization against it on every call, or anyone who guesses a handle inherits that state.</p>
+      <h2 id="tool-descriptions-are-attack-surface"><a class="anchor" href="#tool-descriptions-are-attack-surface" aria-label="Link to this section"></a>Tool descriptions are attack surface</h2>
+      <p>A server you didn't write controls text that lands in your model's context, and the model is expected to act on it. The spec's warning is unambiguous: clients <strong>MUST</strong> consider tool annotations untrusted unless they come from trusted servers.</p>
+      <p>My client scans incoming descriptions for the obvious shapes:</p>
+      <pre><code class="language-python">_MCP_INJECTION_PATTERNS = [
+          r&quot;ignore\s+(all\s+)?previous\s+instructions&quot;,
+          r&quot;you\s+are\s+now\s+a&quot;,
+          r&quot;&lt;\s*system\s*&gt;&quot;,
+          r&quot;do\s+not\s+(tell|reveal)&quot;,
+      ]
+      # WARNING-level only: we log but do not block, since false
+      # positives would break legitimate MCP servers.
+      </code></pre>
+      <p>That comment is the honest state of the art. We log, we don't block, because blocking on a regex breaks real servers. Detection isn't a solution here.</p>
+      <p>What works is narrowing reach. A stdio server is a subprocess that inherits your environment by default, so every API key you hold is one <code>os.environ</code> away from someone else's code. I pass an explicit allowlist instead (<code>PATH</code>, <code>HOME</code>, <code>USER</code>, <code>LANG</code>, the <code>XDG_*</code> vars) and nothing more. I also strip credential-shaped patterns out of error text, since an error string is an easy way to leak a token into a transcript you later paste in public.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>MCP is small: JSON-RPC, per-request metadata, and a list of tools whose descriptions are prompts. Most of what goes wrong comes from treating it as bigger and more magical than that.</p>
+      <p>Write tool descriptions as if the model is your only reader, because it is. Namespace your tool names yourself, since nothing else will. And treat every description from a server you didn't write as untrusted text that's about to enter your model's context, because that's exactly what it is.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
