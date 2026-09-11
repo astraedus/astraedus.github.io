@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 New Python 3.15 Features in 2026 (And 2 I&#x27;m Still Waiting For) | Diven Rastdus</title>
+  <meta name="description" content="Lazy imports that cut CLI startup 3x, unpacking inside comprehensions, a built-in frozendict, a profiler that attaches to a live process, and a real sentinel type. Every example ran on 3.15.0rc2.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/python-315-new-features-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 New Python 3.15 Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta property="og:description" content="Lazy imports that cut CLI startup 3x, unpacking inside comprehensions, a built-in frozendict, a profiler that attaches to a live process, and a real sentinel type. Every example ran on 3.15.0rc2.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/python-315-new-features-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-11">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 New Python 3.15 Features in 2026 (And 2 I&#x27;m Still Waiting For)">
+  <meta name="twitter:description" content="Lazy imports that cut CLI startup 3x, unpacking inside comprehensions, a built-in frozendict, a profiler that attaches to a live process, and a real sentinel type. Every example ran on 3.15.0rc2.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 New Python 3.15 Features in 2026 (And 2 I'm Still Waiting For)",
+      "description": "Lazy imports that cut CLI startup 3x, unpacking inside comprehensions, a built-in frozendict, a profiler that attaches to a live process, and a real sentinel type. Every example ran on 3.15.0rc2.",
+      "url": "https://astraedus.dev/blog/python-315-new-features-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/python-315-new-features-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-11",
+      "dateModified": "2026-09-11",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "lazy import makes slow CLI startup a solved problem",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Put lazy in front of a module-level import and Python binds the name immediately but doesn't load the module until the first time you touch it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Unpacking works inside comprehensions",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "[sub for sub in lists] flattens a list of lists, and it's the fastest way to do it. PEP 798 allows and inside list, set, and dict comprehensions, which turns the double-for idiom into one line: lists = [[1, 2], [3, 4], [5]] [sub for sub in lists] # [1, 2, 3, 4, 5] (new) [x for sub in lists for x in sub] # the 3.14 way..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "frozendict is a built-in",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "frozendict is an immutable, hashable mapping you can use as a dict key, a cache key, or a config object nobody can mutate by accident. It's PEP 814 and needs no import: >> cfg = frozendict(host=\"db\", port=5432) >> cfg[\"port\"] = 1 TypeError: 'frozendict' object does not support item assignment >> pools = {cfg..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "A profiler that attaches to a live process",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "python -m profiling.sampling attach <PID> profiles a running Python process from the outside, with no code change, no restart, and no slowdown in the target."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "sentinel kills the object() trick",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MISSING = sentinel(\"MISSING\") gives you a unique \"no argument was passed\" marker with a readable repr, and it's a built-in (PEP 661). Every codebase I've touched reinvents this with a bare object(): >> import pickle >> MISSING = sentinel(\"MISSING\") >> def fetch(key, default=MISSING): ..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The smaller wins I already use",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "open(\"notes.txt\") is UTF-8 on every platform now (PEP 686), so the \"written on Linux, read on Windows as cp1252\" bug is gone. PYTHONUTF8=0 if a legacy pipeline needs the old behaviour."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What I'm still waiting for",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Both wishes from the 3.14 post are closer, and neither has arrived. The JIT on by default."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What to do this week",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Install the release candidate (uv python install 3.15.0rc2) and run your test suite against it. When it passes, make three changes in this order."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 New Python 3.15 Features in 2026 (And 2 I'm Still Waiting For)", "item": "https://astraedus.dev/blog/python-315-new-features-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 11, 2026</span>
+        <span class="article-tag">Python</span>
+        <span class="article-reading">9 min read</span>
+      </div>
+      <h1>5 New Python 3.15 Features in 2026 (And 2 I&#x27;m Still Waiting For)</h1>
+      <p class="article-lede"><code>lazy import</code> cut one of my CLI tools from 89 ms to 26 ms of startup. One keyword, no other changes.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-lazy-import-makes-slow-cli-startup-a-solved-problem">1. lazy import makes slow CLI startup a solved problem</a></li>
+          <li><a href="#2-unpacking-works-inside-comprehensions">2. Unpacking works inside comprehensions</a></li>
+          <li><a href="#3-frozendict-is-a-built-in">3. frozendict is a built-in</a></li>
+          <li><a href="#4-a-profiler-that-attaches-to-a-live-process">4. A profiler that attaches to a live process</a></li>
+          <li><a href="#5-sentinel-kills-the-object-trick">5. sentinel kills the object() trick</a></li>
+          <li><a href="#the-smaller-wins-i-already-use">The smaller wins I already use</a></li>
+          <li><a href="#what-im-still-waiting-for">What I'm still waiting for</a></li>
+          <li><a href="#what-to-do-this-week">What to do this week</a></li>
+        </ul>
+      </nav>
+
+      <p>Python 3.15 ships on October 1, and that's one of five changes that reach the code you write every day. In July I wrote up <a href="https://dev.to/astraedus/5-python-314-features-that-change-how-you-write-code-in-2026-and-2-im-still-waiting-for-30mn">the 3.14 features that changed how I write code</a> and ended with two things I was still waiting for. So I installed the release candidate with <code>uv python install 3.15.0rc2</code>, ran every example below on it, and kept the numbers.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Eager vs lazy imports: what runs before your code does" src="https://i.imgur.com/5U153ru.png"></p>
+      <h2 id="1-lazy-import-makes-slow-cli-startup-a-solved-problem"><a class="anchor" href="#1-lazy-import-makes-slow-cli-startup-a-solved-problem" aria-label="Link to this section"></a>1. <code>lazy import</code> makes slow CLI startup a solved problem</h2>
+      <p>Put <code>lazy</code> in front of a module-level import and Python binds the name immediately but doesn't load the module until the first time you touch it. That's <a href="https://peps.python.org/pep-0810/">PEP 810</a>. It's the one feature I'd upgrade for on its own.</p>
+      <p>Here's the shape of half the CLI tools I maintain. Fifteen stdlib imports at the top, and a <code>main()</code> that on most runs touches one of them:</p>
+      <pre><code class="language-python"># cli_tool.py
+      import argparse
+      import asyncio
+      import http.client
+      import ssl
+      import sqlite3
+      import xml.etree.ElementTree
+      import tomllib
+      import zipfile
+      # ... 7 more
+
+      def main():
+          args = argparse.ArgumentParser().parse_args()
+          print(&quot;ready&quot;)
+
+      if __name__ == &quot;__main__&quot;:
+          main()
+      </code></pre>
+      <p>Prefix every import with <code>lazy</code> and nothing else changes:</p>
+      <pre><code class="language-python">lazy import argparse
+      lazy import asyncio
+      lazy import sqlite3
+      # ... same for the rest
+      </code></pre>
+      <p>Ten runs of each on 3.15.0rc2, median wall time:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>script</th>
+      <th style="text-align: right;">modules loaded by the time <code>main()</code> returns</th>
+      <th style="text-align: right;">startup</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>eager imports</td>
+      <td style="text-align: right;">185</td>
+      <td style="text-align: right;">89 ms</td>
+      </tr>
+      <tr>
+      <td><code>lazy</code> imports</td>
+      <td style="text-align: right;">37 (all of them argparse, the one module <code>main()</code> uses)</td>
+      <td style="text-align: right;">26 ms</td>
+      </tr>
+      <tr>
+      <td>bare <code>python -c pass</code></td>
+      <td style="text-align: right;">0</td>
+      <td style="text-align: right;">13 ms</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>The eager version spends about 63 ms loading fourteen modules the run never touches. The lazy version still pays for argparse, because <code>main()</code> calls it, and pays for <code>sqlite3</code> only on the run that calls <code>sqlite3.connect()</code>. You can watch it happen:</p>
+      <pre><code class="language-python">import sys
+      lazy import sqlite3
+      print(&quot;sqlite3&quot; in sys.modules)   # False
+      sqlite3.connect(&quot;:memory:&quot;)
+      print(&quot;sqlite3&quot; in sys.modules)   # True
+      </code></pre>
+      <p>The rules are strict. The errors are good, though. <code>lazy</code> works at module scope only. Inside a function, a class body, or a <code>try</code> block it's a <code>SyntaxError</code>. So are <code>lazy from x import *</code> and <code>lazy from __future__ import</code>. If a lazily imported module doesn't exist, the <code>ImportError</code> surfaces at first use, and the traceback shows both the import line and the line that triggered it.</p>
+      <p>Two switches matter for real projects. <code>python -X lazy_imports=all</code> (or <code>PYTHON_LAZY_IMPORTS=all</code>) makes every module-level import lazy without touching source, and gave me the same 26 ms. For a library that must still import on 3.14, declare <code>__lazy_modules__ = ["json", "pathlib"]</code> at the top of the module. Older Pythons ignore the name and import eagerly.</p>
+      <p>One warning: keep imports with side effects eager. Anything that registers a plugin, configures logging, or patches a module on import must not be deferred, or it silently never runs.</p>
+      <h2 id="2-unpacking-works-inside-comprehensions"><a class="anchor" href="#2-unpacking-works-inside-comprehensions" aria-label="Link to this section"></a>2. Unpacking works inside comprehensions</h2>
+      <p><code>[*sub for sub in lists]</code> flattens a list of lists, and it's the fastest way to do it. <a href="https://peps.python.org/pep-0798/">PEP 798</a> allows <code>*</code> and <code>**</code> inside list, set, and dict comprehensions, which turns the double-<code>for</code> idiom into one line:</p>
+      <pre><code class="language-python">lists = [[1, 2], [3, 4], [5]]
+
+      [*sub for sub in lists]                  # [1, 2, 3, 4, 5]  (new)
+      [x for sub in lists for x in sub]        # the 3.14 way
+
+      dicts = [{&quot;a&quot;: 1}, {&quot;b&quot;: 2}, {&quot;a&quot;: 3}]
+      {**d for d in dicts}                     # {'a': 3, 'b': 2}, last write wins
+      </code></pre>
+      <p>Flattening 1,000 lists of 20 ints with <code>timeit</code>, best of five runs:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>idiom</th>
+      <th style="text-align: right;">time per flatten</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>[x for sub in lists for x in sub]</code></td>
+      <td style="text-align: right;">201 µs</td>
+      </tr>
+      <tr>
+      <td><code>list(itertools.chain.from_iterable(lists))</code></td>
+      <td style="text-align: right;">169 µs</td>
+      </tr>
+      <tr>
+      <td><code>[*sub for sub in lists]</code></td>
+      <td style="text-align: right;">73 µs</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>It's faster because the interpreter extends the result list once per inner list instead of appending one element at a time. On 3.12 and 3.14 the same line is <code>SyntaxError: iterable unpacking cannot be used in comprehension</code>, so this is a 3.15-only idiom, not a backport candidate.</p>
+      <h2 id="3-frozendict-is-a-built-in"><a class="anchor" href="#3-frozendict-is-a-built-in" aria-label="Link to this section"></a>3. <code>frozendict</code> is a built-in</h2>
+      <p><code>frozendict</code> is an immutable, hashable mapping you can use as a dict key, a cache key, or a config object nobody can mutate by accident. It's <a href="https://peps.python.org/pep-0814/">PEP 814</a> and needs no import:</p>
+      <pre><code class="language-python">&gt;&gt;&gt; cfg = frozendict(host=&quot;db&quot;, port=5432)
+      &gt;&gt;&gt; cfg[&quot;port&quot;] = 1
+      TypeError: 'frozendict' object does not support item assignment
+      &gt;&gt;&gt; pools = {cfg: &quot;pool-1&quot;}
+      &gt;&gt;&gt; pools[frozendict(port=5432, host=&quot;db&quot;)]        # order doesn't matter
+      'pool-1'
+      &gt;&gt;&gt; cfg | {&quot;port&quot;: 6543}
+      frozendict({'host': 'db', 'port': 6543})
+      &gt;&gt;&gt; hash(frozendict(a=[1]))                        # values must be hashable too
+      TypeError: unhashable type: 'list'
+      </code></pre>
+      <p>The one thing that will bite you: <code>frozendict</code> isn't a subclass of <code>dict</code>. <code>isinstance(cfg, dict)</code> is <code>False</code>. Check against <code>collections.abc.Mapping</code> instead, which also covers <code>MappingProxyType</code>. The stdlib already accepts it where you'd expect, including <code>json.dumps</code>, <code>copy</code>, <code>pickle</code>, and <code>pprint</code>.</p>
+      <h2 id="4-a-profiler-that-attaches-to-a-live-process"><a class="anchor" href="#4-a-profiler-that-attaches-to-a-live-process" aria-label="Link to this section"></a>4. A profiler that attaches to a live process</h2>
+      <p><code>python -m profiling.sampling attach &lt;PID&gt;</code> profiles a running Python process from the outside, with no code change, no restart, and no slowdown in the target. The tool is called Tachyon (<a href="https://peps.python.org/pep-0799/">PEP 799</a>).</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Tachyon reads a live process from outside it" src="https://i.imgur.com/Oerm88F.png"></p>
+      <p>It's a separate process that reads the target's memory and rebuilds the stack, so the target pays nothing. Four subcommands, plus a <code>--live</code> flag for a top-style view:</p>
+      <pre><code class="language-bash">python -m profiling.sampling run hot.py            # run a script under the profiler
+      python -m profiling.sampling attach 4242           # attach to a live PID
+      python -m profiling.sampling attach --live 4242    # top-style TUI on a live PID
+      python -m profiling.sampling dump 4242             # one stack snapshot, no profiling
+      python -m profiling.sampling replay profile.bin    # convert a saved profile
+      </code></pre>
+      <p>Two seconds against a script with two hot loops:</p>
+      <pre><code>Captured 2,001 samples in 2.00 seconds
+      Sample rate: 1,000.45 samples/sec
+
+        nsamples  sample%  tottime (ms)  cumul%  cumtime (s)  filename:lineno(function)
+         943/943     47.1       943.000    47.1        0.943  hot.py:5(hash_loop)
+         780/780     39.0       780.000    39.0        0.780  hot.py:11(parse_loop)
+      </code></pre>
+      <p>Add <code>--flamegraph</code> for a self-contained HTML flame graph, <code>--gecko</code> for the Firefox Profiler, <code>--mode gil</code> to see who holds the GIL, or <code>--async-aware</code> for asyncio code. The docs quote rates up to 1,000,000 samples per second; the default 1,000 nailed the split above.</p>
+      <p>One Linux gotcha: <code>attach</code> reads another process's memory, so a stock Ubuntu (<code>kernel.yama.ptrace_scope=1</code>) refuses it even for your own processes. The error message tells you the fixes: <code>sudo -E</code>, <code>echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope</code>, or <code>--cap-add=SYS_PTRACE</code> in Docker. <code>run</code> mode needs none of that. The old deterministic profiler now lives at <code>profiling.tracing</code>, and <code>cProfile</code> still imports.</p>
+      <h2 id="5-sentinel-kills-the-object-trick"><a class="anchor" href="#5-sentinel-kills-the-object-trick" aria-label="Link to this section"></a>5. <code>sentinel</code> kills the <code>object()</code> trick</h2>
+      <p><code>MISSING = sentinel("MISSING")</code> gives you a unique "no argument was passed" marker with a readable repr, and it's a built-in (<a href="https://peps.python.org/pep-0661/">PEP 661</a>). Every codebase I've touched reinvents this with a bare <code>object()</code>:</p>
+      <pre><code class="language-python">&gt;&gt;&gt; import pickle
+      &gt;&gt;&gt; MISSING = sentinel(&quot;MISSING&quot;)
+      &gt;&gt;&gt; def fetch(key, default=MISSING):
+      ...     if default is MISSING:
+      ...         raise KeyError(key)
+      ...     return default
+      &gt;&gt;&gt; MISSING
+      MISSING
+      &gt;&gt;&gt; int | MISSING                                  # valid in a type annotation
+      int | MISSING
+      &gt;&gt;&gt; pickle.loads(pickle.dumps(MISSING)) is MISSING
+      True
+      </code></pre>
+      <p>Identity survives pickling and copying, which the <code>object()</code> trick never did, and the repr says <code>MISSING</code> instead of <code>&lt;object object at 0x7f...&gt;</code>.</p>
+      <h2 id="the-smaller-wins-i-already-use"><a class="anchor" href="#the-smaller-wins-i-already-use" aria-label="Link to this section"></a>The smaller wins I already use</h2>
+      <ul>
+      <li><code>open("notes.txt")</code> is UTF-8 on every platform now (<a href="https://peps.python.org/pep-0686/">PEP 686</a>), so the "written on Linux, read on Windows as cp1252" bug is gone. <code>PYTHONUTF8=0</code> if a legacy pipeline needs the old behaviour.</li>
+      <li><code>asyncio.TaskGroup.cancel()</code> ends a group early without try/except boilerplate. I use it for "take the first result, drop the rest".</li>
+      <li><code>os.makedirs(path, parent_mode=0o755)</code> and <code>Path.mkdir(parent_mode=...)</code> set a separate mode for the intermediate directories.</li>
+      <li><code>json.loads(text, array_hook=tuple)</code> turns JSON arrays into whatever you want, the way <code>object_hook</code> always did for objects.</li>
+      <li>Error messages now speak other languages: <code>[1, 2].push(3)</code> says <code>Did you mean '.append'?</code>, and <code>(1, 2).append(3)</code> asks whether you wanted a list.</li>
+      <li><code>argparse --help</code>, <code>timeit</code>, <code>ast</code>, <code>sqlite3</code>, and <code>http.server</code> output got colour, and <code>difflib.unified_diff()</code> grew a <code>color=True</code> parameter for git-style diffs.</li>
+      </ul>
+      <h2 id="what-im-still-waiting-for"><a class="anchor" href="#what-im-still-waiting-for" aria-label="Link to this section"></a>What I'm still waiting for</h2>
+      <p>Both wishes from the 3.14 post are closer, and neither has arrived.</p>
+      <p><strong>The JIT on by default.</strong> The 3.15 JIT is a real upgrade. The What's New page reports pyperformance results of roughly 8 to 9 percent geometric-mean speedup on x86-64 Linux over the standard interpreter. On AArch64 macOS it's 12 to 13 percent over the already faster tail-calling interpreter. The page flags both numbers as not final. It still ships off. The official Windows and macOS binaries build it in, but you opt in with <code>PYTHON_JIT=1</code>. <a href="https://peps.python.org/pep-0836/">PEP 836</a>, still a draft, proposes the bar the JIT would have to clear to stop being experimental. I want the release where I forget the environment variable exists.</p>
+      <p><strong>Free-threading as the plain <code>python</code>.</strong> The no-GIL build is still a separate build in 3.15. What landed is the plumbing: <a href="https://peps.python.org/pep-0803/">PEP 803</a> defines a stable ABI for free-threaded builds (<code>abi3t</code>), so extension authors can ship one wheel that works there. The What's New page also notes that setuptools, meson-python, scikit-build-core, and Maturin don't support <code>abi3t</code> yet. When they do, the wheel ecosystem can catch up, and then the default build can change. Not this year.</p>
+      <h2 id="what-to-do-this-week"><a class="anchor" href="#what-to-do-this-week" aria-label="Link to this section"></a>What to do this week</h2>
+      <p>Install the release candidate (<code>uv python install 3.15.0rc2</code>) and run your test suite against it. When it passes, make three changes in this order. Add <code>lazy</code> to the heavy imports in every CLI entry point and measure the startup. Replace your flatten idioms with <code>[*sub for sub in lists]</code>. Switch your immutable config objects to <code>frozendict</code>. Then, the next time a process is slow in production, attach Tachyon to it before you touch the code.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
