@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them) | Diven Rastdus</title>
+  <meta name="description" content="Every one of these shipped green. Five real failures from agent-written code, why the tests missed them, and the short check that catches each one.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/ai-coding-agent-production-failures/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them)">
+  <meta property="og:description" content="Every one of these shipped green. Five real failures from agent-written code, why the tests missed them, and the short check that catches each one.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/ai-coding-agent-production-failures/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-18">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them)">
+  <meta name="twitter:description" content="Every one of these shipped green. Five real failures from agent-written code, why the tests missed them, and the short check that catches each one.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them)",
+      "description": "Every one of these shipped green. Five real failures from agent-written code, why the tests missed them, and the short check that catches each one.",
+      "url": "https://astraedus.dev/blog/ai-coding-agent-production-failures/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/ai-coding-agent-production-failures/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-18",
+      "dateModified": "2026-09-18",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "The permission that was requested but never declared",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An agent will add a runtime permission request and forget the manifest declaration, and Android fails that combination silently. No error, no prompt, just empty data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The transaction that wrapped nothing",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "When a fix depends on a library contract, the agent will honor the shape of the API and ignore the contract, and a mock can't tell the difference."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The tests that defended the bug",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The suite had 400 green tests, and two of them asserted the exact bug. The browser extension of my app blocker had a rule engine ported from Android."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The suite that collected zero tests",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A dead test suite stays invisible for as long as every run is scoped to one file. One script in my tools directory called sys.exit(2) at import time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The build that asserted the input, not the artifact",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The agent will verify the env var, the log line, and the manifest, and never open the bundle the user runs. The mood tracker builds two Android variants from one tree in one CI job."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The pattern under all five",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An AI coding agent optimizes for the check you hand it, so the check has to point at the thing you would bet the deploy on. !The five checks, and which failure each one catches Every one of these bugs lived on the far side of a boundary the checks never crossed."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them)", "item": "https://astraedus.dev/blog/ai-coding-agent-production-failures/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 18, 2026</span>
+        <span class="article-tag">Ai</span>
+        <span class="article-reading">9 min read</span>
+      </div>
+      <h1>5 Production Failures AI Coding Agents Cause (And the Checks That Catch Them)</h1>
+      <p class="article-lede">AI coding agents rarely ship code that fails the check you gave them. They ship code that passes the check while the thing you cared about is broken. The five failures below all went green through unit tests and CI, then broke on a real device, a real store build, or a real user. The fix was the same every time: move the check from the input the agent controls to the artifact the user runs.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-the-permission-that-was-requested-but-never-declared">1. The permission that was requested but never declared</a></li>
+          <li><a href="#2-the-transaction-that-wrapped-nothing">2. The transaction that wrapped nothing</a></li>
+          <li><a href="#3-the-tests-that-defended-the-bug">3. The tests that defended the bug</a></li>
+          <li><a href="#4-the-suite-that-collected-zero-tests">4. The suite that collected zero tests</a></li>
+          <li><a href="#5-the-build-that-asserted-the-input-not-the-artifact">5. The build that asserted the input, not the artifact</a></li>
+          <li><a href="#the-pattern-under-all-five">The pattern under all five</a></li>
+        </ul>
+      </nav>
+
+      <p>For eight weeks my Play Store build shipped the wrong JavaScript. The manifest was right, CI was green, the env var was set, and the Hermes bundle inside the AAB had the same md5 as the one inside the debug APK. I ship agent-written code to production on two open-source Android apps and a pile of automation scripts. For the last few months I logged every bug that passed review and then broke on a real user. Almost none of them were "the agent wrote wrong code." They were "the agent wrote the code and the test to match, and both agreed with each other while disagreeing with reality." Here are the five patterns, with the incident that taught me each one.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Five failures: what the check verified versus where the bug actually lived" src="https://i.imgur.com/sl0684y.png"></p>
+      <h2 id="1-the-permission-that-was-requested-but-never-declared"><a class="anchor" href="#1-the-permission-that-was-requested-but-never-declared" aria-label="Link to this section"></a>1. The permission that was requested but never declared</h2>
+      <p>An agent will add a runtime permission request and forget the manifest declaration, and Android fails that combination silently. No error, no prompt, just empty data.</p>
+      <p>The mood tracker I maintain reads heart rate variability from Health Connect. The agent added the HRV record type to the runtime <code>requestPermission()</code> set and shipped. Users reported "there is no HRV view." The view existed. It was starved of data. A health permission that is not declared in the manifest is never offered to the user. It never appears in <code>getGrantedPermissions()</code>, so code that reads only the granted record types quietly skips it. The metric comes back empty with no exception in sight.</p>
+      <p>That's one fact with two write sites.</p>
+      <p><strong>The check:</strong> an invariant test that locks them together. Swap in your own two constants.</p>
+      <pre><code class="language-ts">// __tests__/healthPermissionInvariant.test.ts
+      const runtime = [...REQUIRED_READ_RECORD_TYPES, ...OPTIONAL_READ_RECORD_TYPES]
+        .map((t) =&gt; RECORD_TYPE_TO_PERMISSION[t])
+        .sort();
+
+      it('manifest permissions equal the runtime request set, exactly', () =&gt; {
+        expect([...HEALTH_PERMISSIONS].sort()).toEqual(runtime);
+      });
+      </code></pre>
+      <p>Add a record type on one side and the suite fails until the other side matches. Any OS permission that is requested at runtime has this second write site. Lock them.</p>
+      <h2 id="2-the-transaction-that-wrapped-nothing"><a class="anchor" href="#2-the-transaction-that-wrapped-nothing" aria-label="Link to this section"></a>2. The transaction that wrapped nothing</h2>
+      <p>When a fix depends on a library contract, the agent will honor the shape of the API and ignore the contract, and a mock can't tell the difference.</p>
+      <p>The same app moved its writes into expo-sqlite's <code>withExclusiveTransactionAsync</code>. The agent ran every statement on the outer <code>db</code> handle instead of the <code>txn</code> argument the callback receives. That API opens a separate connection for the transaction. The <code>txn</code> argument was the transaction. The outer <code>db</code> was not. So a real <code>BEGIN</code> and <code>COMMIT</code> ran on one connection, with nothing inside them, while the writes ran unprotected in autocommit on the other. No lock was ever taken, either. Nothing ran on <code>txn</code>, so the transaction never escalated to a write transaction, and the outer connection sailed through in autocommit.</p>
+      <p>Jest mocked the transaction helper as "just run the callback," so the tests passed. Device QA passed too, because an unrelated change had hidden the visible symptom. The fix stayed "verified" for two weeks while users kept hitting state bugs.</p>
+      <p><strong>The check:</strong> static. Scan the source and ban the outer handle inside write callbacks. This is the shape of the real test, with a brace-naive regex standing in for the helper.</p>
+      <pre><code class="language-ts">// writeTransactionInvariant.test.ts
+      const writeCallbackBodies = (src: string) =&gt;
+        [...src.matchAll(/withWrite(?:Transaction|Lock)\(\s*async\s*\(\w+\)\s*=&gt;\s*\{([\s\S]*?)\n\}\)/g)].map((m) =&gt; m[1]);
+
+      it.each(WRITE_MODULES)('%s never touches the outer db inside a write callback', (file) =&gt; {
+        const src = stripComments(read(file));
+        for (const body of writeCallbackBodies(src)) {
+          expect(body).not.toMatch(/\bdb\.(runAsync|execAsync|getAllAsync|getFirstAsync)\(/);
+        }
+      });
+      </code></pre>
+      <p>When the mechanism of a fix is a callback argument or a handle, read the library source and assert the contract. The symptom disappearing proves nothing.</p>
+      <h2 id="3-the-tests-that-defended-the-bug"><a class="anchor" href="#3-the-tests-that-defended-the-bug" aria-label="Link to this section"></a>3. The tests that defended the bug</h2>
+      <p>The suite had 400 green tests, and two of them asserted the exact bug.</p>
+      <p>The browser extension of my app blocker had a rule engine ported from Android. A hard-block rule with a daily time limit fell through the branch chain to <code>ALLOW</code>. On Android that was a harmless no-op. In the browser the declarativeNetRequest redirect had already fired, so <code>ALLOW</code> became an infinite redirect loop.</p>
+      <p>The spec had said "a hard block with a limit must not block via the unconditional branch." The agent did what the spec said and wrote two tests to prove it. Only a live browser session with a user-authored config caught it. If the spec describes which branch should run, the agent writes tests that assert the branch, and the suite defends the bug forever.</p>
+      <p><strong>The check:</strong> an invariant over the whole input space, not a regression for the instance.</p>
+      <pre><code class="language-ts">describe('an applicable rule can NEVER produce ALLOW', () =&gt; {
+        const MODES = ['HARD_BLOCK', 'DELAY', 'BREATHING'] as const;
+        const LIMITS = [null, 60] as const;
+        const USAGES = [0, 30 * 60_000, 60 * 60_000 - 1, 60 * 60_000, 90 * 60_000];
+
+        for (const mode of MODES)
+          for (const limit of LIMITS)
+            for (const ms of USAGES)
+              it(`blocks: ${mode} ${limit} ${ms}`, () =&gt; {
+                expect(evaluate([rule({ mode, dailyLimitMinutes: limit })], ms).type).toBe('BLOCK');
+              });
+      });
+      </code></pre>
+      <p>That's thirty cases from one sentence of intent. Phrase tests as user-visible outcomes. A test that names an internal branch is a test that will guard whatever that branch does.</p>
+      <h2 id="4-the-suite-that-collected-zero-tests"><a class="anchor" href="#4-the-suite-that-collected-zero-tests" aria-label="Link to this section"></a>4. The suite that collected zero tests</h2>
+      <p>A dead test suite stays invisible for as long as every run is scoped to one file.</p>
+      <p>One script in my tools directory called <code>sys.exit(2)</code> at import time. Pytest hit it during collection and the whole directory stopped collecting. To be fair to pytest, a bare run is loud about this: it exits 3 when collection blows up and 5 when nothing is collected. Nobody ran it bare. Every agent run for 71 days executed a scoped command like <code>pytest tests/test_one_thing.py</code>, which collected fine and exited 0. The gate was green because the gate was never pointed at the whole suite.</p>
+      <p><strong>The check:</strong> run the whole suite on a schedule, and read the count, not just the exit code.</p>
+      <pre><code class="language-bash">OUT=&quot;$(python3 -m pytest --collect-only -q tests 2&gt;&amp;1)&quot;
+      COLLECTED=&quot;$(printf '%s\n' &quot;$OUT&quot; | grep -oE '^[0-9]+ tests? collected' | grep -oE '^[0-9]+')&quot;
+      if [ &quot;${COLLECTED:-0}&quot; -lt 50 ]; then
+        echo &quot;collection broken: ${COLLECTED:-0} tests (floor 50)&quot; &gt;&amp;2
+        exit 1
+      fi
+      </code></pre>
+      <p>Any gate needs a floor, and a scoped run is not a gate. The floor is the number you'd be embarrassed to fall under.</p>
+      <h2 id="5-the-build-that-asserted-the-input-not-the-artifact"><a class="anchor" href="#5-the-build-that-asserted-the-input-not-the-artifact" aria-label="Link to this section"></a>5. The build that asserted the input, not the artifact</h2>
+      <p>The agent will verify the env var, the log line, and the manifest, and never open the bundle the user runs.</p>
+      <p>The mood tracker builds two Android variants from one tree in one CI job. An env knob drives two layers: a config plugin strips the health permissions from the manifest, and Babel inlines the same knob into the JavaScript so the feature card hides. CI asserted the manifest both ways and stopped.</p>
+      <p>For eight weeks the Play build shipped with the permissions excluded from the manifest and the feature enabled in the JavaScript. Tapping the card called a native module with no permission delegate registered, and the release build died. The cause was three layers down, and it plays out as a timeline:</p>
+      <ol>
+      <li>Metro's transform cache key hashes the transformer files and the config. It doesn't hash env values. (Expo has since added cache-vary handling for some <code>EXPO_PUBLIC_</code> vars, so check your SDK, but upstream Metro still works this way.)</li>
+      <li>The cache lives in the OS temp dir, so it survives <code>expo prebuild --clean</code> and both Gradle runs of one job.</li>
+      <li>The APK step ran first and warmed the cache with the "enabled" output.</li>
+      <li>The AAB step got cache hits for every file, including the one whose output depended on the env.</li>
+      </ol>
+      <p>One command settled it: the Hermes bundle inside the AAB had the same md5 as the bundle inside the APK.</p>
+      <p><strong>The check:</strong> bake a marker into the code and read it out of each built artifact.</p>
+      <pre><code class="language-bash">AAB=android/app/build/outputs/bundle/release/app-release.aab
+      APK=android/app/build/outputs/apk/release/app-release.apk
+      unzip -p &quot;$AAB&quot; base/assets/index.android.bundle &gt; aab.bundle   # AAB: base/ prefix
+      unzip -p &quot;$APK&quot; assets/index.android.bundle      &gt; apk.bundle   # APK: no prefix
+      EN=$(strings aab.bundle | grep -F -c 'hc-variant:enabled' || true)
+      EX=$(strings aab.bundle | grep -F -c 'hc-variant:excluded' || true)
+      [ &quot;$EX&quot; -ge 1 ] &amp;&amp; [ &quot;$EN&quot; -eq 0 ] || { echo &quot;::error::Play bundle is the wrong variant&quot;; exit 1; }
+      [ &quot;$(md5sum aab.bundle | awk '{print $1}')&quot; != &quot;$(md5sum apk.bundle | awk '{print $1}')&quot; ] || exit 1
+      </code></pre>
+      <p>Assert the artifact. An env var, a log line saying the env was set, and a manifest grep are inputs. The thing the user runs is the bundle.</p>
+      <h2 id="the-pattern-under-all-five"><a class="anchor" href="#the-pattern-under-all-five" aria-label="Link to this section"></a>The pattern under all five</h2>
+      <p>An AI coding agent optimizes for the check you hand it, so the check has to point at the thing you would bet the deploy on.</p>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The five checks, and which failure each one catches" src="https://i.imgur.com/GdZjTAa.png"></p>
+      <p>Every one of these bugs lived on the far side of a boundary the checks never crossed. Types, unit tests, and CI exit codes are cheap, and the agent will make all of them green. The manifest on the device, the bundle in the store, the library's real connection handling, and the real user config are expensive, and that's where the bugs waited. The five checks above are each a few lines. What they share is the target. The artifact instead of the input. The outcome instead of the branch. And the whole class of inputs, not the one instance that happened to break on a Tuesday.</p>
+      <p>If you review agent-written code, add one question to the review. What would have to be true for this test to pass while the feature is broken? If the answer is easy to state, that's the next check to write.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
