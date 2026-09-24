@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews) | Diven Rastdus</title>
+  <meta name="description" content="The four parts every review monitor needs (public sources, a stable ID, a memory, a webhook), why an empty feed is often a lie, and how to run it daily with no server.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/app-review-monitor-that-actually-works/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews)">
+  <meta property="og:description" content="The four parts every review monitor needs (public sources, a stable ID, a memory, a webhook), why an empty feed is often a lie, and how to run it daily with no server.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/app-review-monitor-that-actually-works/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-25">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews)">
+  <meta name="twitter:description" content="The four parts every review monitor needs (public sources, a stable ID, a memory, a webhook), why an empty feed is often a lie, and how to run it daily with no server.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews)",
+      "description": "The four parts every review monitor needs (public sources, a stable ID, a memory, a webhook), why an empty feed is often a lie, and how to run it daily with no server.",
+      "url": "https://astraedus.dev/blog/app-review-monitor-that-actually-works/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/app-review-monitor-that-actually-works/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-25",
+      "dateModified": "2026-09-25",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews)", "item": "https://astraedus.dev/blog/app-review-monitor-that-actually-works/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 25, 2026</span>
+        <span class="article-tag">Android</span>
+        <span class="article-reading">6 min read</span>
+      </div>
+      <h1>How to Give Your App a Review Monitor That Actually Works (Google Play and App Store, Only New Reviews)</h1>
+      <p class="article-lede">A review monitor that actually works has four parts: a public source for each store, a stable review ID to de-duplicate on, a memory of what it already sent you, and a delivery channel that isn't your inbox. Get those four right and "only the new reviews, both stores, no server" is a daily schedule, not a project. Most review scrapers get one of them wrong, usually the memory, so they hand you the same 200 reviews every morning and you stop reading.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#why-the-stores-own-tools-are-not-enough">Why the stores' own tools are not enough</a></li>
+          <li><a href="#part-1-where-the-reviews-actually-come-from">Part 1: where the reviews actually come from</a></li>
+          <li><a href="#part-2-the-de-duplication-key-is-the-whole-product">Part 2: the de-duplication key is the whole product</a></li>
+          <li><a href="#part-3-dont-believe-an-empty-answer">Part 3: don't believe an empty answer</a></li>
+          <li><a href="#part-4-deliver-to-a-webhook-not-a-dashboard">Part 4: deliver to a webhook, not a dashboard</a></li>
+          <li><a href="#running-it-daily-with-no-server">Running it daily with no server</a></li>
+          <li><a href="#the-takeaway">The takeaway</a></li>
+        </ul>
+      </nav>
+
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="The four parts of a review monitor: public sources, normalize, memory keyed on review IDs, webhook delivery, with a guard for empty feeds" src="https://i.imgur.com/AmbxAjw.png"></p>
+      <h2 id="why-the-stores-own-tools-are-not-enough"><a class="anchor" href="#why-the-stores-own-tools-are-not-enough" aria-label="Link to this section"></a>Why the stores' own tools are not enough</h2>
+      <p>The stores tell you about reviews late, partially, or only for apps you own. Google Play's Developer API returns reviews for your own apps only, and only the ones with text from roughly the last week. Apple's App Store Connect API needs your own keys and never covers a competitor. If you want "every new review on both stores, mine and the two apps I compete with, the morning it lands", nothing in the consoles does it.</p>
+      <p>I ship three Android apps, and a review is usually the first signal that something broke or that a feature is wanted. A five-star review on one of them asked for a date-format setting, and it shipped in the next release. A three-star "It doesn't work sometimes" on another was the first report of a bug. The gap between "a review landed" and "a human read it" is the whole problem.</p>
+      <h2 id="part-1-where-the-reviews-actually-come-from"><a class="anchor" href="#part-1-where-the-reviews-actually-come-from" aria-label="Link to this section"></a>Part 1: where the reviews actually come from</h2>
+      <p>Both stores expose public review data, just not through an API you'd enjoy. Google Play has no public reviews API at all. The store page loads its reviews through an internal <code>batchexecute</code> endpoint, which is what every Play scraper on npm calls under the hood (<code>google-play-scraper</code> is the well-known one). Apple is friendlier. There is a public RSS feed per app and country, newest first:</p>
+      <pre><code class="language-text">https://itunes.apple.com/us/rss/customerreviews/page=1/id=324684580/sortby=mostrecent/json
+      </code></pre>
+      <p>It serves at most 10 pages of 50 reviews, so 500 per app per country, and it carries no developer replies. Google Play does carry replies, and it dropped review titles years ago, so <code>title</code> is always null there. Your normalized row has to accept both shapes:</p>
+      <pre><code class="language-json">{
+        &quot;store&quot;: &quot;google-play&quot;,
+        &quot;appId&quot;: &quot;dev.astraedus.nudge&quot;,
+        &quot;country&quot;: &quot;us&quot;,
+        &quot;reviewId&quot;: &quot;6ca5d4fd-5ef6-49bc-877e-159f062a5a91&quot;,
+        &quot;rating&quot;: 3,
+        &quot;title&quot;: null,
+        &quot;text&quot;: &quot;It doesn't work sometimes&quot;,
+        &quot;date&quot;: &quot;2026-09-06T09:09:52.941Z&quot;,
+        &quot;appVersion&quot;: &quot;1.15.2&quot;,
+        &quot;developerReply&quot;: null,
+        &quot;isNew&quot;: true
+      }
+      </code></pre>
+      <h2 id="part-2-the-de-duplication-key-is-the-whole-product"><a class="anchor" href="#part-2-the-de-duplication-key-is-the-whole-product" aria-label="Link to this section"></a>Part 2: the de-duplication key is the whole product</h2>
+      <p>The review ID is the only stable thing. Both stores give every review an ID that survives edits, rating changes and re-sorting, so "new" means "an ID I haven't emitted before", never "dated after my last run". Dates fail in two ways: users edit old reviews (new date, same review), and stores serve pages out of order under load. Keep a set of emitted IDs per app and country, and diff against it:</p>
+      <pre><code class="language-ts">// state key: `${store}:${appId}:${country}` -&gt; string[] of emitted review IDs
+      async function newReviews(key: string, fetched: Review[], store: KVStore) {
+        const seen = new Set&lt;string&gt;((await store.get(key)) ?? []);
+        const fresh = fetched.filter((r) =&gt; !seen.has(r.reviewId));
+        await store.set(key, [...seen, ...fresh.map((r) =&gt; r.reviewId)]);
+        return fresh; // first run: the backlog; every run after: only the delta
+      }
+      </code></pre>
+      <p>The first run per app is the baseline, so cap it (200 is plenty). Every later run returns only the delta, which is what makes a daily digest readable.</p>
+      <h2 id="part-3-dont-believe-an-empty-answer"><a class="anchor" href="#part-3-dont-believe-an-empty-answer" aria-label="Link to this section"></a>Part 3: don't believe an empty answer</h2>
+      <p>"No new reviews" and "the store wouldn't serve the feed" look identical unless you check. Apple's public feed periodically answers 200 OK with zero reviews for every app, which is rate limiting wearing a valid response. Recording that as "nothing new" costs you nothing in data, since the IDs were never emitted. It costs you the truth: the monitor now believes it looked when it didn't. The cheap guard is to cross-check the app's public rating count: an app with 4,000 ratings and an empty feed is a store problem, not a quiet week. Log three different empties, and never collapse them into one:</p>
+      <ul>
+      <li>this app has no reviews yet</li>
+      <li>this app ID doesn't exist in this storefront</li>
+      <li>the store declined right now, retry later</li>
+      </ul>
+      <p>Never tell yourself "no new reviews" when the truth is "we could not look".</p>
+      <h2 id="part-4-deliver-to-a-webhook-not-a-dashboard"><a class="anchor" href="#part-4-deliver-to-a-webhook-not-a-dashboard" aria-label="Link to this section"></a>Part 4: deliver to a webhook, not a dashboard</h2>
+      <p>A monitor you have to open is a dashboard, and dashboards don't get opened. Post one JSON summary per run to a webhook and let Slack, Telegram, Zapier or n8n do the rest:</p>
+      <pre><code class="language-json">{
+        &quot;runAt&quot;: &quot;2026-09-24T08:00:00.000Z&quot;,
+        &quot;totals&quot;: { &quot;appsChecked&quot;: 5, &quot;newReviews&quot;: 3, &quot;errors&quot;: 0 },
+        &quot;apps&quot;: [
+          {
+            &quot;store&quot;: &quot;google-play&quot;,
+            &quot;appId&quot;: &quot;com.example.app&quot;,
+            &quot;newCount&quot;: 2,
+            &quot;avgRating&quot;: 3.4,
+            &quot;lowestReviews&quot;: [{ &quot;rating&quot;: 1, &quot;text&quot;: &quot;Crashes on launch&quot;, &quot;url&quot;: &quot;https://play.google.com/store/apps/details?id=com.example.app&quot; }]
+          }
+        ]
+      }
+      </code></pre>
+      <p>Filter before you post. Alerting only on ratings of 2 and below means every message is worth reading, and a webhook that's down should be logged and ignored, never allowed to fail a run.</p>
+      <h2 id="running-it-daily-with-no-server"><a class="anchor" href="#running-it-daily-with-no-server" aria-label="Link to this section"></a>Running it daily with no server</h2>
+      <p>The scheduler is the only part that has to live somewhere other than your laptop, and a GitHub Actions cron is free. A workflow on a daily schedule, <code>google-play-scraper</code> plus the Apple feed, and a committed <code>seen.json</code> as the ID set is about a hundred lines. Commit the state file back at the end of the run and your memory survives the ephemeral runner, which is the only trick in it:</p>
+      <pre><code class="language-yaml">on:
+        schedule:
+          - cron: &quot;0 8 * * *&quot;
+        workflow_dispatch:
+      jobs:
+        check:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - run: node monitor.js
+            - run: |
+                git config user.name github-actions
+                git commit -am &quot;reviews: update seen set&quot; || exit 0
+                git push
+      </code></pre>
+      <p>I also packaged the four parts as an Apify actor, <a href="https://apify.com/astraedus/app-review-monitor">App Store and Google Play Review Monitor</a>, if you'd rather not own the cron. Same four parts, same empty-feed guard, pay-per-event, a couple of dollars a month at five apps.</p>
+      <h2 id="the-takeaway"><a class="anchor" href="#the-takeaway" aria-label="Link to this section"></a>The takeaway</h2>
+      <p>The hard part of a review monitor is not fetching reviews. It's remembering what you already saw and refusing to trust an empty page. Build the memory around review IDs, treat "no reviews" as a claim to verify, and push the result somewhere you already look. Then the monitor keeps working on the day you stop thinking about it, which is the only day that matters.</p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
