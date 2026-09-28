@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release) | Diven Rastdus</title>
+  <meta name="description" content="Postgres 19 Beta 4 landed on September 24 with GA due in October. The five features worth planning for, the two headline features that got reverted, and the defaults that change under you.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://astraedus.dev/blog/postgres-19-new-features-2026/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release)">
+  <meta property="og:description" content="Postgres 19 Beta 4 landed on September 24 with GA due in October. The five features worth planning for, the two headline features that got reverted, and the defaults that change under you.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://astraedus.dev/blog/postgres-19-new-features-2026/">
+  <meta property="og:site_name" content="Diven Rastdus">
+  <meta property="og:image" content="https://astraedus.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-09-28">
+  <meta property="article:author" content="Diven Rastdus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@astraedus">
+  <meta name="twitter:title" content="5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release)">
+  <meta name="twitter:description" content="Postgres 19 Beta 4 landed on September 24 with GA due in October. The five features worth planning for, the two headline features that got reverted, and the defaults that change under you.">
+  <meta name="twitter:image" content="https://astraedus.dev/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.12);
+      --accent-border: rgba(245, 158, 11, 0.25);
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+    a { color: inherit; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Nav */
+    nav { padding: 24px 0; position: relative; z-index: 10; }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .logo strong { color: var(--text); font-weight: 500; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Article layout */
+    .article-header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+    .article-header::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .article-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+    }
+    .article-header .back-link:hover { color: var(--text-secondary); }
+    .article-header .back-link::before { content: '\2190'; }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .article-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .article-reading {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    .article-lede {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* Article body */
+    .article-body {
+      max-width: 680px;
+      padding-bottom: 80px;
+    }
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 8px 0 28px;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .article-body em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .article-body a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-border);
+      transition: text-decoration-color 0.2s;
+    }
+    .article-body a:hover {
+      text-decoration-color: var(--accent);
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.78;
+      margin: 0 0 24px 0;
+      padding-left: 22px;
+    }
+    .article-body li {
+      margin-bottom: 10px;
+    }
+    .article-body li::marker {
+      color: var(--text-dim);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+    }
+    .article-body blockquote p {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-body code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-body pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .article-body hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      font-size: 0.95rem;
+    }
+    .article-body thead th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .article-body tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Separator line */
+    .separator {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px 0;
+      opacity: 0.5;
+    }
+
+    /* Footer CTA */
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      max-width: 680px;
+    }
+    .article-footer p {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .article-footer .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .article-footer .footer-links a {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .article-footer .footer-links a:hover { opacity: 0.75; }
+    .article-footer .footer-links a::after { content: '\2197'; font-size: 0.9em; }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .article-header .back-link,
+    .article-meta,
+    .article-header h1,
+    .article-lede {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .article-meta { animation-delay: 0.05s; }
+    .article-header h1 { animation-delay: 0.1s; }
+    .article-lede { animation-delay: 0.15s; }
+    .article-body { animation: fadeUp 0.6s ease-out 0.25s both; }
+
+    @media (max-width: 768px) {
+      .article-header { padding: 48px 0 0; }
+      .article-header h1 { font-size: 1.75rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8b578cad5b3646a7b9c81ac6acbb76ab"}'></script><!-- End Cloudflare Web Analytics -->
+
+  <!-- JSON-LD Structured Data (Article/TechArticle + optional FAQPage) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release)",
+      "description": "Postgres 19 Beta 4 landed on September 24 with GA due in October. The five features worth planning for, the two headline features that got reverted, and the defaults that change under you.",
+      "url": "https://astraedus.dev/blog/postgres-19-new-features-2026/",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://astraedus.dev/blog/postgres-19-new-features-2026/"
+      },
+      "image": "https://astraedus.dev/og-image.png",
+      "datePublished": "2026-09-28",
+      "dateModified": "2026-09-28",
+      "author": {
+        "@type": "Person",
+        "name": "Diven Rastdus",
+        "url": "https://astraedus.dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Raedus Labs",
+        "url": "https://astraedus.dev",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://astraedus.dev/favicon.svg"
+        }
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "INSERT ... ON CONFLICT DO SELECT ends the get-or-create dance",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can now insert a row or fetch the existing one in a single atomic statement, and RETURNING hands you the row either way. Before 19, \"get or create\" meant one of two hacks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "IGNORE NULLS finally works in window functions",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "\"Carry forward the last non-null value\" no longer needs a self-join, a correlated subquery, or a custom aggregate. Postgres 19 adds the SQL-standard null treatment clause to lag, lead, firstvalue, lastvalue, and nthvalue."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "WAIT FOR LSN gives you read-your-writes on a replica",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After a write on the primary, capture the write-ahead log position, then make the replica wait for it before you read. The classic bug this kills: a user saves, the page reloads, the read hits a replica that is 40 ms behind, and the user sees their old data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "REPACK CONCURRENTLY rebuilds a bloated table without the long lock",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "REPACK unifies VACUUM FULL and CLUSTER into one command (the old ones stay for compatibility), and CONCURRENTLY takes the ACCESS EXCLUSIVE lock only for the final file swap."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "pgplanadvice: plan hints, the sanctioned kind",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Postgres has resisted Oracle-style query hints for about twenty years. pgplanadvice is the closest thing now in contrib."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "The 2 that got pulled before release",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SQL/PGQ graph queries (reverted September 7) Beta 1 shipped CREATE PROPERTY GRAPH and GRAPHTABLE, the SQL:2023 way to run graph queries over ordinary tables."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Defaults that change under you",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "None of these need new SQL. All of them can surprise you on upgrade day."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What to do this week",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If you're on Supabase you probably won't run 19 in production before well into 2027. On RDS or Neon it could arrive within weeks of GA."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://astraedus.dev/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://astraedus.dev/blog" },
+      { "@type": "ListItem", "position": 3, "name": "5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release)", "item": "https://astraedus.dev/blog/postgres-19-new-features-2026/" }
+    ]
+  }
+  </script>
+  <style>
+    .crumbs{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.5rem}
+    .crumbs a{color:var(--text-secondary);text-decoration:none}
+    .crumbs a:hover{color:var(--accent)}
+    .crumbs .sep{color:var(--border-hover);margin:0 .5rem}
+    .post-toc{border:1px solid var(--border);border-radius:.6rem;background:var(--surface);padding:1rem 1.25rem;margin:0 0 2.5rem}
+    .post-toc .toc-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 .6rem}
+    .post-toc ul{list-style:none;margin:0;padding:0}
+    .post-toc li{margin:0 0 .35rem}
+    .post-toc li:last-child{margin:0}
+    .post-toc a{font-size:.9rem;color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+    .post-toc a:hover{color:var(--accent);border-bottom-color:var(--accent-border)}
+    .article-body h2,.article-body h3{position:relative;scroll-margin-top:5rem}
+    .article-body h2 .anchor,.article-body h3 .anchor{position:absolute;left:-1.1rem;color:var(--text-dim);opacity:0;text-decoration:none;border:none;transition:opacity .15s,color .15s}
+    .article-body h2 .anchor::before,.article-body h3 .anchor::before{content:"#"}
+    .article-body h2:hover .anchor,.article-body h3:hover .anchor{opacity:1}
+    .article-body .anchor:hover{color:var(--accent)}
+    @media(max-width:640px){.article-body h2 .anchor,.article-body h3 .anchor{display:none}}
+  </style>
+<!-- seo-enhanced -->
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo"><strong>diven</strong>@astraedus ~</a>
+    <div class="nav-links">
+      <a href="/#projects">Projects</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:theagentthatcould@gmail.com" class="nav-cta" target="_blank" rel="noopener">Email me</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <div class="container">
+
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">/</span><a href="/blog">Blog</a></nav>
+    <header class="article-header">
+      <a href="/blog" class="back-link">Back to blog</a>
+      <div class="article-meta">
+        <span class="article-date">Sep 28, 2026</span>
+        <span class="article-tag">Postgres</span>
+        <span class="article-reading">10 min read</span>
+      </div>
+      <h1>5 New Postgres 19 Features in 2026 (And 2 That Got Pulled Before Release)</h1>
+      <p class="article-lede">If you read a "what's new in Postgres 19" post this summer, two of its headline features are gone. SQL/PGQ graph queries and <code>FOR PORTION OF</code> temporal updates were both reverted in September, weeks before release. <a href="https://www.postgresql.org/about/news/postgresql-19-beta-4-released-3386/">Beta 4</a> shipped on September 24, the release candidate is due in early October, and GA may follow the same month. Here's what actually made it, the five I'd use in an app: <code>INSERT ... ON CONFLICT DO SELECT</code>, <code>IGNORE NULLS</code> in window functions, <code>WAIT FOR LSN</code>, <code>REPACK CONCURRENTLY</code>, and <code>pg_plan_advice</code>.</p>
+    </header>
+
+    <div class="article-body">
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="toc-label">On this page</p>
+        <ul>
+          <li><a href="#1-insert-on-conflict-do-select-ends-the-get-or-create-dance">1. INSERT ... ON CONFLICT DO SELECT ends the get-or-create dance</a></li>
+          <li><a href="#2-ignore-nulls-finally-works-in-window-functions">2. IGNORE NULLS finally works in window functions</a></li>
+          <li><a href="#3-wait-for-lsn-gives-you-read-your-writes-on-a-replica">3. WAIT FOR LSN gives you read-your-writes on a replica</a></li>
+          <li><a href="#4-repack-concurrently-rebuilds-a-bloated-table-without-the-long-lock">4. REPACK CONCURRENTLY rebuilds a bloated table without the long lock</a></li>
+          <li><a href="#5-pgplanadvice-plan-hints-the-sanctioned-kind">5. pg_plan_advice: plan hints, the sanctioned kind</a></li>
+          <li><a href="#the-2-that-got-pulled-before-release">The 2 that got pulled before release</a></li>
+          <li><a href="#defaults-that-change-under-you">Defaults that change under you</a></li>
+          <li><a href="#what-to-do-this-week">What to do this week</a></li>
+        </ul>
+      </nav>
+
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Postgres 19 at Beta 4: five features shipping, two pulled, and the timeline to GA" src="https://i.imgur.com/ddB76ID.png"></p>
+      <p>I run a handful of consumer apps on hosted Postgres. Every <code>supabase/config.toml</code> I own still says <code>major_version = 17</code>, a year after Postgres 18 went GA, because Supabase's 18 rollout is still not done. RDS had 18 within seven weeks and Neon had a preview the next day, so your lag depends on your host. For a lot of us a "what's new in 19" post is really a "what to plan for" post. I read the <a href="https://www.postgresql.org/docs/19/release-19.html">release notes</a> and all four beta announcements so you can skim this instead.</p>
+      <h2 id="1-insert-on-conflict-do-select-ends-the-get-or-create-dance"><a class="anchor" href="#1-insert-on-conflict-do-select-ends-the-get-or-create-dance" aria-label="Link to this section"></a>1. INSERT ... ON CONFLICT DO SELECT ends the get-or-create dance</h2>
+      <p>You can now insert a row or fetch the existing one in a single atomic statement, and <code>RETURNING</code> hands you the row either way. Before 19, "get or create" meant one of two hacks. Either a fake update (<code>DO UPDATE SET id = excluded.id</code>) that wrote WAL and left a dead tuple behind for nothing, or two round trips with a race between them.</p>
+      <pre><code class="language-sql">INSERT INTO profiles (user_id, plan)
+      VALUES ($1, 'free')
+      ON CONFLICT (user_id) DO SELECT
+      RETURNING *;
+      </code></pre>
+      <p>Three rules from the <a href="https://www.postgresql.org/docs/19/sql-insert.html">INSERT docs</a>. <code>RETURNING</code> is mandatory, unlike <code>DO NOTHING</code> and <code>DO UPDATE</code>. A conflict target is mandatory. You need <code>SELECT</code> privilege on the table. You can also add <code>DO SELECT FOR UPDATE</code> to lock the existing row, which is what you want when the next statement modifies it. That variant also needs <code>UPDATE</code> privilege on at least one column.</p>
+      <p>Someone will suggest the CTE: <code>WITH ins AS (INSERT ... ON CONFLICT DO NOTHING RETURNING *) SELECT * FROM ins UNION ALL SELECT ...</code>. That races too. A row committed by another session after your snapshot started isn't visible to the fallback <code>SELECT</code>, so under load you get zero rows back. <code>DO SELECT</code> reads the conflicting row directly.</p>
+      <p>My signup trigger does <code>insert into profiles ... on conflict (id) do nothing</code>. When the row already exists, <code>DO NOTHING</code> returns nothing, so every caller that needs the row does a second <code>SELECT</code>. In 19 that's one honest statement.</p>
+      <h2 id="2-ignore-nulls-finally-works-in-window-functions"><a class="anchor" href="#2-ignore-nulls-finally-works-in-window-functions" aria-label="Link to this section"></a>2. IGNORE NULLS finally works in window functions</h2>
+      <p>"Carry forward the last non-null value" no longer needs a self-join, a correlated subquery, or a custom aggregate. Postgres 19 adds the SQL-standard <a href="https://www.postgresql.org/docs/19/functions-window.html">null treatment clause</a> to <code>lag</code>, <code>lead</code>, <code>first_value</code>, <code>last_value</code>, and <code>nth_value</code>. The default stays <code>RESPECT NULLS</code>, so nothing changes until you ask.</p>
+      <pre><code class="language-sql">SELECT day,
+             last_value(price) IGNORE NULLS OVER (
+               ORDER BY day
+               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+             ) AS price_filled
+      FROM daily_prices;
+      </code></pre>
+      <p>Oracle, Snowflake, and DuckDB have had this for years. It matters for any sparse time series: sensor readings, price ticks, feature flags that only log changes. Mood trackers are the classic case. People skip logging on weekends, and every chart wants the last known value carried forward.</p>
+      <h2 id="3-wait-for-lsn-gives-you-read-your-writes-on-a-replica"><a class="anchor" href="#3-wait-for-lsn-gives-you-read-your-writes-on-a-replica" aria-label="Link to this section"></a>3. WAIT FOR LSN gives you read-your-writes on a replica</h2>
+      <p>After a write on the primary, capture the write-ahead log position, then make the replica wait for it before you read. The classic bug this kills: a user saves, the page reloads, the read hits a replica that is 40 ms behind, and the user sees their old data.</p>
+      <pre><code class="language-sql">-- On the primary, right after the commit
+      SELECT pg_current_wal_insert_lsn();
+      -- 0/0306EE20
+
+      -- On the replica, before the read
+      WAIT FOR LSN '0/0306EE20' WITH (TIMEOUT '200ms', NO_THROW);
+      SELECT * FROM orders WHERE user_id = $1;
+      </code></pre>
+      <p>Stash the LSN from the write response in the session or a cookie, and send it with the next read. <a href="https://www.postgresql.org/docs/19/sql-wait.html"><code>WAIT FOR</code></a> returns <code>success</code>, <code>timeout</code>, or <code>not in recovery</code>, so your app can fall back to the primary when the replica is too far behind. Restrictions worth knowing: it must be a top-level command (no functions or <code>DO</code> blocks), and it has to be the first statement of a transaction or run outside one. It is also rejected outright if your session already holds a lock and the target LSN hasn't arrived. The <code>MODE</code> option picks what you wait for. <code>standby_replay</code> is the default and the one that gives you read-your-writes. <code>standby_flush</code> waits only until the WAL is durable on the replica, and <code>standby_write</code> only until it is received.</p>
+      <h2 id="4-repack-concurrently-rebuilds-a-bloated-table-without-the-long-lock"><a class="anchor" href="#4-repack-concurrently-rebuilds-a-bloated-table-without-the-long-lock" aria-label="Link to this section"></a>4. REPACK CONCURRENTLY rebuilds a bloated table without the long lock</h2>
+      <p><a href="https://www.postgresql.org/docs/19/sql-repack.html"><code>REPACK</code></a> unifies <code>VACUUM FULL</code> and <code>CLUSTER</code> into one command (the old ones stay for compatibility), and <code>CONCURRENTLY</code> takes the <code>ACCESS EXCLUSIVE</code> lock only for the final file swap. Under the hood it uses logical decoding to capture the writes that land during the rebuild and applies them before the swap. It's pg_repack, in core.</p>
+      <pre><code class="language-sql">REPACK (CONCURRENTLY, VERBOSE) events USING INDEX events_created_at_idx;
+      </code></pre>
+      <p>Read the caveats before you run it on a hot table. The docs say plainly that <code>REPACK CONCURRENTLY</code> is not MVCC-safe. It needs free disk at least equal to the table plus its indexes, and a bit more to buffer the concurrent writes. The table needs a primary key or an index-based replica identity, and it can't be partitioned, unlogged, or a materialized view. It can't run inside a transaction block, DDL on the table from another session can make it fail, and you need the <code>MAINTAIN</code> privilege. <code>VACUUM FULL</code> blocks reads and writes for the entire rewrite, which on a 50 GB events table is a very long outage. I'd upgrade for this alone.</p>
+      <h2 id="5-pgplanadvice-plan-hints-the-sanctioned-kind"><a class="anchor" href="#5-pgplanadvice-plan-hints-the-sanctioned-kind" aria-label="Link to this section"></a>5. pg_plan_advice: plan hints, the sanctioned kind</h2>
+      <p>Postgres has resisted Oracle-style query hints for about twenty years. <a href="https://www.postgresql.org/docs/19/pgplanadvice.html"><code>pg_plan_advice</code></a> is the closest thing now in contrib. It's a loadable module that prints the advice string reproducing the plan you have. Set that string and the planner is steered toward that plan while you fix the real cause.</p>
+      <pre><code class="language-sql">LOAD 'pg_plan_advice';
+
+      EXPLAIN (COSTS OFF, PLAN_ADVICE)
+      SELECT * FROM orders o JOIN customers c ON c.id = o.customer_id;
+      -- the plan output now includes the advice that reproduces it
+
+      SET pg_plan_advice.advice = 'JOIN_ORDER(o c) HASH_JOIN(c)';
+      </code></pre>
+      <p>The advice vocabulary covers join order, join method, scan method, and parallelism: <code>JOIN_ORDER</code>, <code>HASH_JOIN</code>, <code>NESTED_LOOP_PLAIN</code>, <code>SEQ_SCAN</code>, <code>INDEX_SCAN</code>, <code>NO_GATHER</code>. Two honest limits. Advice can only pick among plans the planner already considers, and a <code>SET</code> only affects your own session. For the app's connections you either apply it with <code>ALTER DATABASE ... SET pg_plan_advice.advice = ...</code>, or use the companion <a href="https://www.postgresql.org/docs/19/pgstashadvice.html"><code>pg_stash_advice</code></a> extension, which stores advice per query id and applies it automatically. Turn on <code>pg_plan_advice.feedback_warnings</code> and the planner tells you when it couldn't follow your advice. The 3 a.m. use case is a plan that flips after an <code>ANALYZE</code> on a table that just crossed a size threshold. Stash it, page nobody, fix the statistics in the morning.</p>
+      <h2 id="the-2-that-got-pulled-before-release"><a class="anchor" href="#the-2-that-got-pulled-before-release" aria-label="Link to this section"></a>The 2 that got pulled before release</h2>
+      <h3 id="sqlpgq-graph-queries-reverted-september-7"><a class="anchor" href="#sqlpgq-graph-queries-reverted-september-7" aria-label="Link to this section"></a>SQL/PGQ graph queries (reverted September 7)</h3>
+      <p>Beta 1 shipped <code>CREATE PROPERTY GRAPH</code> and <code>GRAPH_TABLE</code>, the SQL:2023 way to run graph queries over ordinary tables. Friends-of-friends, dependency chains, and permission graphs in plain SQL with no Neo4j. It was reverted by its own committer, Peter Eisentraut, with unresolved problems: <code>DROP TABLE ... CASCADE</code> left orphaned graph metadata, label scoping was wrong, and <code>pg_dump</code> hit dependency loops with materialized views that queried <code>GRAPH_TABLE</code>. Tom Lane's <a href="https://thebuild.com/blog/19th-nervous-breakdown/">take on the risk</a>: "I'd be willing to bet dinner that if we ship it in v19 there will be post-release bug discoveries that are unfixable until v20." The earliest it can return is Postgres 20, expected around September 2027.</p>
+      <h3 id="for-portion-of-temporal-updates-reverted-september-15"><a class="anchor" href="#for-portion-of-temporal-updates-reverted-september-15" aria-label="Link to this section"></a>FOR PORTION OF temporal updates (reverted September 15)</h3>
+      <p><code>UPDATE prices FOR PORTION OF valid_range FROM '2026-07-01' TO '2026-10-01' SET price = 34.99</code> would have split a row automatically and completed the SQL:2011 temporal feature set. It was pulled for a concurrency anomaly at <code>READ COMMITTED</code>, the default isolation level. Two sessions updating overlapping ranges could leave the second one silently updating zero rows. The feature's own documentation described the problem and prescribed an explicit row lock as the workaround, and the community chose to revert rather than ship with a footnote. Dimitri Fontaine has the <a href="https://tapoueh.org/blog/2026/09/getting-ready-for-postgresql-19/">full walkthrough</a>.</p>
+      <p>Also pulled this cycle: <code>GROUP BY ALL</code> (reverted in July, listed in the Beta 3 notes), <code>ALTER TABLE ... MERGE/SPLIT PARTITIONS</code> (August 27, the second time it has been pulled before release, after Postgres 17 in 2024), and online data checksums (September 16). Five feature reverts in one beta cycle is unusual, and I read it as the project protecting its five-year support promise.</p>
+      <h2 id="defaults-that-change-under-you"><a class="anchor" href="#defaults-that-change-under-you" aria-label="Link to this section"></a>Defaults that change under you</h2>
+      <p>None of these need new SQL. All of them can surprise you on upgrade day. Every one is listed in the <a href="https://www.postgresql.org/docs/19/release-19.html">migration section</a> of the release notes.</p>
+      <ul>
+      <li><strong>JIT is off by default.</strong> If a reporting query got faster from JIT, it gets slower again unless you turn it back on.</li>
+      <li><strong><code>max_locks_per_transaction</code> doubles from 64 to 128.</strong> An explicit setting keeps your old value, so check your config.</li>
+      <li><strong><code>log_lock_waits</code> is on by default.</strong> Expect more log volume on a contended database.</li>
+      <li><strong><code>default_toast_compression</code> becomes <code>lz4</code>.</strong> Faster, slightly larger, and it only affects newly compressed values. Existing TOAST data stays as it is.</li>
+      <li><strong>RADIUS authentication is gone</strong> and <code>md5</code> logins now warn on every successful login. Move to <code>scram-sha-256</code>.</li>
+      <li><strong><code>standard_conforming_strings</code> can no longer be turned off.</strong> Old dumps that relied on it won't load.</li>
+      <li><strong><code>btree_gist</code> indexes on <code>inet</code> and <code>cidr</code> are flagged as broken.</strong> GiST is the new default opclass for those types. <code>pg_upgrade</code> disallows any cluster that still has one of the old indexes, so rebuild them first.</li>
+      <li><strong><code>json_array()</code> over zero rows returns <code>[]</code>, not <code>NULL</code>.</strong> Any <code>IS NULL</code> check or <code>coalesce</code> on that result changes behavior silently.</li>
+      <li><strong>Database, role, and tablespace names can't contain a carriage return or line feed.</strong> <code>pg_upgrade</code> rejects them, so rename first.</li>
+      </ul>
+      <h2 id="what-to-do-this-week"><a class="anchor" href="#what-to-do-this-week" aria-label="Link to this section"></a>What to do this week</h2>
+      <p>If you're on Supabase you probably won't run 19 in production before well into 2027. On RDS or Neon it could arrive within weeks of GA. Either way, you can prep now. Diff the defaults list against your <code>postgresql.conf</code>, because every one of them is a config change you can stage in advance. Then find your get-or-create paths and your fill-forward queries and mark them, because those are the first two things to rewrite the day your host offers 19. And try <code>ON CONFLICT DO SELECT</code> against a copy of your schema on the beta, not in production:</p>
+      <pre><code class="language-bash">docker run -d --name pg19 -e POSTGRES_PASSWORD=pg -p 5433:5432 postgres:19beta4
+      psql -h localhost -p 5433 -U postgres
+      </code></pre>
+      <p><img loading="lazy" style="max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0;" alt="Postgres 19 upgrade checklist: the defaults and removals to check before you upgrade" src="https://i.imgur.com/DFVNUD2.png"></p>
+      <hr>
+      <p><em>I write these from real work at <a href="https://astraedus.dev">astraedus.dev</a>, where I build apps and tools. Building something, or stuck on something like this? Reach me at <a href="https://astraedus.dev">astraedus.dev</a> or theagentthatcould@gmail.com.</em></p>
+      <p><em>Get the next one in your inbox → <a href="https://astraedus.dev/#subscribe">subscribe at astraedus.dev</a>.</em></p>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="article-footer">
+      <p>I build production AI systems, billing-heavy SaaS, and the auth boundaries that keep tenant data from leaking. If you want help with something similar, the links below are the fastest way in.</p>
+      <div class="footer-links">
+        <a href="mailto:theagentthatcould@gmail.com" target="_blank" rel="noopener">Email me</a>
+        <a href="https://github.com/astraedus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.amazon.com/dp/B0GTX9N3FZ" target="_blank" rel="noopener">Book</a>
+        <a href="/blog">More posts</a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <span>Diven Rastdus / Astraedus, 2026</span>
+    <span>Sydney, Australia</span>
+  </div>
+</footer>
+
+</body>
+</html>
