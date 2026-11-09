@@ -42,7 +42,7 @@ Section order (each is a `<section id=...>`): `hero` → `work` (featured: Nudge
 **Load-bearing invariants (don't break):**
 - `#subscribe` anchor id is EXACT — Dev.to articles deep-link `astraedus.dev/#subscribe`. The form still POSTs `{ email }` to the `https://astraedus.dev/api/subscribe` Cloudflare Worker (re-skinned, never rewired).
 - Cloudflare beacon (token `8b578cad5b3646a7b9c81ac6acbb76ab`), self-canonical `https://astraedus.dev/`, og:image `og-image.png` all preserved.
-- No links to suspended/real-identity accounts: NO x.com, medium.com, or linkedin (the old page's `linkedin.com/in/yuvraj-fowdar` was Anti's real name — removed). Socials are GitHub / Dev.to / Hashnode only.
+- No links to suspended/real-identity accounts: NO x.com, medium.com, or linkedin (an old personal link was removed; never add one back, and never write a real name in this repo: it is public). Socials are GitHub / Dev.to / Hashnode only.
 
 **Adding a new blog post card** (the articles slot lives in the `#writing` section, between the `<!-- post-cards:start -->` and `<!-- post-cards:end -->` markers): copy one `<a class="post" href="/blog/<slug>/">` block to the TOP of that list, set the title + `<span class="post-date">Mon D, YYYY</span>`, and drop the oldest so 4–5 show. Same one-post-per-line pattern as before; keep newest-first. `href` must be the real hosted slug (`/blog/<slug>/`) or it 404s.
 
